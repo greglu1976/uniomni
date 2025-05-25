@@ -1,9 +1,11 @@
 import pandas as pd
 
 class Function:
-    def __init__(self, df_signals=None, df_info=None):
+    def __init__(self, df_signals=None, df_info=None, iec_name=''):
         self.df_signals = df_signals
         self.df_info = df_info
+        self.iec_name = iec_name
+
         self.df_setting = None  # для хранения уставок
         self.df_status = None   # для хранения статусов
 
@@ -199,6 +201,12 @@ class Function:
         return self.list_bu
     def get_settings_for_re(self):
         return self.list_re
+    def get_iec_name(self):
+        return self.iec_name
+    def get_name(self):
+        return self.name
+    def get_description(self):
+        return self.description
 
     def set_SGF1(self, value):
         self.SGF1 = value

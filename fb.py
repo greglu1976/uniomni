@@ -30,7 +30,7 @@ class FB:
             files = [f for f in self.path.iterdir() if f.is_file()]
             print("Список файлов:")
             for file in files:
-                print(file.name)
+                print(file.stem)
 
                 excel_path = self.path / file.name
                 df_signals = pd.read_excel(excel_path, sheet_name='Signals')
@@ -40,13 +40,13 @@ class FB:
                     self.process_control()
                     continue                
                 if file.name == 'LLN0.xlsx':
-                    self.mainfunc = Function(df_signals=df_signals_processed, df_info=df_info)
+                    self.mainfunc = Function(df_signals=df_signals_processed, df_info=df_info, iec_name='LLN0')
                     self.iec_name = df_info[df_info['Parameter'] == 'IEC61850Name']['Value'].iloc[0]
                     self.name = df_info[df_info['Parameter'] == 'RussianName']['Value'].iloc[0]
                     self.description = df_info[df_info['Parameter'] == 'DescriptionFB']['Value'].iloc[0]
                     self.weight = df_info[df_info['Parameter'] == 'WeightFB']['Value'].iloc[0]
                     continue
-                func = Function(df_signals=df_signals_processed, df_info=df_info)
+                func = Function(df_signals=df_signals_processed, df_info=df_info, iec_name=file.stem)
                 self.functions.append(func)
 
         else:
