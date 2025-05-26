@@ -6,7 +6,7 @@ class Hardware:
         self.hmi_fks = ['ЮНИТ-ИЧМ', 'Плата ФК №1']
         self.hmi_leds = ['ЮНИТ-ИЧМ', 'Плата СД №1']
 
-        self.inputs = ['Слот М8. Тип платы В021']
+        self.inputs = [{'desc':'Слот М8. Тип платы В021', 'num_of_inputs':14},]
 
 
     def get_hmi_fks(self):
