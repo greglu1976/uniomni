@@ -2,9 +2,9 @@
 from docxtpl import DocxTemplate
 
 
-def fill_template(fb):
+def fill_template(fsu):
 
-    doc = DocxTemplate("1.docx")
+    doc = DocxTemplate("templ.docx")
 
 
 
@@ -12,7 +12,7 @@ def fill_template(fb):
 
     # Формируем контекст для Jinja2
     context = {
-        "functions": fb.functions,
+        "fsu": fsu,
     }
 
     #print(func.get_iec_name(), func.get_name(), func.get_description())

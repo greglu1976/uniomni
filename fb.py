@@ -23,8 +23,10 @@ class FB:
     def process_control(self):
         pass
 
-    def create(self):
+    def process_inputs(self):
+        pass
 
+    def create(self):
         # Получение списка файлов и папок в директории
         if self.path.exists() and self.path.is_dir():
             files = [f for f in self.path.iterdir() if f.is_file()]
@@ -38,7 +40,10 @@ class FB:
                 df_signals_processed = start_data_convert(df_signals)
                 if file.name == 'control.xlsx':
                     self.process_control()
-                    continue                
+                    continue
+                if file.name == 'inputs.xlsx':
+                    self.process_inputs()
+                    continue                                
                 if file.name == 'LLN0.xlsx':
                     self.mainfunc = Function(df_signals=df_signals_processed, df_info=df_info, iec_name='LLN0')
                     self.iec_name = df_info[df_info['Parameter'] == 'IEC61850Name']['Value'].iloc[0]
@@ -55,3 +60,5 @@ class FB:
 
 
 
+    def get_description(self):
+        return self.description

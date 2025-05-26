@@ -7,6 +7,8 @@ import pickle
 
 from prim_data_handler import start_data_convert
 from fb import FB
+from fsu import FSU
+
 
 from templater import fill_template
 
@@ -14,7 +16,11 @@ from templater import fill_template
 path = Path("funcs/")
 
 a = FB(path)
+b = FB(path)
 
+aa = FSU()
+aa.add_fb(a)
+aa.add_fb(b)
 
 with open('object.pkl', 'wb') as file:
     pickle.dump(a, file)
@@ -25,7 +31,7 @@ with open('object.pkl', 'rb') as file:
 
 
 
-fill_template(a)
+fill_template(aa)
 
 
 
