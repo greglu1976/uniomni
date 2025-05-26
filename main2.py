@@ -19,11 +19,17 @@ a = FB(path)
 b = FB(path)
 
 for func in a.functions:
-    print(func.get_list_status())
+    #print(func.get_list_status())
+    pass
 aa = FSU()
 aa.add_fb(a)
-#aa.add_fb(b)
+aa.add_fb(b)
+aa.collect_statuses()
 
+
+for fb in aa.fbs:
+    #print(fb.get_fb_statuses())
+    pass
 
 
 with open('object.pkl', 'wb') as file:

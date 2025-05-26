@@ -148,6 +148,8 @@ class Function:
         if self.df_status is None:
             return
         for _, row in self.df_status.iterrows():
+            if row['type']!='BOOL':
+                continue
             desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
             short_desc = row['ShortDescription']
             digit_input = row['DigitalInput']
