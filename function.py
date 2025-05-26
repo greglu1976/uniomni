@@ -1,18 +1,18 @@
 import pandas as pd
 
 class Function:
-    def __init__(self, df_signals=None, df_info=None, iec_name=''):
+    def __init__(self, df_signals=None, df_info=None, iec_name='', fb_name = ''):
         self.df_signals = df_signals
         self.df_info = df_info
         self.iec_name = iec_name
-
+        self.fb_name = fb_name
         self.df_setting = None  # для хранения уставок
         self.df_status = None   # для хранения статусов
 
         self.list_bu = []
         self.list_re = []
 
-        self.list_statuses = []
+        self.list_status = []
 
         self.description = ''
         self.weight = ''
@@ -159,7 +159,7 @@ class Function:
             start_disturber = row['StartDisturber']
 
             dict = {
-            'Полное наименование сигнала': self.name + ': ' + desc, 
+            'Полное наименование сигнала': self.fb_name + ' / ' + self.name + ': ' + desc, 
             'Наименование сигналов на ФСУ': short_desc, 
             'Дискретные входы': '+' if str(digit_input)=='1' else '-',
             'Выходные реле': '+' if str(digit_output)=='1' else '-',
@@ -169,7 +169,7 @@ class Function:
             'РАС': '+' if str(disturber)=='1' else '-',
             'Пуск РАС': '+' if str(start_disturber)=='1' else '-',
             }
-            self.list_statuses.append(dict)
+            self.list_status.append(dict)
 
     def save_to_xlsx(self, filename='split_data.xlsx'):
         # Проверяем, есть ли данные для записи
@@ -194,9 +194,6 @@ class Function:
 
 
 
-
-
-
     def get_settings_for_bu(self):
         return self.list_bu
     def get_settings_for_re(self):
@@ -208,6 +205,12 @@ class Function:
     def get_description(self):
         return self.description
 
-    def set_SGF1(self, value):
-        self.SGF1 = value
+    def get_list_status(self):
+        return self.list_status
 
+    def set_description(self, desc):
+        self.description = desc
+    def set_name(self, name):
+        self.name = name
+    def set_fb_name(self, fb_name):
+        self.fb_name = fb_name

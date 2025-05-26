@@ -18,9 +18,13 @@ path = Path("funcs/")
 a = FB(path)
 b = FB(path)
 
+for func in a.functions:
+    print(func.get_list_status())
 aa = FSU()
 aa.add_fb(a)
-aa.add_fb(b)
+#aa.add_fb(b)
+
+
 
 with open('object.pkl', 'wb') as file:
     pickle.dump(a, file)
