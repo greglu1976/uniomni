@@ -8,6 +8,7 @@ class FSU:
         self.buttons_list = []
         self.switches_list = []
         self.control_list=[]
+        self.inputs_list=[]
 
     def add_fb(self, fb):
         self.fbs.append(fb)
@@ -22,6 +23,10 @@ class FSU:
         self.control_list = self.buttons_list + self.switches_list
         #print(self.switches_list)
 
+    def collect_inputs(self):
+        self.inputs_list = [inp for fb in self.fbs for inp in fb.get_inputs_list()]
+        print(self.inputs_list)
+
     def get_fbs(self):
         return self.fbs
 
@@ -30,3 +35,6 @@ class FSU:
 
     def get_fsu_control_list(self):
         return self.control_list        
+
+    def get_fsu_inputs_list(self):
+        return self.inputs_list

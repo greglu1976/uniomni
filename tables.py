@@ -429,7 +429,7 @@ def add_table_mtrx_outs(doc): # новая таблица исходящих о�
 
 table_mtrx_ins = (Inches(2), Inches(4))
 
-def add_table_mtrx_ins(doc): # новая таблица исходящих отчетов
+def add_table_mtrx_ins(doc, inputs): # новая таблица исходящих отчетов
     table = doc.add_table(rows=4, cols=2)
     table.style = 'Стиль6'
     table.allow_autofit = False
@@ -451,27 +451,19 @@ def add_table_mtrx_ins(doc): # новая таблица исходящих от
     set_repeat_table_header(table.rows[0]) # повторение заголовка на след странице
 
     hdr_cells = table.rows[1].cells
-    tag = f'for param_name, param_data in bin_inputs.inputs.items()'
+    tag = r'for i in range(1, input_plate.num_of_inputs|int+1)'
     hdr_cells[0].text = '{%tr '+ tag + ' %}'
 
     # четвертая строка со служебными тегами
     hdr_cells = table.rows[2].cells
-    hdr_cells[0].text = '{{ param_data.name }}'
+    hdr_cells[0].text = 'Дискретный вход '+'{{ loop.index }}'
 
-    # Проверка существования файла inputs.json
-    if os.path.exists('inputs.json'):
-        # Если файл существует, загружаем его содержимое в список
-        with open('inputs.json', 'r', encoding='utf-8') as json_file:
-            choices_start = json.load(json_file)
-    else:
-        # Если файл не существует, инициализируем список значением ['Не определен файл',]
-        choices_start = ['Не определен файл',]
 
     #choices_start = ["Не выполняется", "По переднему фронту", "По заднему фронту", "По любому изменению"]
     par1 = hdr_cells[1].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par1,
-        choices=choices_start,
+        choices=inputs,
     )
     hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 

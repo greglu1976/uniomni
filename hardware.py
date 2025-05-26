@@ -14,3 +14,6 @@ class Hardware:
 
     def get_hmi_leds(self):
         return self.hmi_leds        
+
+    def get_inputs(self):
+        return self.inputs

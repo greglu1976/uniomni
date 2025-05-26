@@ -86,7 +86,7 @@ class FB:
         self._df_inputs = self._df_inputs.reset_index(drop=True)
         if self._df_inputs is None:
             return 
-        self.inputs_list = self.__process_ctrl(self.df_inputs)
+        self.inputs_list = self.__process_ctrl(self._df_inputs)
 
     def _process_excel_file(self, file):
         """Общая функция обработки Excel файла."""

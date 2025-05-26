@@ -4,7 +4,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from docx_handler import add_new_section, add_new_section_landscape
-from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new
+from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new,  add_table_mtrx_ins
 
 def fill_template(fsu, hardware):
 
@@ -60,8 +60,15 @@ def create_template(fsu, hardware):
 
     add_table_reg(doc)
 
+
+
+
+
+
+
     #############################################################################
     # СОЗДАЕМ РАЗДЕЛ С ПАРАМЕТРИРОВАНИЕ ДИСКРЕТНЫХ ВХОДОВ И ВЫХОДНЫХ РЕЛЕ
+
     add_new_section_landscape(doc) # Создаем раздел для матрицы вх/вых
     # Добавляем заголовок
     p = doc.add_paragraph('ПАРАМЕТРИРОВАНИЕ ДИСКРЕТНЫХ ВХОДОВ И ВЫХОДНЫХ РЕЛЕ')
@@ -72,6 +79,24 @@ def create_template(fsu, hardware):
 
     text = doc.add_paragraph('Для дискретного входа возможно подключение только одного сигнала.')
     text.style = 'ДОК Текст'
+
+    p = doc.add_paragraph(r'{% for input_plate in hardware.get_inputs() if hardware.get_inputs() %}')
+    p.style = 'ДОК Текст'
+
+    p = doc.add_paragraph(r'{{ input_plate.desc }}')
+    p.style = 'ДОК Таблица Название'
+
+    inputs_ = fsu.get_fsu_inputs_list()
+    inputs = set([item['Полное наименование сигнала'] for item in inputs_])
+    inputs = list(inputs)
+
+    add_table_mtrx_ins(doc, inputs)
+
+    p = doc.add_paragraph(r'{% endfor %}')
+    p.style = 'TAGS'   
+
+
+
 
 
 

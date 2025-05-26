@@ -26,6 +26,7 @@ aa.add_fb(a)
 aa.add_fb(b)
 aa.collect_control()
 aa.collect_statuses()
+aa.collect_inputs()
 
 # Создаем описание железа
 hw =  Hardware()
