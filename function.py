@@ -143,7 +143,6 @@ class Function:
             self.list_bu.append(dict_bu)
             self.list_re.append(dict_re)            
 
-
     def _get_statuses(self):
         if self.df_status is None:
             return
@@ -172,6 +171,9 @@ class Function:
             'Пуск РАС': '+' if str(start_disturber)=='1' else '-',
             }
             self.list_status.append(dict)
+
+    def _get_controls(self):
+        pass
 
     def save_to_xlsx(self, filename='split_data.xlsx'):
         # Проверяем, есть ли данные для записи

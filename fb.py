@@ -19,16 +19,74 @@ class FB:
         self.weight = ''
         self.statuses = []
 
+        # инициализация данных по упр. сигналам
+        self._df_control = None
+        self.df_buttons = None        
+        self.df_switches = None
+        self.buttons_list = []
+        self.switches_list = [] 
+
+        # инициализация данных по дискретным входам
+        self._df_inputs = None
+        self.inputs_list = [] 
+
+        # методы при инициализации
         self._get_fb_data()
         self._create()
         self._collect_statuses()
 
-    def process_control(self):
-        pass
 
-    def process_inputs(self):
-        pass
+    def __process_ctrl(self, df):
+        df_control_list=[]
+        for _, row in df.iterrows():
+            desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
+            short_desc = row['ShortDescription']
+            digit_input = row['DigitalInput']
+            func_btn = row['FunctionalButton']
+            digit_output = row['DigitalOutput']
+            led = row['LED']
+            logger = row['Logger']
+            disturber = row['Disturber']
+            start_disturber = row['StartDisturber']
+            dict = {
+            'Полное наименование сигнала': desc, 
+            'Наименование сигналов на ФСУ': short_desc, 
+            'Дискретные входы': '+' if str(digit_input)=='1' else '-',
+            'Выходные реле': '+' if str(digit_output)=='1' else '-',
+            'Светодиоды': '+' if str(led)=='1' else '-',
+            'ФК': '+' if str(func_btn)=='1' else '-',
+            'РС': '+' if str(logger)=='1' else '-',
+            'РАС': '+' if str(disturber)=='1' else '-',
+            'Пуск РАС': '+' if str(start_disturber)=='1' else '-',
+            }
+            df_control_list.append(dict)
+        return df_control_list
 
+    def process_control(self, file):
+        df_signals_processed, df_info = self._process_excel_file(file)
+        self._df_control = df_signals_processed[df_signals_processed['Категория (group)'] == 'control']
+        self._df_control = self._df_control.reset_index(drop=True)
+        if self._df_control is None:
+            return 
+
+        self.df_buttons = self._df_control[self._df_control['reserved1'] == 'button'] 
+        if not self.df_buttons.empty: 
+            self.buttons_list = self.__process_ctrl(self.df_buttons)
+        else:
+            self.buttons_list = []      
+        self.df_switches = self._df_control[self._df_control['reserved1'] != 'button']
+        if not self.df_switches.empty: 
+            self.switches_list = self.__process_ctrl(self.df_switches)
+        else:
+            self.switches_list = [] 
+
+    def process_inputs(self, file):
+        df_signals_processed, df_info = self._process_excel_file(file)
+        self._df_inputs = df_signals_processed[df_signals_processed['Категория (group)'] == 'input']
+        self._df_inputs = self._df_inputs.reset_index(drop=True)
+        if self._df_inputs is None:
+            return 
+        self.inputs_list = self.__process_ctrl(self.df_inputs)
 
     def _process_excel_file(self, file):
         """Общая функция обработки Excel файла."""
@@ -76,11 +134,11 @@ class FB:
                 continue
                 
             if file.name == 'control.xlsx':
-                self.process_control()
+                self.process_control(file)
                 continue
                 
             if file.name == 'inputs.xlsx':
-                self.process_inputs()
+                self.process_inputs(file)
                 continue
                 
             if file.name == 'LLN0.xlsx':
@@ -104,3 +162,10 @@ class FB:
 
     def get_fb_statuses(self):
         return self.statuses
+
+    def get_buttons_list(self):
+        return self.buttons_list
+    def get_switches_list(self):
+        return self.switches_list
+    def get_inputs_list(self):
+        return self.inputs_list        
