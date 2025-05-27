@@ -39,11 +39,11 @@ class Plate():
         self._start()
 
     def _start(self):
-        for i in range(1, self.inputs_number+2):
+        for i in range(1, self.inputs_number+1):
             temp = Bin_Input()
             obj_in = temp.get_info()
             self.inputs.append(obj_in)
-        for a in range(1, self.outputs_number+2):
+        for a in range(1, self.outputs_number+1):
             temp = Bin_Input()
             obj_out = temp.get_info()
             self.outputs.append(obj_out)
@@ -58,7 +58,7 @@ class Plate():
         return self.outputs_number
     def get_inputs(self):
         return self.inputs
-    def get_ioutputs(self):
+    def get_outputs(self):
         return self.outputs
 
 class InOutPart():

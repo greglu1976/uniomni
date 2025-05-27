@@ -49,7 +49,6 @@ info = dict(zip(df_info['Ключ'], df_info['Значение']))
 
 hw = Hardware(versions, info)
 
-print(hw.get_hw_plates())
 ########################################################################
 # Запуск генерации бланка уставок устройства
 create_template(aa, hw)

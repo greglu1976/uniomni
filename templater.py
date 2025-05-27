@@ -4,7 +4,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from docx_handler import add_new_section, add_new_section_landscape
-from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new, add_table_mtrx_ins, add_table_mtrx_outs
+from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new, add_table_mtrx_ins, add_table_mtrx_outs, add_table_binaries
 
 def fill_template(fsu, hardware):
 
@@ -32,15 +32,24 @@ def create_template(fsu, hardware):
     p = doc.add_paragraph('КОНФИГУРАЦИЯ ДИСКРЕТНЫХ ВХОДОВ И РЕЛЕ')
     p.style = 'ДОК Заголовок 1'
 
-    p = doc.add_paragraph('Дискретные входы')
+    p = doc.add_paragraph('Модули дискретных входов'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}' + r'{% if plate.get_inputs() %}')
     p.style = 'ДОК Заголовок 2'
 
-    p = doc.add_paragraph(r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}')
-    p.style = 'ДОК Текст'
-    p = doc.add_paragraph(r'{{  plate.get_name() }}')
-    p.style = 'ДОК Текст'
-    p = doc.add_paragraph(r'{% endfor %}')
+
+    p = doc.add_paragraph(r'Слот {{ plate.get_slot() }}'+r'{% for items in plate.get_inputs() %}')
+    p.style = 'ДОК Заголовок 3'
+
+
+
+    p = doc.add_paragraph(r'Дискрентый вход {{ loop.index }}')
+    p.style = 'ДОК Таблица Название'
+
+    add_table_binaries(doc)
+
+    p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
     p.style = 'TAGS' 
+
+
 
     ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
