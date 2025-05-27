@@ -28,8 +28,24 @@ aa.collect_control()
 aa.collect_statuses()
 aa.collect_inputs()
 
+
+
 # Создаем описание железа
-hw =  Hardware()
+# Создание пути (автоматически учитывает ОС)
+path2 = Path("hardware/")
+
+excel_path2 = path2 / 'description.xlsx'
+df_versions = pd.read_excel(excel_path2, sheet_name='Версии')
+df_versions['Дата'] = df_versions['Дата'].dt.strftime(r'%d.%m.%Y')
+df_info = pd.read_excel(excel_path2, sheet_name='Инфо')
+
+# 1. Словарь из df_versions (Номер -> Дата)
+#versions = dict(zip(df_versions['Номер'], df_versions['Дата']))
+versions = df_versions[['Номер', 'Дата']].to_dict('records')
+# 2. Словарь из df_info (Ключ -> Значение)
+info = dict(zip(df_info['Ключ'], df_info['Значение']))
+
+hw = Hardware(versions, info)
 
 #for fb in aa.fbs:
     #print(fb.get_buttons_list)

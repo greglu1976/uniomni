@@ -306,7 +306,7 @@ def add_table_reg(doc): # новая таблица исходящих отче�
 
 table_mtrx_outs = (Inches(2), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7))
 
-def add_table_mtrx_outs(doc): # новая таблица исходящих отчетов
+def add_table_mtrx_outs(doc, statuses): # новая таблица исходящих отчетов
     table = doc.add_table(rows=5, cols=6)
     table.style = 'Стиль6'
     table.allow_autofit = False
@@ -341,27 +341,19 @@ def add_table_mtrx_outs(doc): # новая таблица исходящих о�
 
 
     hdr_cells = table.rows[2].cells
-    tag = f'for param_name, param_data in bin_outputs.inputs.items()'
+    tag = r'for i in range(1, output_plate.num_of_outputs|int+1)'
     hdr_cells[2].text = '{%tr '+ tag + ' %}'
 
     # четвертая строка со служебными тегами
     hdr_cells = table.rows[3].cells
-    hdr_cells[0].text = '{{ param_data.name }}'
+    hdr_cells[0].text = 'Реле '+'{{ loop.index }}'
 
-    # Проверка существования файла signals.json
-    if os.path.exists('signals.json'):
-        # Если файл существует, загружаем его содержимое в список
-        with open('signals.json', 'r', encoding='utf-8') as json_file:
-            choices_start = json.load(json_file)
-    else:
-        # Если файл не существует, инициализируем список значением ['Не определен файл',]
-        choices_start = ['Не определен файл',]
 
     #choices_start = ["Не выполняется", "По переднему фронту", "По заднему фронту", "По любому изменению"]
     par1 = hdr_cells[1].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par1,
-        choices=choices_start,
+        choices=statuses,
         #alias= f"DropDown_{i}",
         #instruction_text=f"Выберите ",
     )
@@ -370,28 +362,28 @@ def add_table_mtrx_outs(doc): # новая таблица исходящих о�
     par2 = hdr_cells[2].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par2,
-        choices=choices_start,
+        choices=statuses,
     )
     hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     par3 = hdr_cells[3].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par3,
-        choices=choices_start,
+        choices=statuses,
     )
     hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     par4 = hdr_cells[4].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par4,
-        choices=choices_start,
+        choices=statuses,
     )
     hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     par5 = hdr_cells[5].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par5,
-        choices=choices_start,
+        choices=statuses,
     )
     hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 

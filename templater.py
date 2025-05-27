@@ -4,7 +4,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from docx_handler import add_new_section, add_new_section_landscape
-from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new,  add_table_mtrx_ins
+from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new, add_table_mtrx_ins, add_table_mtrx_outs
 
 def fill_template(fsu, hardware):
 
@@ -18,7 +18,7 @@ def fill_template(fsu, hardware):
  
     # Заполняем документ
     doc.render(context)
-    doc.save("output.docx")
+    doc.save("blanc.docx")
 
 
 def create_template(fsu, hardware):
@@ -60,12 +60,6 @@ def create_template(fsu, hardware):
 
     add_table_reg(doc)
 
-
-
-
-
-
-
     #############################################################################
     # СОЗДАЕМ РАЗДЕЛ С ПАРАМЕТРИРОВАНИЕ ДИСКРЕТНЫХ ВХОДОВ И ВЫХОДНЫХ РЕЛЕ
 
@@ -95,9 +89,28 @@ def create_template(fsu, hardware):
     p = doc.add_paragraph(r'{% endfor %}')
     p.style = 'TAGS'   
 
+    ############################### ВЫХОДНЫЕ РЕЛЕ ####################################
 
+    p = doc.add_paragraph('Выходные реле')
+    p.style = 'ДОК Заголовок 2'
 
+    text = doc.add_paragraph('Возможно подключение до пяти сигналов на одно выходное реле.')
+    text.style = 'ДОК Текст'
 
+    p = doc.add_paragraph(r'{% for output_plate in hardware.get_outputs() if hardware.get_outputs() %}')
+    p.style = 'ДОК Текст'
+
+    p = doc.add_paragraph(r'{{ output_plate.desc }}')
+    p.style = 'ДОК Таблица Название'
+
+    statuses_ = fsu.get_fsu_statuses()
+    statuses = set([item['Полное наименование сигнала'] for item in statuses_])
+    statuses = list(statuses)
+
+    add_table_mtrx_outs(doc, statuses)
+
+    p = doc.add_paragraph(r'{% endfor %}')
+    p.style = 'TAGS' 
 
 
     #############################################################################
@@ -120,9 +133,9 @@ def create_template(fsu, hardware):
     p = doc.add_paragraph(r'{{ leds_unit }}')
     p.style = 'ДОК Таблица Название'
 
-    statuses_ = fsu.get_fsu_statuses()
-    statuses = set([item['Полное наименование сигнала'] for item in statuses_])
-    statuses = list(statuses)
+    #statuses_ = fsu.get_fsu_statuses() # Выше вычисляются statuses
+    #statuses = set([item['Полное наименование сигнала'] for item in statuses_])
+    #statuses = list(statuses)
 
     add_table_leds_new(doc, statuses)
 

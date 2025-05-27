@@ -90,7 +90,8 @@ class Function:
                     units = 'с'
                     min_value = str(int(min_value)/1000)
                     max_value = str(int(max_value)/1000)
-                    step = str(int(step)/1000)                
+                    step = str(int(step)/1000)
+                    default_value = str(int(default_value)/1000)                
 
                 if 'INT' not in type or units == 'с':
                     step_str = str(step).replace(',', '.')  # Нормализуем разделитель
