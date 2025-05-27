@@ -12,7 +12,10 @@ from hardware import Hardware
 
 from templater import fill_template, create_template
 
-# Создание пути (автоматически учитывает ОС)
+
+###########################################################################
+# Создаем описание ФСУ устройства
+
 path = Path("funcs/")
 
 a = FB(path)
@@ -29,9 +32,8 @@ aa.collect_statuses()
 aa.collect_inputs()
 
 
-
-# Создаем описание железа
-# Создание пути (автоматически учитывает ОС)
+###########################################################################
+# Создаем описание железа устройства
 path2 = Path("hardware/")
 
 excel_path2 = path2 / 'description.xlsx'
@@ -47,29 +49,10 @@ info = dict(zip(df_info['Ключ'], df_info['Значение']))
 
 hw = Hardware(versions, info)
 
-#for fb in aa.fbs:
-    #print(fb.get_buttons_list)
-    #for btn in fb.get_buttons_list():
-        #print(btn)
-
-
-
-#with open('object.pkl', 'wb') as file:
-    #pickle.dump(a, file)
-
-# Загружаем объект обратно
-#with open('object.pkl', 'rb') as file:
-    #a = pickle.load(file)
-
-
-
+print(hw.get_hw_plates())
+########################################################################
+# Запуск генерации бланка уставок устройства
 create_template(aa, hw)
 fill_template(aa, hw)
 
 
-
-#print(a.name, a.description)
-
-#for func in a.functions:
-    #print(func.get_iec_name(), func.get_name(), func.get_description())
-    #print('=================================')

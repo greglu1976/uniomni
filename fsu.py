@@ -25,7 +25,7 @@ class FSU:
 
     def collect_inputs(self):
         self.inputs_list = [inp for fb in self.fbs for inp in fb.get_inputs_list()]
-        print(self.inputs_list)
+        #print(self.inputs_list)
 
     def get_fbs(self):
         return self.fbs

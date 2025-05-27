@@ -26,6 +26,23 @@ def create_template(fsu, hardware):
     doc = Document('origin.docx')
 
     ############################################################################
+    # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
+    add_new_section(doc)
+
+    p = doc.add_paragraph('КОНФИГУРАЦИЯ ДИСКРЕТНЫХ ВХОДОВ И РЕЛЕ')
+    p.style = 'ДОК Заголовок 1'
+
+    p = doc.add_paragraph('Дискретные входы')
+    p.style = 'ДОК Заголовок 2'
+
+    p = doc.add_paragraph(r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}')
+    p.style = 'ДОК Текст'
+    p = doc.add_paragraph(r'{{  plate.get_name() }}')
+    p.style = 'ДОК Текст'
+    p = doc.add_paragraph(r'{% endfor %}')
+    p.style = 'TAGS' 
+
+    ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
     add_new_section(doc)
 
