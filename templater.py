@@ -36,20 +36,33 @@ def create_template(fsu, hardware):
     p.style = 'ДОК Заголовок 2'
 
 
-    p = doc.add_paragraph(r'Слот {{ plate.get_slot() }}'+r'{% for items in plate.get_inputs() %}')
+    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. Тип платы {{ plate.get_name() }}'+r'{% for items in plate.get_inputs() %}')
     p.style = 'ДОК Заголовок 3'
 
 
-
-    p = doc.add_paragraph(r'Дискрентый вход {{ loop.index }}')
+    p = doc.add_paragraph(r'Дискретный вход {{ loop.index }}')
     p.style = 'ДОК Таблица Название'
 
     add_table_binaries(doc)
 
     p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
-    p.style = 'TAGS' 
+    p.style = 'TAGS'
+
+    #################################################################################
+    p = doc.add_paragraph('Модули выходных реле'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}' + r'{% if plate.get_outputs() %}')
+    p.style = 'ДОК Заголовок 2'
 
 
+    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. Тип платы {{ plate.get_name() }}'+r'{% for items in plate.get_outputs() %}')
+    p.style = 'ДОК Заголовок 3'
+
+    p = doc.add_paragraph(r'Реле {{ loop.index }}')
+    p.style = 'ДОК Таблица Название'
+
+    add_table_binaries(doc)
+
+    p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
+    p.style = 'TAGS'
 
     ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
@@ -108,7 +121,7 @@ def create_template(fsu, hardware):
 
     inputs_ = fsu.get_fsu_inputs_list()
     inputs = set([item['Полное наименование сигнала'] for item in inputs_])
-    inputs = list(inputs)
+    inputs = sorted(list(inputs))
 
     add_table_mtrx_ins(doc, inputs)
 
@@ -131,7 +144,7 @@ def create_template(fsu, hardware):
 
     statuses_ = fsu.get_fsu_statuses()
     statuses = set([item['Полное наименование сигнала'] for item in statuses_])
-    statuses = list(statuses)
+    statuses = sorted(list(statuses))
 
     add_table_mtrx_outs(doc, statuses)
 
@@ -183,7 +196,7 @@ def create_template(fsu, hardware):
 
     choices_ = fsu.get_fsu_control_list()
     choices = set([item['Наименование сигналов на ФСУ'] for item in choices_])
-    choices = list(choices)
+    choices = sorted(list(choices))
 
     add_table_fks(doc, choices)
 

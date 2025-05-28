@@ -12,25 +12,44 @@ from hardware import Hardware
 
 from templater import fill_template, create_template
 
+# Функция сборки объекта FSU
+def create_fsu_from_subdirs(base_dir):
+    """Создает объект FSU, добавляя FB для каждой подпапки в base_dir."""
+    path = Path(base_dir)
+    
+    if not path.exists():
+        raise FileNotFoundError(f"Directory not found: {base_dir}")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {base_dir}")
+
+    fsu = FSU()  # Создаем FSU
+
+    # Проходим по всем подпапкам (без учета имен)
+    for subdir in path.iterdir():
+        if subdir.is_dir():
+            try:
+                fb = FB(subdir)  # Создаем FB из подпапки
+                fsu.add_fb(fb)   # Добавляем в FSU
+                print(f"Added FB from: {subdir.name}")
+            except Exception as e:
+                print(f"Error creating FB from {subdir}: {e}")
+
+    # Если добавили хотя бы один FB, собираем данные
+    if hasattr(fsu, 'fbs') and fsu.fbs:  
+        fsu.collect_control()
+        fsu.collect_statuses()
+        fsu.collect_inputs()
+    else:
+        print("Warning: No FB objects were added!")
+
+    return fsu
+
 
 ###########################################################################
-# Создаем описание ФСУ устройства
+# Создаем описание ФСУ устройства (описание функций находится в папке fsu, далее в ней есть папки по ФБ с номерами 1...)
 
-path = Path("funcs/")
-
-a = FB(path)
-b = FB(path)
-
-for func in a.functions:
-    #print(func.get_list_status())
-    pass
-aa = FSU()
-aa.add_fb(a)
-aa.add_fb(b)
-aa.collect_control()
-aa.collect_statuses()
-aa.collect_inputs()
-
+print('Генератор бланка уставок v0.1.0')
+fsu = create_fsu_from_subdirs("fsu/")
 
 ###########################################################################
 # Создаем описание железа устройства
@@ -51,7 +70,7 @@ hw = Hardware(versions, info)
 
 ########################################################################
 # Запуск генерации бланка уставок устройства
-create_template(aa, hw)
-fill_template(aa, hw)
+create_template(fsu, hw)
+fill_template(fsu, hw)
 
 

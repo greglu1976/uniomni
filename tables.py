@@ -814,7 +814,7 @@ def add_table_binaries(doc):
     hdr_cells[2].text = '{{ row["Наименование ПО"] }}'
     hdr_cells[3].text = '{{ row["Наименование ФСУ"] }}'    
     hdr_cells[4].text = '{{ row["Значение / Диапазон"]  }}'
-    hdr_cells[5].text = '{{ row["Ед.изм."] }}'
+    hdr_cells[5].text = '{{ row["Ед. изм."] }}'
     hdr_cells[6].text = '{{ row["Шаг"] }}'
     hdr_cells[7].text = '{{ row["Значение по умолчанию"] }}'
     hdr_cells[8].text = '' #'{{ param_data.setpoint }}'
