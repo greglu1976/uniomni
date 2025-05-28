@@ -763,7 +763,7 @@ def add_table_leds_new(doc, statuses): # новая таблица исходя�
 
 
 ####################################################################################
-################################ ТАБЛИЦА ДЛЯ ДИСКРЕТНЫХ ФХОДОВ ВЫХОДОВ ##############################
+################################ ТАБЛИЦА ДЛЯ ДИСКРЕТНЫХ ВХОДОВ ВЫХОДОВ ##############################
 ####################################################################################
 
 table_binaries = (Inches(0.28), Inches(1.23), Inches(0.9), Inches(0.5), Inches(1.5), Inches(0.55), Inches(0.45), Inches(0.9), Inches(1.05))  #задаем ширину столбцов таблицы вывода репортов
@@ -863,4 +863,252 @@ def add_table_binaries(doc):
 
 ####################################################################################
 ################################ КОНЕЦ ТАБЛИЦА ДЛЯ ДИСКРЕТНЫХ ФХОДОВ ВЫХОДОВ #########################
+####################################################################################
+
+
+
+
+
+
+####################################################################################
+################################ СУММАРНАЯ ТАБЛИЦА СИГНАЛОВ #######################################
+
+table_summ = (Inches(4), Inches(2), Inches(1), Inches(1), Inches(0.5), Inches(0.5), Inches(0.5), Inches(0.5), Inches(0.5))  #задаем ширину столбцов таблицы
+
+def add_summ_table(doc):
+    table = doc.add_table(rows=17, cols=9)
+    table.style = 'Сетка таблицы51'
+    table.allow_autofit = False
+
+    # Устанавливаем фиксированный макет таблицы с правильным пространством имен
+    table._tbl.xpath('./w:tblPr')[0].append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Полное наименование сигналов'
+    hdr_cells[1].text = 'Наименование сигналов на ФСУ'
+    hdr_cells[2].text = 'Дискретные входы'
+    hdr_cells[3].text = 'Выходные реле'
+    hdr_cells[4].text = 'Светодиоды'
+    hdr_cells[5].text = 'ФК'
+    hdr_cells[6].text = 'РС'
+    hdr_cells[7].text = 'РАС'
+    hdr_cells[8].text = 'Пуск РАС'
+    for i in range(0,9):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # Устанавливаем серый фон для всех ячеек заголовка
+    for cell in hdr_cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        # Создаем НОВЫЙ элемент shading для каждой ячейки
+        shading_elm = parse_xml(
+            f'<w:shd {nsdecls("w")} w:fill="D9D9D9"/>'
+        )
+        # Удаляем старый shading, если он есть (чтобы избежать дублирования)
+        for shd in tcPr.xpath(".//w:shd"):
+            tcPr.remove(shd)
+        tcPr.append(shading_elm)
+
+    set_repeat_table_header(table.rows[0]) # повторение заголовка на след странице
+
+########################################################################################
+######################## ВИРТУАЛЬНЫЕ КНОПКИ #########################################
+
+    # третья строка со служебными тегами
+    hdr_cells = table.rows[1].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_buttons() %}Виртуальные кнопки{% endif %}'
+    paragraph = hdr_cells[1].paragraphs[0]
+    # Делаем текст полужирным
+    for run in paragraph.runs:
+        run.bold = True
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER   
+    hdr_cells = table.rows[2].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_buttons() %}{%tr for row in fsu.get_fsu_buttons() %}'    
+    # строка со служебными тегами
+    hdr_cells = table.rows[3].cells
+    hdr_cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+    hdr_cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+    hdr_cells[2].text = '{{ row["Дискретные входы"] }}'
+    hdr_cells[3].text = '{{ row["Выходные реле"] }}'    
+    hdr_cells[4].text = '{{ row["Светодиоды"]  }}'
+    hdr_cells[5].text = '{{ row["ФК"] }}'
+    hdr_cells[6].text = '{{ row["РС"] }}'
+    hdr_cells[7].text = '{{ row["РАС"] }}'
+    hdr_cells[8].text = '{{ row["Пуск РАС"] }}'
+
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[8].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    # строка со служебными тегами
+    hdr_cells = table.rows[4].cells
+    hdr_cells[0].text = '{%tr endfor %}{% endif %}'
+
+    table.cell(1, 0).merge(table.cell(1, 8))
+    table.cell(2, 0).merge(table.cell(2, 8))
+    table.cell(4, 0).merge(table.cell(4, 8))
+
+########################################################################
+#####################################################################
+
+########################################################################################
+######################## ВИРТУАЛЬНЫЕ КЛЮЧИ #########################################
+
+    # строка со служебными тегами
+    hdr_cells = table.rows[5].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_switches() %}Виртуальные ключи{% endif %}'
+    paragraph = hdr_cells[1].paragraphs[0]
+    # Делаем текст полужирным
+    for run in paragraph.runs:
+        run.bold = True
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER   
+    hdr_cells = table.rows[6].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_switches() %}{%tr for row in fsu.get_fsu_switches() %}'    
+    # строка со служебными тегами
+    hdr_cells = table.rows[7].cells
+    hdr_cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+    hdr_cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+    hdr_cells[2].text = '{{ row["Дискретные входы"] }}'
+    hdr_cells[3].text = '{{ row["Выходные реле"] }}'    
+    hdr_cells[4].text = '{{ row["Светодиоды"]  }}'
+    hdr_cells[5].text = '{{ row["ФК"] }}'
+    hdr_cells[6].text = '{{ row["РС"] }}'
+    hdr_cells[7].text = '{{ row["РАС"] }}'
+    hdr_cells[8].text = '{{ row["Пуск РАС"] }}'
+
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[8].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    # строка со служебными тегами
+    hdr_cells = table.rows[8].cells
+    hdr_cells[0].text = '{%tr endfor %}{% endif %}'
+
+    table.cell(5, 0).merge(table.cell(5, 8))
+    table.cell(6, 0).merge(table.cell(6, 8))
+    table.cell(8, 0).merge(table.cell(8, 8))
+
+########################################################################
+#####################################################################
+
+########################################################################################
+######################## ОБЩИЕ СИГНАЛЫ #########################################
+
+    # строка со служебными тегами
+    hdr_cells = table.rows[9].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_statuses_sorted() %}Общие сигналы функциональной логики{% endif %}'
+    paragraph = hdr_cells[1].paragraphs[0]
+    # Делаем текст полужирным
+    for run in paragraph.runs:
+        run.bold = True    
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER   
+    hdr_cells = table.rows[10].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_statuses_sorted() %}{%tr for row in fsu.get_fsu_statuses_sorted() %}'    
+    # строка со служебными тегами
+    hdr_cells = table.rows[11].cells
+    hdr_cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+    hdr_cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+    hdr_cells[2].text = '{{ row["Дискретные входы"] }}'
+    hdr_cells[3].text = '{{ row["Выходные реле"] }}'    
+    hdr_cells[4].text = '{{ row["Светодиоды"]  }}'
+    hdr_cells[5].text = '{{ row["ФК"] }}'
+    hdr_cells[6].text = '{{ row["РС"] }}'
+    hdr_cells[7].text = '{{ row["РАС"] }}'
+    hdr_cells[8].text = '{{ row["Пуск РАС"] }}'
+
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[8].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    # строка со служебными тегами
+    hdr_cells = table.rows[12].cells
+    hdr_cells[0].text = '{%tr endfor %}{% endif %}'
+
+    table.cell(9, 0).merge(table.cell(9, 8))
+    table.cell(10, 0).merge(table.cell(10, 8))
+    table.cell(12, 0).merge(table.cell(12, 8))
+
+################################################################################
+############################################################################
+
+########################################################################################
+######################## СИСТЕМНЫЕ СИГНАЛЫ #########################################
+
+    # строка со служебными тегами
+    hdr_cells = table.rows[13].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_sys_statuses_sorted() %}Системные сигналы{% endif %}'
+    paragraph = hdr_cells[1].paragraphs[0]
+    # Делаем текст полужирным
+    for run in paragraph.runs:
+        run.bold = True    
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER   
+    hdr_cells = table.rows[14].cells
+    hdr_cells[1].text = r'{% if fsu.get_fsu_sys_statuses_sorted() %}{%tr for row in fsu.get_fsu_sys_statuses_sorted() %}'    
+    # строка со служебными тегами
+    hdr_cells = table.rows[15].cells
+    hdr_cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+    hdr_cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+    hdr_cells[2].text = '{{ row["Дискретные входы"] }}'
+    hdr_cells[3].text = '{{ row["Выходные реле"] }}'    
+    hdr_cells[4].text = '{{ row["Светодиоды"]  }}'
+    hdr_cells[5].text = '{{ row["ФК"] }}'
+    hdr_cells[6].text = '{{ row["РС"] }}'
+    hdr_cells[7].text = '{{ row["РАС"] }}'
+    hdr_cells[8].text = '{{ row["Пуск РАС"] }}'
+
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[8].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
+    # строка со служебными тегами
+    hdr_cells = table.rows[16].cells
+    hdr_cells[0].text = '{%tr endfor %}{% endif %}'
+
+    table.cell(13, 0).merge(table.cell(13, 8))
+    table.cell(14, 0).merge(table.cell(14, 8))
+    table.cell(16, 0).merge(table.cell(16, 8))
+
+################################################################################
+############################################################################
+
+
+
+    # Приведение оформления таблицы
+    for row in table.rows:
+        for idx, width in enumerate(table_summ):
+            row.cells[idx].width = width
+        # Устанавливаем высоту шрифта (11 пунктов) для всех ячеек таблицы
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(11)  # Устанавливаем размер шрифта 12 пунктов
+
+    return table
+
+####################################################################################
+################################ КОНЕЦ СУММАРНАЯ ТАБЛИЦА СИГНАЛОВ #########################
 ####################################################################################

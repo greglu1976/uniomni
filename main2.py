@@ -12,6 +12,11 @@ from hardware import Hardware
 
 from templater import fill_template, create_template
 
+# В РАЗРАБОТКЕ ####################################
+from sign_templater import create_summ_table
+################################################
+
+
 # Функция сборки объекта FSU
 def create_fsu_from_subdirs(base_dir):
     """Создает объект FSU, добавляя FB для каждой подпапки в base_dir."""
@@ -48,7 +53,7 @@ def create_fsu_from_subdirs(base_dir):
 ###########################################################################
 # Создаем описание ФСУ устройства (описание функций находится в папке fsu, далее в ней есть папки по ФБ с номерами 1...)
 
-print('Генератор бланка уставок v0.1.0')
+print('Генератор бланка уставок v0.1.1')
 fsu = create_fsu_from_subdirs("fsu/")
 
 ###########################################################################
@@ -73,4 +78,7 @@ hw = Hardware(versions, info)
 create_template(fsu, hw)
 fill_template(fsu, hw)
 
+########################################################################
+# Запуск генерации суммарной таблицы
 
+create_summ_table(fsu)

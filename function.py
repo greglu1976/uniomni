@@ -173,8 +173,6 @@ class Function:
             }
             self.list_status.append(dict)
 
-    def _get_controls(self):
-        pass
 
     def save_to_xlsx(self, filename='split_data.xlsx'):
         # Проверяем, есть ли данные для записи
@@ -196,7 +194,6 @@ class Function:
                 self.df_status.to_excel(writer, sheet_name='Status', index=False)
 
         print(f"Файл успешно сохранён как {filename}")
-
 
 
     def get_settings_for_bu(self):

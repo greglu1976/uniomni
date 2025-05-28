@@ -1,3 +1,4 @@
+# ГЕНЕРАЦИЯ И ЗАПОЛНЕНИЕ ШАБЛОНА БЛАНКА УСТАВОК
 import os
 
 from docxtpl import DocxTemplate
@@ -18,7 +19,7 @@ def fill_template(fsu, hardware):
  
     # Заполняем документ
     doc.render(context)
-    doc.save("blanc.docx")
+    doc.save("Бланк уставок.docx")
 
 
 def create_template(fsu, hardware):
@@ -204,7 +205,5 @@ def create_template(fsu, hardware):
     p.style = 'TAGS'
 
     ##################################################################
-
-
 
     doc.save("temp.docx")
