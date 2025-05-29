@@ -23,6 +23,8 @@ class Function:
         self._get_settings()
         self._get_statuses()
 
+
+
     @staticmethod
     def __get_description_by_number(text, number):
         lines = text.split('\n')  # Разделяем строку по переводам строк

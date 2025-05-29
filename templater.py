@@ -71,25 +71,15 @@ def create_template(fsu, hardware):
 
     p = doc.add_paragraph('УСТАВКИ РЗА')
     p.style = 'ДОК Заголовок 1'
-    p = doc.add_paragraph('Группа уставок №1'+r'{% for fb in fsu.get_fbs() %}')
+    p = doc.add_paragraph('Группа уставок №1'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
     p.style = 'ДОК Заголовок 2'
 
 
-    p = doc.add_paragraph(r'{{ fb.get_description() }}{% for func in fb.functions %}'
-                        r'{% if func.get_settings_for_bu() %}')
+    p = doc.add_paragraph(r'{{ fb.get_description() }}{% for func in fb.get_functions() if func.get_settings_for_bu() %}')
     p.style = 'ДОК Заголовок 3'
 
-    p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}'
-                        r'{% endif %}{% endfor %}')
+    p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')
     p.style = 'ДОК Таблица Название'
-
-
-
-    #p = doc.add_paragraph(r'{{ fb.get_description() }}{% for func in fb.functions if func.get_settings_for_bu() %}')
-    #p.style = 'ДОК Заголовок 3'
-
-    #p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')
-    #p.style = 'ДОК Таблица Название'
 
     add_table_settings(doc)
 

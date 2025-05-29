@@ -157,6 +157,9 @@ class FB:
         self.statuses = [status for func in self.functions for status in func.get_list_status()]
 
 
+    def get_fb_name(self):
+        return self.name
+
     def get_description(self):
         return self.description
 
@@ -169,3 +172,12 @@ class FB:
         return self.switches_list
     def get_inputs_list(self):
         return self.inputs_list        
+    
+    def get_functions(self):
+        return self.functions 
+
+    def is_fb_settings_empty(self):
+        for func in self.functions:
+            if func.get_settings_for_bu():
+                return True
+        return False
