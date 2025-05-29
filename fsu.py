@@ -61,7 +61,7 @@ class FSU:
         return self.inputs_list
 
     def get_fsu_buttons(self):
-        return self.buttons_list
+        return sorted(self.buttons_list, key=lambda x: x['Полное наименование сигнала'])
 
     def get_fsu_switches(self):
-        return self.switches_list        
+        return sorted(self.switches_list, key=lambda x: x['Полное наименование сигнала'])         
