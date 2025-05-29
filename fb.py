@@ -169,3 +169,12 @@ class FB:
         return self.switches_list
     def get_inputs_list(self):
         return self.inputs_list        
+    
+    def get_functions(self):
+        return self.functions 
+
+    def is_fb_settings_empty(self):
+        for func in self.functions:
+            if func.get_settings_for_bu():
+                return True
+        return False
