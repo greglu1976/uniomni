@@ -19,7 +19,15 @@ class FSU:
 
     def collect_control(self):
         self.buttons_list = [btn for fb in self.fbs for btn in fb.get_buttons_list()]
+        unique_buttons = {item['Полное наименование сигнала']: item 
+        for item in self.buttons_list}
+        self.buttons_list = list(unique_buttons.values())
+
+
         self.switches_list = [sw for fb in self.fbs for sw in fb.get_switches_list()]
+        unique_switches = {item['Полное наименование сигнала']: item 
+        for item in self.switches_list}
+        self.switches_list = list(unique_switches.values())        
         self.control_list = self.buttons_list + self.switches_list
         #print(self.switches_list)
 
