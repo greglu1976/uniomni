@@ -134,7 +134,7 @@ class Function:
                     step = str(step).split('.')[0].split(',')[0]
                     znach_diap = f"{min_val} ... {max_val}"
                     #default_value = str(default_value).replace('.', ',')
-                    default_value = f"{default_value:.{decimal_places}f}".replace('.', ',')
+                    default_value = f"{default_value:.{0}f}".replace('.', ',')
                     
             # словарь для бланка уставок
             dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value}
