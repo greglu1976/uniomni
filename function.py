@@ -56,7 +56,7 @@ class Function:
             return
         for _, row in self.df_setting.iterrows():
             desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
-            short_desc = row['ShortDescription']
+            short_desc = row['ShortDescription'].replace('<<','«').replace('>>','»')
             applied_desc = row['AppliedDescription']
             note = row['Note (Справочная информация)']
             units = row['units']
