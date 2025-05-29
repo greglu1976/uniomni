@@ -45,6 +45,8 @@ class Function:
         # Фильтруем по значению в столбце 'Категория (group)'
         self.df_setting = self.df_signals[self.df_signals['Категория (group)'] == 'setting']
         self.df_status = self.df_signals[self.df_signals['Категория (group)'] == 'status']
+        self.df_setting.loc[:, 'reserved1'] = self.df_setting['reserved1'].fillna('-') # отсутствие в этих столбцах значений (NaN) вызывает ошибку далее
+        self.df_setting.loc[:, 'reserved2'] = self.df_setting['reserved2'].fillna('-') 
         # Опционально: сброс индексов (если нужен "чистый" вид)
         self.df_setting = self.df_setting.reset_index(drop=True)
         self.df_status = self.df_status.reset_index(drop=True)
