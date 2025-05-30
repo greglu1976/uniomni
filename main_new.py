@@ -9,10 +9,10 @@ from hardware import Hardware
 from templater import fill_template, create_template
 
 # В РАЗРАБОТКЕ ####################################
-from sign_templater import create_summ_table
+from sign_templater2 import create_summ_table
 ################################################
 
-
+print('Генератор бланка уставок и суммарной таблицы сигналов v0.2.1 от 30.05.25')
 
 # Задаем папку где описание софт
 path = Path('fsu/')
@@ -31,14 +31,13 @@ for file_name in fbs_list:
     fb = FB2(file_path)
 
     fsu.add_fb(fb)   # Добавляем в FSU
-    #print(f"Added FB from: {fb.get_fb_name()}")
+    print(f"Добавляем функциональный блок: {fb.get_fb_name()}")
 
 fsu.collect_control()
 fsu.collect_statuses()
 fsu.collect_inputs()
 
-print(fsu.get_fsu_statuses_sorted())
-
+#print(fsu.get_fsu_all_statuses_sorted())
 
 
 ###########################################################################
@@ -69,4 +68,4 @@ fill_template(fsu, hw)
 ########################################################################
 # Запуск генерации суммарной таблицы
 
-create_summ_table(fsu)
+create_summ_table(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()) )

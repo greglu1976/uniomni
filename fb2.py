@@ -114,7 +114,7 @@ class FB2:
         else:
             result_dict = {}
             print("Не найдено достаточного количества меток 'DescriptionFuncList'")
-        print(result_dict)
+        #print(result_dict)
 
         for name_, description_ in result_dict.items():
             for node_df in list_of_dfs:

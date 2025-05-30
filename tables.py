@@ -1112,3 +1112,199 @@ def add_summ_table(doc):
 ####################################################################################
 ################################ КОНЕЦ СУММАРНАЯ ТАБЛИЦА СИГНАЛОВ #########################
 ####################################################################################
+
+
+
+####################################################################################
+################################ СУММАРНАЯ ТАБЛИЦА СИГНАЛОВ ВЕРСИЯ 2 #######################################
+def add_summ_table2(doc, isVirtKey=False, isVirtSwitch=False, isStatuses=False, isSysStatuses=False):
+    table = doc.add_table(rows=1, cols=9)  # Начинаем с одной строки
+    table.style = 'Сетка таблицы51'
+    table.allow_autofit = False
+    table._tbl.xpath('./w:tblPr')[0].append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+
+    # Добавляем заголовок
+    hdr_cells = table.rows[0].cells
+    for i, text in enumerate([
+        'Полное наименование сигналов', 'Наименование сигналов на ФСУ',
+        'Дискретные входы', 'Выходные реле', 'Светодиоды', 'ФК', 'РС', 'РАС', 'Пуск РАС'
+    ]):
+        hdr_cells[i].text = text
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        tcPr = hdr_cells[i]._tc.get_or_add_tcPr()
+        shading_elm = parse_xml(f'<w:shd {nsdecls("w")} w:fill="D9D9D9"/>')
+        for shd in tcPr.xpath(".//w:shd"):
+            tcPr.remove(shd)
+        tcPr.append(shading_elm)
+
+    set_repeat_table_header(table.rows[0])
+
+    current_row = 1  # Следующая строка после заголовка
+
+    # --- Виртуальные кнопки ---
+    if isVirtKey:
+        table.add_row()
+        row = table.rows[current_row]
+        cell = row.cells[0]
+        cell.text = r'{% if fsu.get_fsu_buttons() %}Виртуальные кнопки{% endif %}'
+        cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = cell.paragraphs[0].runs[0]
+        run.bold = True
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[1].text = r'{% if fsu.get_fsu_buttons() %}{%tr for row in fsu.get_fsu_buttons() %}'
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+        row.cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+        row.cells[2].text = '{{ row["Дискретные входы"] }}'
+        row.cells[3].text = '{{ row["Выходные реле"] }}'
+        row.cells[4].text = '{{ row["Светодиоды"] }}'
+        row.cells[5].text = '{{ row["ФК"] }}'
+        row.cells[6].text = '{{ row["РС"] }}'
+        row.cells[7].text = '{{ row["РАС"] }}'
+        row.cells[8].text = '{{ row["Пуск РАС"] }}'
+        for i in range(9):
+            row.cells[i].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{%tr endfor %}{% endif %}'
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+    # --- Виртуальные ключи ---
+    if isVirtSwitch:
+        table.add_row()
+        row = table.rows[current_row]
+        cell = row.cells[0]
+        cell.text = r'{% if fsu.get_fsu_switches() %}Виртуальные ключи{% endif %}'
+        cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = cell.paragraphs[0].runs[0]
+        run.bold = True
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[1].text = r'{% if fsu.get_fsu_switches() %}{%tr for row in fsu.get_fsu_switches() %}'
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+        row.cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+        row.cells[2].text = '{{ row["Дискретные входы"] }}'
+        row.cells[3].text = '{{ row["Выходные реле"] }}'
+        row.cells[4].text = '{{ row["Светодиоды"] }}'
+        row.cells[5].text = '{{ row["ФК"] }}'
+        row.cells[6].text = '{{ row["РС"] }}'
+        row.cells[7].text = '{{ row["РАС"] }}'
+        row.cells[8].text = '{{ row["Пуск РАС"] }}'
+        for i in range(9):
+            row.cells[i].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{%tr endfor %}{% endif %}'
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+    # --- Общие сигналы ---
+    if isStatuses:
+        table.add_row()
+        row = table.rows[current_row]
+        cell = row.cells[0]
+        cell.text = r'{% if fsu.get_fsu_statuses_sorted() %}Общие сигналы функциональной логики{% endif %}'
+        cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = cell.paragraphs[0].runs[0]
+        run.bold = True
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[1].text = r'{% if fsu.get_fsu_statuses_sorted() %}{%tr for row in fsu.get_fsu_statuses_sorted() %}'
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+        row.cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+        row.cells[2].text = '{{ row["Дискретные входы"] }}'
+        row.cells[3].text = '{{ row["Выходные реле"] }}'
+        row.cells[4].text = '{{ row["Светодиоды"] }}'
+        row.cells[5].text = '{{ row["ФК"] }}'
+        row.cells[6].text = '{{ row["РС"] }}'
+        row.cells[7].text = '{{ row["РАС"] }}'
+        row.cells[8].text = '{{ row["Пуск РАС"] }}'
+        for i in range(9):
+            row.cells[i].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{%tr endfor %}{% endif %}'
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+    # --- Системные сигналы ---
+    if isSysStatuses:
+        table.add_row()
+        row = table.rows[current_row]
+        cell = row.cells[0]
+        cell.text = r'{% if fsu.get_fsu_sys_statuses_sorted() %}Системные сигналы{% endif %}'
+        cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = cell.paragraphs[0].runs[0]
+        run.bold = True
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[1].text = r'{% if fsu.get_fsu_sys_statuses_sorted() %}{%tr for row in fsu.get_fsu_sys_statuses_sorted() %}'
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{{ row["Полное наименование сигнала"] }}'
+        row.cells[1].text = '{{ row["Наименование сигналов на ФСУ"] }}'
+        row.cells[2].text = '{{ row["Дискретные входы"] }}'
+        row.cells[3].text = '{{ row["Выходные реле"] }}'
+        row.cells[4].text = '{{ row["Светодиоды"] }}'
+        row.cells[5].text = '{{ row["ФК"] }}'
+        row.cells[6].text = '{{ row["РС"] }}'
+        row.cells[7].text = '{{ row["РАС"] }}'
+        row.cells[8].text = '{{ row["Пуск РАС"] }}'
+        for i in range(9):
+            row.cells[i].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        current_row += 1
+
+        table.add_row()
+        row = table.rows[current_row]
+        row.cells[0].text = '{%tr endfor %}{% endif %}'
+        table.cell(current_row, 0).merge(table.cell(current_row, 8))
+        current_row += 1
+
+    # --- Форматирование таблицы ---
+    for row in table.rows:
+        for idx, width in enumerate(table_summ):
+            row.cells[idx].width = width
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(11)
+
+    return table

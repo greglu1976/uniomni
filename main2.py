@@ -44,6 +44,7 @@ def create_fsu_from_subdirs(base_dir):
         fsu.collect_control()
         fsu.collect_statuses()
         fsu.collect_inputs()
+        print(fsu.get_fsu_statuses_sorted())
     else:
         print("Warning: No FB objects were added!")
 
