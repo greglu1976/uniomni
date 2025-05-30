@@ -68,4 +68,23 @@ fill_template(fsu, hw)
 ########################################################################
 # Запуск генерации суммарной таблицы
 
-create_summ_table(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()) )
+create_summ_table(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()))
+
+path = Path('.')
+# Убеждаемся, что папка существует
+if path.exists() and path.is_dir():
+    # Список файлов для удаления
+    files_to_remove = ['summ_table_templ.docx', 'temp.docx']
+
+    for filename in files_to_remove:
+        file_path = path / filename  # Полный путь к файлу
+        if file_path.exists():      # Проверяем, существует ли файл
+            file_path.unlink()      # Удаляем файл
+            print(f"Файл {filename} удален.")
+        else:
+            print(f"Файл {filename} не найден.")
+else:
+    print("Папка fsu/ не найдена или это не папка.")
+
+
+input("Нажмите Enter для выхода...")
