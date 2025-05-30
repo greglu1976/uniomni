@@ -1,3 +1,6 @@
+import sys
+import argparse
+
 from pathlib import Path
 import pandas as pd
 
@@ -11,6 +14,46 @@ from templater import fill_template, create_template
 # В РАЗРАБОТКЕ ####################################
 from sign_templater2 import create_summ_table
 ################################################
+
+
+def get_help():
+    print("""
+Справка по использованию скрипта:
+--------------------------------
+--help, -h      : Показать это сообщение
+--------------------------------
+
+Версии
+0.2.1 - альфа версия , без особого тестирования
+(с) ООО Юнител Инжиниринг, 2025, Лубов Г.А.
+
+В папке с exe должны быть папка fsu/
+В ней должен быть файл init.xlsx в нем прописан порядок следования функц блоков и какие блоки используются
+сами блоки - их названия должны быть как в файле init.xlsx
+
+Блоки должны быть ДОРАБОТАНЫ (как в примере красной заливкой). 
+1. Общие уставки прописываются тегом LLN0 в столбце 61850_TypeLN.
+2. Отделить функциональные кнопки отдельно тегом button в столбце reserved1. Если столбца нет его нужно добавить
+3. На листе Controls в Категория (group) прописать правильные теги (control, input, и system)
+4. Столбцы MappingMask, Extension_enum, Extension_enum_HMI заменить на Logger, Disturber, StartDisturber в них прописать что требуется (сигналы на РС, РАС, пуск РАС) на листах Controls, Status Information, Settings
+5. На лист TechInfo добавить описание ФБ (DescriptionFB) и описание функций между тегами DescriptionFuncList
+
+
+1. В папке hardware/ описание железа терминала
+2. В папке fsu/ описание функций терминала
+3. Файл origin.docx - необходимый файл для шаблона бланка уставок - НЕ УДАЛЯТЬ!
+4. Файл origin_summ.docx - необходимый файл для шаблона таблицы сигналов - НЕ УДАЛЯТЬ!
+""")
+    sys.exit(0)
+
+parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument('--help', '-h', action='store_true')
+args = parser.parse_args()
+
+if args.help:
+    get_help()
+
+
 
 print('Генератор бланка уставок и суммарной таблицы сигналов v0.2.1 от 30.05.25')
 
