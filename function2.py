@@ -214,3 +214,25 @@ class Function2:
         self.name = name
     def set_fb_name(self, fb_name):
         self.fb_name = fb_name
+
+    def get_settings_for_latex(self, header):
+        table = []
+        if header is not None:
+            head_latex = r'\multicolumn{5}{|c|}{ ' + header + r' } \\ \hline'
+            table.append(head_latex)
+        for row in self.list_re:
+            str_ = r'\centering '
+            str_ += row['Параметр на ИЧМ']
+            str_ += r' & \centering '
+            str_ += row['Условное обозначение на схеме']
+            str_ += r' & \centering '
+            str_ += row['Значение / Диапазон']
+            str_ += r' & \centering '
+            str_ += row['Ед.изм.']
+            str_ += r' & \centering \arraybackslash '
+            str_ += row['Шаг']
+            str_ += r' & \centering '
+            str_ += r' \\'
+            str_ += r' \hline'
+            table.append(str_)
+        return table

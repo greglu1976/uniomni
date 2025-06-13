@@ -187,6 +187,9 @@ class FB2:
     def get_fb_name(self):
         return self.name
 
+    def get_fb_iec_name(self):
+        return self.iec_name
+
     def get_description(self):
         return self.description
 

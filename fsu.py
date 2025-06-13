@@ -176,4 +176,14 @@ class FSU:
                 str += r' \\'
                 str += r'\hline'
                 table.append(str)
-        return table    
+        return table 
+    
+    def get_table_settings_latex(self, func_iec_name, fb_iec_name, header = None):
+        for fb in self.fbs:
+            if fb.get_fb_iec_name() == fb_iec_name:
+                for func in fb.get_functions():
+                    if func.get_iec_name() == func_iec_name:
+
+                        return func.get_settings_for_latex(header)
+
+        return 

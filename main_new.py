@@ -114,9 +114,13 @@ fill_template(fsu, hw)
 create_summ_table(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()))
 
 t = fsu.get_summ_table_latex()
+#print(t)
 with open('output.tex', 'w', encoding='utf-8') as f:
     for line in t:
         f.write(line + '\n')  # Добавляем \n, чтобы каждая запись была с новой строки
+
+q = fsu.get_table_settings_latex('LLN0', 'LVTTOC', 'Общие уставки')
+print(q)
 
 path = Path('.')
 # Убеждаемся, что папка существует
