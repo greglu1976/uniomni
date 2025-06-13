@@ -11,10 +11,9 @@ from hardware import Hardware
 
 from templater import fill_template, create_template
 
-# В РАЗРАБОТКЕ ####################################
+#######################################
 from sign_templater2 import create_summ_table
 ################################################
-
 
 def get_help():
     print("""
@@ -55,7 +54,7 @@ if args.help:
 
 
 
-print('Генератор бланка уставок и суммарной таблицы сигналов v0.2.1 от 30.05.25')
+print('Генератор бланка уставок и суммарной таблицы сигналов v0.2.2 от 13.06.25')
 
 # Задаем папку где описание софт
 path = Path('fsu/')
@@ -109,9 +108,15 @@ create_template(fsu, hw)
 fill_template(fsu, hw)
 
 ########################################################################
+
 # Запуск генерации суммарной таблицы
 
 create_summ_table(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()))
+
+t = fsu.get_summ_table_latex()
+with open('output.tex', 'w', encoding='utf-8') as f:
+    for line in t:
+        f.write(line + '\n')  # Добавляем \n, чтобы каждая запись была с новой строки
 
 path = Path('.')
 # Убеждаемся, что папка существует
