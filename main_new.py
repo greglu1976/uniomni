@@ -12,7 +12,7 @@ from hardware import Hardware
 from templater import fill_template, create_template
 
 #######################################
-from sign_templater2 import create_summ_table
+from sign_templater2 import create_summ_table_docx
 ################################################
 
 def get_help():
@@ -111,7 +111,7 @@ fill_template(fsu, hw)
 
 # Запуск генерации суммарной таблицы
 
-create_summ_table(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()))
+create_summ_table_docx(fsu, isVirtKey=fsu.get_fsu_buttons(), isVirtSwitch=fsu.get_fsu_switches(), isStatuses=bool(fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(fsu.get_fsu_sys_statuses_sorted()))
 
 t = fsu.get_summ_table_latex()
 #print(t)

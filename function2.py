@@ -217,22 +217,22 @@ class Function2:
 
     def get_settings_for_latex(self, header):
         table = []
-        if header is not None:
-            head_latex = r'\multicolumn{5}{|c|}{ ' + header + r' } \\ \hline'
+        if header is not None and header!="":
+            head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\ \hline \n'
             table.append(head_latex)
         for row in self.list_re:
-            str_ = r'\centering '
-            str_ += row['Параметр на ИЧМ']
-            str_ += r' & \centering '
-            str_ += row['Условное обозначение на схеме']
-            str_ += r' & \centering '
-            str_ += row['Значение / Диапазон']
-            str_ += r' & \centering '
-            str_ += row['Ед.изм.']
-            str_ += r' & \centering \arraybackslash '
-            str_ += row['Шаг']
-            str_ += r' & \centering '
-            str_ += r' \\'
-            str_ += r' \hline'
+            str_ = '\centering '
+            str_ += row['Параметр на ИЧМ'].replace('_', r'\_')
+            str_ += ' & \centering '
+            str_ += row['Условное обозначение на схеме'].replace('-', r'--')
+            str_ += ' & \centering '
+            str_ += row['Значение / Диапазон'].replace('\n', r'\\')
+            str_ += ' & \centering '
+            str_ += row['Ед.изм.'].replace('-', r'--')
+            str_ += ' & \centering \\arraybackslash '
+            str_ += row['Шаг'].replace('-', r'--')
+            str_ += ' \\\\'
+            str_ += '\n\hline'
+            str_ += '\n'
             table.append(str_)
         return table

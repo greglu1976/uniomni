@@ -7,7 +7,7 @@ from tables import add_summ_table2
 from docx_handler import add_new_section_landscape
 
 
-def create_summ_table(fsu, isVirtKey=False,isVirtSwitch=False, isStatuses=False, isSysStatuses=False):
+def create_summ_table_docx(fsu, isVirtKey=False,isVirtSwitch=False, isStatuses=False, isSysStatuses=False):
 
     doc = Document('origin_summ.docx')
 
