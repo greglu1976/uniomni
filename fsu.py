@@ -75,109 +75,48 @@ class FSU:
     def get_fsu_switches(self):
         return sorted(self.switches_list, key=lambda x: x['Полное наименование сигнала'])         
 
-
     # Генерация суммарной таблицы в формате LATEX
     def _generate_summ_table_latex(self):
+        def _generate_row(row):
+            row_str = '\\raggedright '
+            row_str += row['Полное наименование сигнала'].replace('_', r'\_')
+            row_str += ' & \\centering '
+            row_str += row['Наименование сигналов на ФСУ'].replace('_', r'\_')
+            row_str += ' & \\centering '
+            row_str += row['Дискретные входы'].replace('-', r'--')
+            row_str += ' & \\centering '
+            row_str += row['Выходные реле'].replace('-', r'--')
+            row_str += ' & \\centering '
+            row_str += row['Светодиоды'].replace('-', r'--')
+            row_str += ' & \\centering '
+            row_str += row['ФК'].replace('-', r'--')
+            row_str += ' & \\centering '
+            row_str += row['РС'].replace('-', r'--')
+            row_str += ' & \\centering '
+            row_str += row['РАС'].replace('-', r'--')
+            row_str += ' & \\centering \\arraybackslash '
+            row_str += row['Пуск РАС'].replace('-', r'--')
+            row_str += ' \\\\ \\hline\n'
+            return row_str
+
+        def _generate_section(data, title):
+            section = []
+            if data:
+                section.append(f'\\multicolumn{{9}}{{c|}}{{{title}}} \\\\\n\\hline\n')
+                for row in data:
+                    section.append(_generate_row(row))
+            return section
+
         table = []
-            # Добавляем раздел, только если есть данные
-        if self.get_fsu_buttons():  # Если список не пуст
-            table.append(r'''\multicolumn{9}{c|}{Виртуальные кнопки} \\ \hline''')
-            for row in self.get_fsu_buttons():
-                str = r'\raggedright '
-                str += row['Полное наименование сигнала']
-                str += r' & \centering '
-                str += row['Наименование сигналов на ФСУ']
-                str += r' & \centering'
-                str += row['Дискретные входы']
-                str += r' & \centering'
-                str += row['Выходные реле']
-                str += r' & \centering'
-                str += row['Светодиоды']
-                str += r' & \centering'
-                str += row['ФК']
-                str += r' & \centering'
-                str += row['РС']
-                str += r' & \centering'
-                str += row['РАС']
-                str += r' & \centering \arraybackslash'
-                str += row['Пуск РАС']
-                str += r' \\'
-                str += r'\hline'
-                table.append(str)
-        if self.get_fsu_switches():
-            table.append(r'''\multicolumn{9}{c|}{Виртуальные ключи} \\ \hline''')
-            for row in self.get_fsu_switches():
-                str = r'\raggedright '
-                str += row['Полное наименование сигнала']
-                str += r' & \centering '
-                str += row['Наименование сигналов на ФСУ']
-                str += r' & \centering'
-                str += row['Дискретные входы']
-                str += r' & \centering'
-                str += row['Выходные реле']
-                str += r' & \centering'
-                str += row['Светодиоды']
-                str += r' & \centering'
-                str += row['ФК']
-                str += r' & \centering'
-                str += row['РС']
-                str += r' & \centering'
-                str += row['РАС']
-                str += r' & \centering \arraybackslash'
-                str += row['Пуск РАС']
-                str += r' \\'
-                str += r'\hline'
-                table.append(str)
-        if self.get_fsu_statuses_sorted():
-            table.append(r'''\multicolumn{9}{c|}{Общие сигналы} \\ \hline''')
-            for row in self.get_fsu_statuses_sorted():
-                str = r'\raggedright '
-                str += row['Полное наименование сигнала']
-                str += r' & \centering '
-                str += row['Наименование сигналов на ФСУ']
-                str += r' & \centering'
-                str += row['Дискретные входы']
-                str += r' & \centering'
-                str += row['Выходные реле']
-                str += r' & \centering'
-                str += row['Светодиоды']
-                str += r' & \centering'
-                str += row['ФК']
-                str += r' & \centering'
-                str += row['РС']
-                str += r' & \centering'
-                str += row['РАС']
-                str += r' & \centering \arraybackslash'
-                str += row['Пуск РАС']
-                str += r' \\'
-                str += r'\hline'
-                table.append(str)
-        if self.get_fsu_sys_statuses_sorted():
-            table.append(r'''\multicolumn{9}{c|}{Системные сигналы} \\ \hline''')
-            for row in self.get_fsu_sys_statuses_sorted():
-                str = r'\raggedright '
-                str += row['Полное наименование сигнала']
-                str += r' & \centering '
-                str += row['Наименование сигналов на ФСУ']
-                str += r' & \centering'
-                str += row['Дискретные входы']
-                str += r' & \centering'
-                str += row['Выходные реле']
-                str += r' & \centering'
-                str += row['Светодиоды']
-                str += r' & \centering'
-                str += row['ФК']
-                str += r' & \centering'
-                str += row['РС']
-                str += r' & \centering'
-                str += row['РАС']
-                str += r' & \centering \arraybackslash'
-                str += row['Пуск РАС']
-                str += r' \\'
-                str += r'\hline'
-                table.append(str)
-        return table 
-    
+        table.extend(_generate_section(self.get_fsu_buttons(), "Виртуальные кнопки"))
+        table.extend(_generate_section(self.get_fsu_switches(), "Виртуальные ключи"))
+        table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы"))
+        table.extend(_generate_section(self.get_fsu_sys_statuses_sorted(), "Системные сигналы"))
+        
+        return table
+
+
+    # Генерация таблицы в формате LATEX для подраздела РЭ с выбором функции   
     def get_table_settings_latex(self, func_iec_name, fb_iec_name, header = None):
         for fb in self.fbs:
             if fb.get_fb_iec_name() == fb_iec_name:

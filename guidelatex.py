@@ -99,7 +99,6 @@ class ExploitationGuideLatex:
             header = match.group(3).strip() if match.group(3) else ""
             return ln, fb, header
         return None, None, None
-
     # метод для обновления таблиц с уставками в РЭ
     def renew_setting_tables_re(self):
         start_tag_prefix = '%==+t1*'
@@ -127,7 +126,7 @@ class ExploitationGuideLatex:
 
                     # Парсим LN, FB и заголовок
                     ln, fb, header = self._parse_start_tag(start_line)
-                    print(f"Найден тег: ln={ln}, fb={fb}, header='{header}'")
+                    #print(f"Найден тег: ln={ln}, fb={fb}, header='{header}'")
 
                     # Генерируем новое содержимое
                     latex_new = self._fsu.get_table_settings_latex(ln, fb, header)
@@ -182,6 +181,73 @@ class ExploitationGuideLatex:
                 print(f"Файл обновлён: {path}")
             else:
                 print(f"Изменений в файле нет: {path}")
+    # метод для обновления суммарной таблицы сигналов в РЭ
+    def renew_sum_table_latex(self):
+        path_to_appA_tex = Path(self.path_to_latex_desc) / "Приложение А. Сигналы" / "_latex" / "app1.tex"
+        start_tag = '%===t2\n'
+
+        if not os.path.exists(path_to_appA_tex):
+            print(f"Файл описания приложения А не найден: {path_to_appA_tex}")
+            return
+
+        with open(path_to_appA_tex, 'r', encoding='utf-8') as f:
+            content = f.readlines()
+
+        new_content = []
+        i = 0
+        modified = False
+
+        while i < len(content):
+            line = content[i]
+
+            if line == start_tag:
+                # Найден начальный тег
+                new_content.append(line)  # Сохраняем начальный тег
+                i += 1
+
+                # Собираем старое содержимое до закрывающего %===t2
+                old_block = []
+                while i < len(content) and content[i] != start_tag:
+                    old_block.append(content[i])
+                    i += 1
+
+                # Генерируем новое содержимое
+                latex_new = self._fsu.get_summ_table_latex()
+
+                # Проверяем результат
+                if not latex_new:
+                    print("Новое содержимое не сгенерировано — оставляем старое.")
+                    new_content.extend(old_block)
+                    new_content.append(start_tag)  # Добавляем закрывающий тег
+                elif old_block != latex_new:
+                    print("Контент отличается — будет обновлён.")
+                    #print(old_block)
+                    #print(latex_new)
+                    new_content.extend(latex_new)
+                    new_content.append(start_tag)  # Добавляем закрывающий тег
+                    modified = True
+                else:
+                    print("Контент не изменился — пропускаем обновление.")
+                    new_content.extend(old_block)
+                    new_content.append(start_tag)
+
+                i += 1  # Пропускаем закрывающий тег после добавления
+
+            else:
+                # Копируем остальные строки
+                new_content.append(line)
+                i += 1
+
+        # Записываем только если были изменения
+        if modified:
+            with open(path_to_appA_tex, 'w', encoding='utf-8') as f:
+                f.writelines(new_content)
+            print(f"Файл обновлён: {path_to_appA_tex}")
+        else:
+            print(f"Изменений в файле нет: {path_to_appA_tex}")
+
+
+
 
 
 
@@ -199,10 +265,12 @@ path_to_fsu = Path('fsu/')
 fbs_list = ['TDIF', 'LVARCTOC']
 re_ = ExploitationGuideLatex(path_to_latex_desc, path_to_fsu, fbs_list)
 
-re_.renew_setting_tables_re()
+# Обновляем таблицы с уставками в разделах РЭ
+#re_.renew_setting_tables_re()
 
 
-
+# Обновляем суммарную таблицу сигналов приложения А в РЭ
+re_.renew_sum_table_latex()
 
 
 
