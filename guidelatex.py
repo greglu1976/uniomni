@@ -3,9 +3,19 @@ import os
 import re
 from pathlib import Path
 
+import pandas as pd
+
 from fb2 import FB2
 from fsu import FSU
+from hardware import Hardware
 
+from docx import Document
+from docxtpl import DocxTemplate
+
+from tables import add_summ_table2
+from docx_handler import add_new_section_landscape
+
+from templater import fill_template, create_template
 
 class ExploitationGuideLatex:
     def __init__(self, path_to_latex_desc, path_to_fsu, fbs_list):
@@ -15,6 +25,7 @@ class ExploitationGuideLatex:
         self.paths = [] # пути к файлам tex
 
         self._fsu = None
+        self._hardware = None
 
         self._proceed_init() # ищем все пути к файлам tex
         self._create_fsu()
@@ -245,10 +256,41 @@ class ExploitationGuideLatex:
             print(f"Файл обновлён: {path_to_appA_tex}")
         else:
             print(f"Изменений в файле нет: {path_to_appA_tex}")
-
-
-
-
+    # метод для создания экземпляра класса Hardware из xlsx файла
+    def _init_hardware_with_xlsx(self):
+        path2 = Path("hardware/")
+        excel_path2 = path2 / 'description.xlsx'
+        df_versions = pd.read_excel(excel_path2, sheet_name='Версии')
+        df_versions['Дата'] = df_versions['Дата'].dt.strftime(r'%d.%m.%Y')
+        df_info = pd.read_excel(excel_path2, sheet_name='Инфо')
+        # 1. Словарь из df_versions (Номер -> Дата)
+        #versions = dict(zip(df_versions['Номер'], df_versions['Дата']))
+        versions = df_versions[['Номер', 'Дата']].to_dict('records')
+        # 2. Словарь из df_info (Ключ -> Значение)
+        info = dict(zip(df_info['Ключ'], df_info['Значение']))
+        self._hardware = Hardware(versions, info)
+    # метод для создания суммарной таблицы сигналов в docx
+    def generate_sum_table_docx(self):
+        doc = Document('origin_summ.docx')
+        add_new_section_landscape(doc)
+        p = doc.add_paragraph('Перечень сигналов ФСУ, предназначенных для конфигурирования устройства')
+        p.style = 'ДОК Таблица Название'
+        add_summ_table2(doc, isVirtKey=self._fsu.get_fsu_buttons(), isVirtSwitch=self._fsu.get_fsu_switches(), isStatuses=bool(self._fsu.get_fsu_statuses_sorted()),isSysStatuses=bool(self._fsu.get_fsu_sys_statuses_sorted()))
+        doc.save("summ_table_templ.docx")
+        doc2 = DocxTemplate("summ_table_templ.docx")
+        # Формируем контекст для Jinja2
+        context = {
+            "fsu": self._fsu,
+        }
+        # Заполняем документ
+        doc2.render(context)
+        doc2.save("Таблица сигналов.docx")
+    # метод для создания бланка уставок в docx файл
+    def generate_setting_blanc_docx(self):
+        if self._hardware is None:
+            self._init_hardware_with_xlsx()
+        create_template(self._fsu, self._hardware)
+        fill_template(self._fsu, self._hardware)
 
 
     # ГЕТТЕРЫ И СЕТТЕРЫ
@@ -265,13 +307,14 @@ path_to_fsu = Path('fsu/')
 fbs_list = ['TDIF', 'LVARCTOC']
 re_ = ExploitationGuideLatex(path_to_latex_desc, path_to_fsu, fbs_list)
 
-# Обновляем таблицы с уставками в разделах РЭ
+# 1. Обновляем таблицы с уставками в разделах РЭ
 #re_.renew_setting_tables_re()
 
+# 2. Обновляем суммарную таблицу сигналов приложения А в РЭ
+#re_.renew_sum_table_latex()
 
-# Обновляем суммарную таблицу сигналов приложения А в РЭ
-re_.renew_sum_table_latex()
+# 3. Генерируем суммарную таблицу сигналов в docx
+#re_.generate_sum_table_docx()
 
-
-
-
+# 4. Генерируем бланк уставок в docx
+re_.generate_setting_blanc_docx()   
