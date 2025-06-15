@@ -17,12 +17,16 @@ from docx_handler import add_new_section_landscape
 
 from templater import fill_template, create_template
 
+from abbrs import start_abbr
+
 class ExploitationGuideLatex:
     def __init__(self, path_to_latex_desc, path_to_fsu, fbs_list):
         self.path_to_latex_desc = path_to_latex_desc # путь к корневой папке проекта РЭ
         self.path_to_fsu = path_to_fsu # путь к корневой папке описания ФБ xlsx
         self.fbs_list = fbs_list # список имен ФБ для сборки ФСУ
         self.paths = [] # пути к файлам tex
+
+        self.path_to_ru_desc = None # путь к описанию расчета уставок для обновления аббревиатур РУ , только для этого, инициализируется сеттером
 
         self._fsu = None
         self._hardware = None
@@ -292,8 +296,20 @@ class ExploitationGuideLatex:
         create_template(self._fsu, self._hardware)
         fill_template(self._fsu, self._hardware)
 
+    def renew_abbrs(self):
+        path_to = Path(self.path_to_latex_desc)  / '_manual_latex' / 'general.pdf'
+        print(path_to)
+        start_abbr(path_to)
+
+    def renew_abbrs_ru(self):
+        path_to = Path(self.path_to_ru_desc)
+        start_abbr(path_to)
+
 
     # ГЕТТЕРЫ И СЕТТЕРЫ
+    def set_path_to_ru_desc(self, path_to_ru_desc):
+        self.path_to_ru_desc = path_to_ru_desc
+
     def get_paths_to_tex(self):
         return self.paths
 
@@ -317,4 +333,11 @@ re_ = ExploitationGuideLatex(path_to_latex_desc, path_to_fsu, fbs_list)
 #re_.generate_sum_table_docx()
 
 # 4. Генерируем бланк уставок в docx
-re_.generate_setting_blanc_docx()   
+#re_.generate_setting_blanc_docx()   
+
+# 5. Генерируем перечень сокращений в latex
+#re_.renew_abbrs()
+
+# 6. Генерируем перечень сокращений для РУ, нужно задать путь полный с именем файла
+re_.set_path_to_ru_desc(Path(r'E:\www4\ИЭУ Т 35 кВ Россети\02. Разработка РУ\01. РЭ ЮНИТ-М3-ДЗТ2\general.pdf'))
+re_.renew_abbrs_ru()
