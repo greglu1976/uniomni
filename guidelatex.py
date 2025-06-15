@@ -135,6 +135,12 @@ class ExploitationGuideLatex:
                     # Собираем старое содержимое до %===t1
                     old_block = []
                     i += 1
+                    line = content[i]
+                    if line.startswith('%===t1*'):
+                        # Сохраняем старый тег, если есть
+                        new_content.append(line)
+                        i += 1
+
                     while i < len(content):
                         current_line = content[i]
                         if current_line.startswith('%===t1*'):
@@ -163,11 +169,6 @@ class ExploitationGuideLatex:
                         new_content.append(end_tag)
 
                     i += 1  # Пропускаем закрывающий тег после добавления
-
-                elif line.startswith('%===t1*'):
-                    # Сохраняем старый тег, если есть
-                    new_content.append(line)
-                    i += 1
 
                 else:
                     # Копируем остальные строки
