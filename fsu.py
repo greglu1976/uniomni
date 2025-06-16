@@ -83,19 +83,19 @@ class FSU:
             row_str += ' & \\centering '
             row_str += row['Наименование сигналов на ФСУ'].replace('_', r'\_')
             row_str += ' & \\centering '
-            row_str += row['Дискретные входы'].replace('-', r'--')
+            row_str += row['Дискретные входы'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering '
-            row_str += row['Выходные реле'].replace('-', r'--')
+            row_str += row['Выходные реле'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering '
-            row_str += row['Светодиоды'].replace('-', r'--')
+            row_str += row['Светодиоды'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering '
-            row_str += row['ФК'].replace('-', r'--')
+            row_str += row['ФК'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering '
-            row_str += row['РС'].replace('-', r'--')
+            row_str += row['РС'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering '
-            row_str += row['РАС'].replace('-', r'--')
+            row_str += row['РАС'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering \\arraybackslash '
-            row_str += row['Пуск РАС'].replace('-', r'--')
+            row_str += row['Пуск РАС'].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' \\\\ \\hline\n'
             return row_str
 

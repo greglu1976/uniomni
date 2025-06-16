@@ -327,10 +327,10 @@ re_ = ExploitationGuideLatex(path_to_latex_desc, path_to_fsu, fbs_list)
 #re_.renew_setting_tables_re()
 
 # 2. Обновляем суммарную таблицу сигналов приложения А в РЭ
-#re_.renew_sum_table_latex()
+re_.renew_sum_table_latex()
 
 # 3. Генерируем суммарную таблицу сигналов в docx
-re_.generate_sum_table_docx()
+#re_.generate_sum_table_docx()
 
 # 4. Генерируем бланк уставок в docx
 #re_.generate_setting_blanc_docx()   
