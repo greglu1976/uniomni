@@ -142,6 +142,29 @@ class Function2:
             self.list_bu.append(dict_bu)
             self.list_re.append(dict_re)            
 
+    def _format_status(self, value):
+        """Форматирование числового статуса в символьное представление
+        
+        Параметры:
+            value (int/str): Входное значение статуса
+            
+        Возвращает:
+            str: Символьное представление статуса:
+                - '+' для значения 1
+                - '-' для значения 0
+                - '*' для значения 2
+                - '⊕' для значения 3
+                - '?' для всех остальных случаев
+        """
+        status_mapping = {
+            '0': '-',
+            '1': '+',
+            '2': '*',
+            '3': '-'  # Символ плюса в кружочке (U+2295)
+        }
+        str_value = str(value).strip()
+        return status_mapping.get(str_value, '?')
+
     def _get_statuses(self):
         if self.df_status is None:
             return
@@ -150,24 +173,17 @@ class Function2:
                 continue
             desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
             short_desc = row['ShortDescription']
-            digit_input = row['DigitalInput']
-            func_btn = row['FunctionalButton']
-            digit_output = row['DigitalOutput']
-            led = row['LED']
-            logger = row['Logger']
-            disturber = row['Disturber']
-            start_disturber = row['StartDisturber']
 
             dict = {
             'Полное наименование сигнала': self.fb_name + ' / ' + self.name + ': ' + desc, 
             'Наименование сигналов на ФСУ': short_desc, 
-            'Дискретные входы': '+' if str(digit_input)=='1' else '-',
-            'Выходные реле': '+' if str(digit_output)=='1' else '-',
-            'Светодиоды': '+' if str(led)=='1' else '-',
-            'ФК': '+' if str(func_btn)=='1' else '-',
-            'РС': '+' if str(logger)=='1' else '-',
-            'РАС': '+' if str(disturber)=='1' else '-',
-            'Пуск РАС': '+' if str(start_disturber)=='1' else '-',
+            'Дискретные входы': self._format_status(row['DigitalInput']),
+            'Выходные реле': self._format_status(row['DigitalOutput']),
+            'Светодиоды': self._format_status(row['LED']),
+            'ФК': self._format_status(row['FunctionalButton']),
+            'РС': self._format_status(row['Logger']),
+            'РАС': self._format_status(row['Disturber']),
+            'Пуск РАС': self._format_status(row['StartDisturber']),
             }
             self.list_status.append(dict)
 
