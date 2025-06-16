@@ -330,7 +330,7 @@ re_ = ExploitationGuideLatex(path_to_latex_desc, path_to_fsu, fbs_list)
 #re_.renew_sum_table_latex()
 
 # 3. Генерируем суммарную таблицу сигналов в docx
-#re_.generate_sum_table_docx()
+re_.generate_sum_table_docx()
 
 # 4. Генерируем бланк уставок в docx
 #re_.generate_setting_blanc_docx()   
@@ -339,5 +339,5 @@ re_ = ExploitationGuideLatex(path_to_latex_desc, path_to_fsu, fbs_list)
 #re_.renew_abbrs()
 
 # 6. Генерируем перечень сокращений для РУ, нужно задать путь полный с именем файла
-re_.set_path_to_ru_desc(Path(r'E:\www4\ИЭУ Т 35 кВ Россети\02. Разработка РУ\01. РЭ ЮНИТ-М3-ДЗТ2\general.pdf'))
-re_.renew_abbrs_ru()
+#re_.set_path_to_ru_desc(Path(r'E:\www4\ИЭУ Т 35 кВ Россети\02. Разработка РУ\01. РЭ ЮНИТ-М3-ДЗТ2\general.pdf'))
+#re_.renew_abbrs_ru()

@@ -162,7 +162,7 @@ class Function2:
             '2': '*',
             '3': '-'  # Символ плюса в кружочке (U+2295)
         }
-        str_value = str(value).strip()
+        str_value = str(int(float(str(value).strip())))
         return status_mapping.get(str_value, '?')
 
     def _get_statuses(self):
