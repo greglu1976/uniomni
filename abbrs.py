@@ -4,6 +4,7 @@ import os
 import sys
 import json
 
+from logger import Logger
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(parent_dir)
@@ -33,7 +34,7 @@ abbrs = {
 }
 
 
-# Определяем словарь аббревиатур
+# Определяем словарь абревиатур
 def load_dict(abbrs):
     data = abbrs
     # Ищем файл со словарем
@@ -41,15 +42,14 @@ def load_dict(abbrs):
     if os.path.isfile(path_to_dict):
         with open(path_to_dict, 'r', encoding='utf-8') as file:
             data = json.load(file)
-            print("Найден внешний словарь аббревиатур dictionary.json")
+            Logger.info("Найден внешний словарь абревиатур dictionary.json")
             return data
-    print("Не найден внешний словарь аббревиатур dictionary.json, будет использоваться пустой внутренний словарь!")
+    Logger.warning("Не найден внешний словарь абревиатур dictionary.json, будет использоваться пустой внутренний словарь!")
     return data
 
 def get_abbrs_new(word_list, abbr_dict):
     abbr_set = set(abbr_dict.keys())
     new_list = []
-    #print(word_list)
     for word in word_list:
         for abbr in abbr_set:
             if abbr in word:
@@ -68,7 +68,6 @@ def get_abbrs(word_list):
         if re.match('^[A-ZА-Я]{2}[A-Za-zА-Яа-я~\s]*$', cleaned_string): #^[A-ZА-Я]{2}[A-Za-zА-Яа-я~\s]*$ # ^[A-ZА-Я]{2}[A-Za-zА-Яа-я]*$
             new_word_list.append(cleaned_string)
         
-    #print(new_word_list)
     abbrs = []
     for word in new_word_list:
         if len(word)<=7:
@@ -158,12 +157,12 @@ def parse_tex_new(new_word_list, dict):
 ########################## ТОЧКА ВХОДА ###################################
 def start_abbr(filepath):
 
-    print("Запуск скрипта обновления аббревиатур...")
+    Logger.info("Запуск скрипта обновления абревиатур...")
 
     #pdf_path = filepath+'/general.pdf'
     path_to_pdf = replace_pdf_with_attrs_txt(filepath)
 
-    print(f"Обработка {path_to_pdf[0]}")
+    Logger.info(f"Обработка {path_to_pdf[0]}")
     word_list_origin = extract_words_from_pdf(path_to_pdf[0])
 
     # убираем повторяющиеся слова
@@ -171,11 +170,11 @@ def start_abbr(filepath):
     word_list = sorted(list(word_set))
     # вытаскиваем абревиатуры
     new_word_list = get_abbrs(word_list)
-    print(new_word_list)
+    Logger.info(new_word_list)
 
     # если список пустой возвращаемся
     if not new_word_list:
-        print("Нет распознанных аббревиатур в текущем файле pdf...")
+        Logger.info("Нет распознанных абревиатур в текущем файле pdf...")
         return 'noabbrs'
 
     new_word_list = sorted(new_word_list)
@@ -203,6 +202,6 @@ def start_abbr(filepath):
         for line in final_tex:
             file.write(line)  # Добавляем символ новой строки после каждой строки
 
-    print("Останов скрипта поиска аббревиатур...")
+    Logger.info("Останов скрипта поиска абревиатур...")
     return
 
