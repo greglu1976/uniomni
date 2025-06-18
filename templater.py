@@ -75,7 +75,7 @@ def create_template(fsu, hardware):
     p.style = 'ДОК Заголовок 2'
 
 
-    p = doc.add_paragraph(r'{{ fb.get_description() }}{% for func in fb.get_functions() if func.get_settings_for_bu() %}')
+    p = doc.add_paragraph(r'{{ fb.get_description() }} ({{ fb.get_fb_name() }}) {% for func in fb.get_functions() if func.get_settings_for_bu() %}')
     p.style = 'ДОК Заголовок 3'
 
     p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')

@@ -76,7 +76,8 @@ class FB2:
         self.description = self.raw_info_df[self.raw_info_df['Parameter'] == 'DescriptionFB']['Value'].iloc[0]
         self.weight = self.raw_info_df[self.raw_info_df['Parameter'] == 'WeightCoefficient']['Value'].iloc[0]
 
-        df_signals = self.raw_settings_df[self.raw_settings_df['61850_TypeLN'] == 'LLN0']
+        #df_signals = self.raw_settings_df[self.raw_settings_df['61850_TypeLN'] == 'LLN0']
+        df_signals = self.raw_settings_df[self.raw_settings_df['61850_TypeLN'].str.contains('LLN0', na=False)]
 
         self.mainfunc = Function2(
             df_signals=df_signals,
@@ -91,7 +92,8 @@ class FB2:
     def _create(self):
         """Основной метод создания всех функций"""
         df_summ_t = pd.concat([self.raw_settings_df, self.raw_statuses_df])
-        df = df_summ_t[df_summ_t['61850_TypeLN'] != 'LLN0']  # убираем уставки относящиеся к LLN0
+        #df = df_summ_t[df_summ_t['61850_TypeLN'] != 'LLN0']  # убираем уставки относящиеся к LLN0
+        df = df_summ_t[~df_summ_t['61850_TypeLN'].str.contains('LLN0', na=False)]
 
         # Разбиваем датафрей по именам функций
         # Удаляем строки с пустыми значениями в 'NodeName (рус)'
