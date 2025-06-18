@@ -53,7 +53,7 @@ class Function2:
         for _, row in self.df_setting.iterrows():
             desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
             short_desc = row['ShortDescription'].replace('<<','«').replace('>>','»')
-            applied_desc = row['AppliedDescription']
+            applied_desc = row['AppliedDescription'].replace('<<','«').replace('>>','»')
             note = row['Note (Справочная информация)']
             units = row['units']
             min_value = row['minValue']
@@ -174,7 +174,7 @@ class Function2:
             if row['type']!='BOOL':
                 continue
             desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
-            short_desc = row['ShortDescription']
+            short_desc = row['ShortDescription'].strip().replace('<<','«').replace('>>','»')
 
             dict = {
             'Полное наименование сигнала': self.fb_name + ' / ' + self.name + ': ' + desc, 
