@@ -63,6 +63,8 @@ class Function2:
             type = row['type']
             znach_diap = ''
             isKey = False
+            if 'Del' in row['reserved2']:
+                continue
             if 'SGF' in row['reserved2'] or 'SGF' in applied_desc: # Дополнительная строка с разъяснениями (если есть SGF - то это ключ)
                 isKey = True
 
@@ -234,7 +236,7 @@ class Function2:
     def get_settings_for_latex(self, header):
         table = []
         if header is not None and header != "":
-            head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\ \hline \n'
+            head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \hline \n'
             table.append(head_latex)
         for row in self.list_re:
             str_ = '\centering '

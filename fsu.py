@@ -115,7 +115,6 @@ class FSU:
         
         return table
 
-
     # Генерация таблицы в формате LATEX для подраздела РЭ с выбором функции   
     def get_table_settings_latex(self, func_iec_name, fb_iec_name, header = None):
         for fb in self.fbs:
