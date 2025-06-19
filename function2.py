@@ -251,4 +251,5 @@ class Function2:
             str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
             table.append(str_)  # Добавляем строку таблицы
             table.append('\\hline\n')  # Добавляем \hline отдельным элементом
+ 
         return table
