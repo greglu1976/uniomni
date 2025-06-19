@@ -245,7 +245,7 @@ class Function2:
             str_ += ' & \centering '
             str_ += row['Значение / Диапазон'].replace('\n', r'\\')
             str_ += ' & \centering '
-            str_ += row['Ед.изм.'].replace('-', r'--')
+            str_ += row['Ед.изм.'].replace('-', r'--').replace('%', r'\%')
             str_ += ' & \centering \\arraybackslash '
             str_ += row['Шаг'].replace('-', r'--')
             str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
