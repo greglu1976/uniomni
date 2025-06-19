@@ -188,8 +188,6 @@ class Function2:
             'Пуск РАС': self._format_status(row['StartDisturber']),
             }
             self.list_status.append(dict)
-        print(self.list_status)
-
 
     def save_to_xlsx(self, filename='split_data.xlsx'):
         # Проверяем, есть ли данные для записи
