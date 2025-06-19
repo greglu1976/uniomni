@@ -38,7 +38,6 @@ class FSU:
         for item in self.switches_list}
         self.switches_list = list(unique_switches.values())        
         self.control_list = self.buttons_list + self.switches_list
-        #print(self.switches_list)
 
     def collect_inputs(self):
         self.inputs_list = [inp for fb in self.fbs for inp in fb.get_inputs_list()]
@@ -56,7 +55,8 @@ class FSU:
     # получаем весь список сигналов без СИСТ
     def get_fsu_statuses_sorted(self):
         other_list = [d for d in self.statuses if 'СИСТ' not in d['Полное наименование сигнала']]
-        return sorted(other_list, key=lambda x: x['Полное наименование сигнала'])
+        #return sorted(other_list, key=lambda x: x['Полное наименование сигнала']) # ВКЛЮЧИТЬ СОРТИРОВКУ
+        return other_list
     # получаем список сигналов только СИСТ
     def get_fsu_sys_statuses_sorted(self):
         sist_list = [d for d in self.statuses if 'СИСТ' in d['Полное наименование сигнала']]
@@ -73,7 +73,8 @@ class FSU:
         return sorted(self.buttons_list, key=lambda x: x['Полное наименование сигнала'])
 
     def get_fsu_switches(self):
-        return sorted(self.switches_list, key=lambda x: x['Полное наименование сигнала'])         
+        #return sorted(self.switches_list, key=lambda x: x['Полное наименование сигнала'])         
+        return self.switches_list 
 
     # Генерация суммарной таблицы в формате LATEX
     def _generate_summ_table_latex(self):
@@ -110,7 +111,7 @@ class FSU:
         table = []
         table.extend(_generate_section(self.get_fsu_buttons(), "Виртуальные кнопки"))
         table.extend(_generate_section(self.get_fsu_switches(), "Виртуальные ключи"))
-        table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы"))
+        table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики"))
         table.extend(_generate_section(self.get_fsu_sys_statuses_sorted(), "Системные сигналы"))
         
         return table

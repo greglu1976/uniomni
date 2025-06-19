@@ -188,6 +188,7 @@ class Function2:
             'Пуск РАС': self._format_status(row['StartDisturber']),
             }
             self.list_status.append(dict)
+        print(self.list_status)
 
 
     def save_to_xlsx(self, filename='split_data.xlsx'):
@@ -242,7 +243,7 @@ class Function2:
             str_ = '\centering '
             str_ += row['Параметр на ИЧМ'].replace('_', r'\_')
             str_ += ' & \centering '
-            str_ += row['Условное обозначение на схеме'].replace('-', r'--')
+            str_ += row['Условное обозначение на схеме'].replace('-', r'--').replace('_', r'\_')
             str_ += ' & \centering '
             str_ += row['Значение / Диапазон'].replace('\n', r'\\')
             str_ += ' & \centering '

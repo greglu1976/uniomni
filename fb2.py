@@ -77,11 +77,12 @@ class FB2:
         self.weight = self.raw_info_df[self.raw_info_df['Parameter'] == 'WeightCoefficient']['Value'].iloc[0]
 
         #df_signals = self.raw_settings_df[self.raw_settings_df['61850_TypeLN'] == 'LLN0']
-        df_signals = self.raw_settings_df[self.raw_settings_df['61850_TypeLN'].str.contains('LLN0', na=False)]
+        df_summ_t = pd.concat([self.raw_settings_df, self.raw_statuses_df])
+        df_signals = df_summ_t[df_summ_t['61850_TypeLN'].str.contains('LLN0', na=False)]
 
         self.mainfunc = Function2(
             df_signals=df_signals,
-            name='',
+            name=self.name, # ПРОТЕСТИРОВАТЬ!!!!!
             description='Общие уставки',
             iec_name='LLN0',
             fb_name=self.name
