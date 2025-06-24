@@ -17,7 +17,7 @@ class FB2:
 
 
         self.functions = []
-
+        self._fb_signals_latex = []
         self.mainfunc = None
 
         self.name = ''
@@ -44,6 +44,7 @@ class FB2:
         self._collect_statuses()
         self._process_inputs()
         self._process_control()
+        self.get_formatted_signals_for_latex()
 
     def __init_raw_dfs(self):
         if not self.path.exists():
@@ -214,3 +215,34 @@ class FB2:
             if func.get_settings_for_bu():
                 return True
         return False
+
+    # Генерация таблицы сигналов разбитой по функциям (тип 2)
+    @staticmethod
+    def __remove_consecutive_duplicates(lst):
+        result = []
+        for item in lst:
+            if not result or result[-1] != item:
+                result.append(item)
+        return result  
+
+    def _is_signals_for_latex(self):
+        for func in self.functions:
+            if func.get_formatted_signals_for_latex():
+                return True
+        return False
+
+    def _create_formatted_signals_for_latex(self):
+        if not self._is_signals_for_latex():
+            return
+        self._fb_signals_latex.append('\\rowcolor{gray!15} \n')
+        header = f'\\multicolumn{{9}}{{c|}}{{{self.description} ({self.name})}} \\\\\n\\hline\n'
+        self._fb_signals_latex.append(header)
+        for func in self.functions:
+            self._fb_signals_latex.extend(func.get_formatted_signals_for_latex())
+        self._fb_signals_latex = self.__remove_consecutive_duplicates(self._fb_signals_latex)
+
+    def get_formatted_signals_for_latex(self):
+        if not self._fb_signals_latex:
+            self._create_formatted_signals_for_latex()
+        #print(self._fb_signals_latex)
+        return self._fb_signals_latex

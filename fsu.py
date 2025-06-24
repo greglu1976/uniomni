@@ -10,7 +10,9 @@ class FSU:
         self.control_list=[]
         self.inputs_list=[]
 
+        self._fsu_signals_latex = []
 
+        self._table_for_latex_type = 1
         self._summ_table_latex = None
 
     def get_summ_table_latex(self):
@@ -103,7 +105,8 @@ class FSU:
         def _generate_section(data, title):
             section = []
             if data:
-                section.append(f'\\multicolumn{{9}}{{c|}}{{{title}}} \\\\\n\\hline\n')
+                #section.append(f'\\multicolumn{{9}}{{c|}}{{{title}}} \\\\\n\\hline\n')
+                section.append(f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{title}}}}} \\\\\n\\hline\n')
                 for row in data:
                     section.append(_generate_row(row))
             return section
@@ -111,7 +114,13 @@ class FSU:
         table = []
         table.extend(_generate_section(self.get_fsu_buttons(), "Виртуальные кнопки"))
         table.extend(_generate_section(self.get_fsu_switches(), "Виртуальные ключи"))
-        table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики"))
+
+        if self._table_for_latex_type == 1:
+            table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики")) # Суммарная таблица сигналов ТИП 1
+        else:
+            table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов ТИП 2
+
         table.extend(_generate_section(self.get_fsu_sys_statuses_sorted(), "Системные сигналы"))
         
         return table
@@ -126,3 +135,25 @@ class FSU:
                         return func.get_settings_for_latex(header)
 
         return 
+
+    # Генерация таблицы сигналов разбитой по функциям (тип 2) LATEX
+    def _is_signals_for_latex(self):
+        for fb in self.fbs:
+            if fb.get_formatted_signals_for_latex():
+                return True
+        return False
+
+    def _create_formatted_signals_for_latex(self):
+        if not self._is_signals_for_latex():
+            return
+        for fb in self.fbs:
+            self._fsu_signals_latex.extend(fb.get_formatted_signals_for_latex())
+
+    def get_formatted_signals_for_latex(self):
+        if not self._fsu_signals_latex:
+            self._create_formatted_signals_for_latex()
+        #print(self._fsu_signals_latex)
+        return self._fsu_signals_latex
+
+    def set_table_for_latex_type(self, type):
+        self._table_for_latex_type = type

@@ -13,6 +13,7 @@ class Function2:
         self.df_setting = None  # для хранения уставок
         self.df_status = None   # для хранения статусов
 
+        self._func_signals_latex = [] # хранение отформатированых под latex сигналов вместе с заголовком
         self.list_bu = []
         self.list_re = []
 
@@ -21,6 +22,8 @@ class Function2:
         self._process()
         self._get_settings()
         self._get_statuses()
+
+
 
     @staticmethod
     def __get_description_by_number(text, number):
@@ -253,3 +256,43 @@ class Function2:
             table.append('\\hline\n')  # Добавляем \hline отдельным элементом
  
         return table
+
+    # Генерация таблицы сигналов разбитой по функциям (тип 2)
+    # для форматирования latex сигналов функции
+    def _create_formatted_signals_for_latex(self):
+        if not self.list_status:
+            return
+        # Добавляем заголовок функции
+        if self.description == 'Общие уставки':
+            self.header_for_latex = f'\\multicolumn{{9}}{{c|}}{{Общие сигналы}} \\\\\n\\hline\n'
+        else:
+            self.header_for_latex = f'\\multicolumn{{9}}{{c|}}{{{self.description} ({self.name})}} \\\\\n\\hline\n'
+
+        self._func_signals_latex.append(self.header_for_latex)    
+        for row in self.list_status:
+            row_str = '\\raggedright '
+            row_str += row['Полное наименование сигнала'].split(':')[1].replace('_', r'\_')
+            row_str += ' & \\centering '
+            row_str += row['Наименование сигналов на ФСУ'].replace('_', r'\_')
+            row_str += ' & \\centering '
+            row_str += row['Дискретные входы'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' & \\centering '
+            row_str += row['Выходные реле'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' & \\centering '
+            row_str += row['Светодиоды'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' & \\centering '
+            row_str += row['ФК'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' & \\centering '
+            row_str += row['РС'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' & \\centering '
+            row_str += row['РАС'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' & \\centering \\arraybackslash '
+            row_str += row['Пуск РАС'].replace('-', r'--').replace('*', r'$\ast$')
+            row_str += ' \\\\ \\hline\n'
+            self._func_signals_latex.append(row_str)
+
+    def get_formatted_signals_for_latex(self):
+        if not self._func_signals_latex:
+            self._create_formatted_signals_for_latex()
+        return self._func_signals_latex
+
