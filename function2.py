@@ -266,7 +266,8 @@ class Function2:
         if self.description == 'Общие уставки':
             self.header_for_latex = f'\\multicolumn{{9}}{{c|}}{{Общие сигналы}} \\\\\n\\hline\n'
         else:
-            self.header_for_latex = f'\\multicolumn{{9}}{{c|}}{{{self.description} ({self.name})}} \\\\\n\\hline\n'
+            name_ = self.name.replace('_', r'\_')
+            self.header_for_latex = f'\\multicolumn{{9}}{{c|}}{{{self.description} ({name_})}} \\\\\n\\hline\n'
 
         self._func_signals_latex.append(self.header_for_latex)    
         for row in self.list_status:
