@@ -22,7 +22,7 @@ class Application:
         dpg.bind_theme(light_theme)        
         # Настройка шрифтов
         with dpg.font_registry():
-            default_font = dpg.add_font("Montserrat-Regular.ttf", 15)
+            default_font = dpg.add_font("Roboto-Regular.ttf", 15)
             dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic, parent=default_font)
         dpg.bind_font(default_font)
         

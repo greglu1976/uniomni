@@ -117,11 +117,11 @@ class FSU:
 
         if self._table_for_latex_type == 1:
             table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики")) # Суммарная таблица сигналов ТИП 1
+            table.extend(_generate_section(self.get_fsu_sys_statuses_sorted(), "Системные сигналы")) # для таблицы 1 типа отдельно системные сигналы
         else:
             table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов ТИП 2
-
-        table.extend(_generate_section(self.get_fsu_sys_statuses_sorted(), "Системные сигналы"))
+            
         
         return table
 
