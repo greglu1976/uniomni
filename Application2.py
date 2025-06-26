@@ -77,7 +77,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.3.1", width=1215, height=450)
         dpg.setup_dearpygui()
 
     def set_sum_table_type(self, sender, app_data):
@@ -158,10 +158,12 @@ class Application:
             self.re_ = ExploitationGuideLatex(
                 path_to_latex_desc=device['path_to_latex_desc'],
                 path_to_fsu=self.device_manager.get_general_settings()['path_to_fsu'],
-                fbs_list=device['fbs_list'])
+                fbs_list=device['fbs_list'],
+                path_to_ru_desc = device['path_to_ru_desc'],
+                path_to_hardware_desc = device['path_to_hardware_desc'])
             # Установка дополнительных путей
-            self.re_.set_path_to_hardware_desc(device['path_to_hardware_desc'])
-            self.re_.set_path_to_ru_desc(device['path_to_ru_desc'])
+            #self.re_.set_path_to_hardware_desc(device['path_to_hardware_desc'])
+            #self.re_.set_path_to_ru_desc(device['path_to_ru_desc'])
             Logger.info(f"Устройство: {device['name']} v{device['version']} инициализировано")
 
     def run(self):

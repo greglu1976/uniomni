@@ -10,7 +10,10 @@ class FSU:
         self.control_list=[]
         self.inputs_list=[]
 
+        self.order_code_parsed = [] # устанавливается сеттером
+        self._slots = [] # хранит описание слотов устройства для таблицы системных сигналов устройства (платы ввода вывода и тд)
         self._fsu_signals_latex = []
+        self._fsu_system_signals_latex = []
 
         self._table_for_latex_type = 1
         self._summ_table_latex = None
@@ -19,7 +22,6 @@ class FSU:
         if self._summ_table_latex is None:  # Если таблица ещё не генерировалась
             self._summ_table_latex = self._generate_summ_table_latex()
         return self._summ_table_latex        
-
 
     def add_fb(self, fb):
         self.fbs.append(fb)
@@ -33,7 +35,6 @@ class FSU:
         unique_buttons = {item['Полное наименование сигнала']: item 
         for item in self.buttons_list}
         self.buttons_list = list(unique_buttons.values())
-
 
         self.switches_list = [sw for fb in self.fbs for sw in fb.get_switches_list()]
         unique_switches = {item['Полное наименование сигнала']: item 
@@ -63,7 +64,6 @@ class FSU:
     def get_fsu_sys_statuses_sorted(self):
         sist_list = [d for d in self.statuses if 'СИСТ' in d['Полное наименование сигнала']]
         return sorted(sist_list, key=lambda x: x['Полное наименование сигнала'])
-
 
     def get_fsu_control_list(self):
         return self.control_list        
@@ -102,11 +102,12 @@ class FSU:
             row_str += ' \\\\ \\hline\n'
             return row_str
 
-        def _generate_section(data, title):
+        def _generate_section(data, title=''):
             section = []
             if data:
                 #section.append(f'\\multicolumn{{9}}{{c|}}{{{title}}} \\\\\n\\hline\n')
-                section.append(f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{title}}}}} \\\\\n\\hline\n')
+                if title:
+                    section.append(f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{title}}}}} \\\\\n\\hline\n')
                 for row in data:
                     section.append(_generate_row(row))
             return section
@@ -117,11 +118,17 @@ class FSU:
 
         if self._table_for_latex_type == 1:
             table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики")) # Суммарная таблица сигналов ТИП 1
-            table.extend(_generate_section(self.get_fsu_sys_statuses_sorted(), "Системные сигналы")) # для таблицы 1 типа отдельно системные сигналы
+            table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.extend(self.get_hardware_signals_for_summ_table_latex(type=1))
+            #table.extend(_generate_section(self.get_fsu_sys_statuses_sorted())) # для таблицы 1 типа отдельно системные сигналы
         else:
             table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
-            table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов ТИП 2
-            
+            table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов по функциям ТИП 2
+            table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы (СИСТ)"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.extend('\\rowcolor{gray!15} \n')
+            table.extend((f'\\multicolumn{{9}}{{c|}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.extend(self.get_hardware_signals_for_summ_table_latex(type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
+            #table.extend(self.get_system_formatted_signals_for_latex()[3:]) # Суммарная таблица системных сигналов из ФБ СИСТ ТИП 2
         
         return table
 
@@ -143,11 +150,20 @@ class FSU:
                 return True
         return False
 
+    def _create_system_formatted_signals_for_latex(self,fb):
+        self._fsu_system_signals_latex.extend(fb.get_formatted_signals_for_latex())
+
     def _create_formatted_signals_for_latex(self):
         if not self._is_signals_for_latex():
             return
         for fb in self.fbs:
+            if 'СИСТ' in fb.get_fb_name():
+                self._create_system_formatted_signals_for_latex(fb)
+                continue
             self._fsu_signals_latex.extend(fb.get_formatted_signals_for_latex())
+
+    def get_system_formatted_signals_for_latex(self):
+        return self._fsu_system_signals_latex
 
     def get_formatted_signals_for_latex(self):
         if not self._fsu_signals_latex:
@@ -157,3 +173,70 @@ class FSU:
 
     def set_table_for_latex_type(self, type):
         self._table_for_latex_type = type
+
+    def set_order_code_parsed(self, order_code):
+        self.order_code_parsed = order_code
+
+    def _get_slots(self):
+        slot = 1
+        plate = 3
+        #print(self.order_code_parsed)
+
+        while True:
+            current_plate = self.order_code_parsed[plate]
+            if current_plate == 'x' or current_plate == 'х':
+                slot+=1
+                plate+=1
+                continue
+            if current_plate in ['P02c', 'Р02с']:
+                self._slots.append({'num': slot, 'purpose': 'supply'})
+                slot+=1
+                plate+=1 
+                continue
+            if current_plate in [ 'P02', 'Р02']:
+                self._slots.append({'num': slot, 'purpose': 'supply'})
+                slot+=1
+                plate+=1                
+                continue            
+            if 'B' in current_plate or 'В' in current_plate:
+                self._slots.append({'num': slot, 'purpose': 'inputs'})
+                slot+=1
+                plate+=1                
+                continue                
+            if 'K' in current_plate or 'К' in current_plate:
+                self._slots.append({'num': slot, 'purpose': 'outputs'})
+                slot+=1
+                plate+=1                
+                continue
+            if 'M' in current_plate or 'М' in current_plate:
+                self._slots.append({'num': slot, 'purpose': 'analogs'})
+                slot+=1
+                plate+=1                
+                continue
+            if 'C' in current_plate or 'С' in current_plate:
+                self._slots.append({'num': slot, 'purpose': 'cpu'})
+                break
+
+    def get_hardware_signals_for_summ_table_latex(self, type=1):
+        # часть вторая - генерируем из словаря latex разметку
+        if not self._slots:
+            self._get_slots()
+        prefix = 'СИСТ / Диагностика: ' if type ==1 else ''   
+        latex_slots = []
+        for slot in self._slots:
+            if slot['purpose'] == 'supply':
+                latex_slots.append(f'\\raggedright  {prefix}Неисправность 12 В & \centering Слот М'+ str(slot['num']) +' Неиспр.12В & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                latex_slots.append(f'\\raggedright  {prefix}Неисправность внешнего питания & \centering Слот М'+ str(slot['num']) +' Нет внеш.питания & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                latex_slots.append(f'\\raggedright  {prefix}Критическая ошибка & \centering Слот М'+ str(slot['num']) +' Неисп.внеш.питания & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                continue
+            if slot['purpose'] == 'inputs' or slot['purpose'] == 'outputs':
+                latex_slots.append(f'\\raggedright  {prefix}Отказ модуля & \centering Слот М'+ str(slot['num']) +' Отказ модуля & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                latex_slots.append(f'\\raggedright  {prefix}Критическая ошибка & \centering Слот М'+ str(slot['num']) +' Модуль не определен & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                continue
+            if slot['purpose'] == 'analogs':
+                latex_slots.append(f'\\raggedright  {prefix}Отказ модуля & \centering Слот М'+ str(slot['num']) +' Отказ модуля & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                latex_slots.append(f'\\raggedright  {prefix}Критическая ошибка & \centering Слот М'+ str(slot['num']) +' Модуль не определен & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
+                latex_slots.append(f'\\raggedright  {prefix}Неисправность АЦП & \centering Слот М'+ str(slot['num']) +' Неисправность АЦП & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')               
+            if slot['purpose'] == 'cpu':
+                pass
+        return latex_slots                                        

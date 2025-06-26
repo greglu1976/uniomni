@@ -13,7 +13,7 @@ class Hardware:
         #self.num_of_bins = {'B001':8, 'В001':8, 'B021':14, 'В021':14, 'K001':8, 'К001':8, 'K002':8, 'К002':8, 'P02c':1, 'Р02с':1,} # здесь храним тип плат и количество входов выходов на ней
 
         self.hmi_short_name = '' # короткое обозначение ИЧМ, например ЮНИТ-ИЧМ
-
+        self._order_code_parsed = []
         self.hmi_fks = ['ЮНИТ-ИЧМ', ]
         self.hmi_leds = ['ЮНИТ-ИЧМ',]
 
@@ -29,6 +29,7 @@ class Hardware:
         if self.info['order_card_ied']=='':
             return
         parts = self.info['order_card_ied'].split('-')
+        self._order_code_parsed = parts
         self.terminal_short_name = f"{parts[0]}-{parts[1]}-{parts[2]}"
 
         # ИНИЦИАЛИЗИРУЕМ ПЛАТЫ ВХОДОВ ВЫХОДОВ ПО КОДУ ЗАКАЗА
@@ -105,3 +106,5 @@ class Hardware:
     def get_hw_plates(self):
         return self.hw_plates
 
+    def get_order_code_parsed(self):
+        return self._order_code_parsed
