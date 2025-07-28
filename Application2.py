@@ -49,7 +49,7 @@ class Application:
                 dpg.add_text("Тип суммарной таблицы:")
                 dpg.add_radio_button(
                     items=["Тип 1", "Тип 2"],
-                    default_value="Тип 1",
+                    default_value="Тип 2",
                     callback=self.set_sum_table_type,
                     horizontal=True
                 )
