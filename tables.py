@@ -12,6 +12,8 @@ from docx.table import _Cell
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 
+from docx.enum.table import WD_ROW_HEIGHT_RULE
+
 import os, sys
 import json
 
@@ -195,7 +197,7 @@ def add_table_settings(doc):
 
 table_reg = (Inches(4.5), Inches(1.5), Inches(1.6), Inches(1.6), Inches(1.6))  #задаем ширину столбцов таблицы вывода репортов
 
-def add_table_reg(doc): # новая таблица исходящих отчетов
+def add_table_reg(doc, generate): # новая таблица исходящих отчетов
     table = doc.add_table(rows=5, cols=5)
     table.style = 'Стиль6'
     table.allow_autofit = False
@@ -225,7 +227,14 @@ def add_table_reg(doc): # новая таблица исходящих отче�
     hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     hdr_cells = table.rows[2].cells
-    tag = f'for row in fsu.get_fsu_statuses()'
+    if generate == 0:
+        tag = f'for row in fsu.get_fsu_sys_statuses_sorted()'    
+    if generate == 1:
+        tag = f'for row in fsu.get_fsu_statuses()'
+    if generate == 2:    
+        tag = f'for row in fsu.get_fsu_control_list()'
+    if generate == 3:    
+        tag = f'for row in fsu.get_fsu_inputs_list()'         
     hdr_cells[2].text = '{%tr '+ tag + ' %}'
 
     # четвертая строка со служебными тегами
@@ -298,6 +307,7 @@ def add_table_reg(doc): # новая таблица исходящих отче�
 ####################################################################################
 ################################ КОНЕЦ ТАБЛИЦА ДЛЯ РЕГИСТРАЦИИ #####################
 ####################################################################################
+
 
 
 ####################################################################################
@@ -1308,3 +1318,55 @@ def add_summ_table2(doc, isVirtKey=False, isVirtSwitch=False, isStatuses=False, 
                     run.font.size = Pt(11)
 
     return table
+
+
+
+
+####################################################################################
+############################ ФИНАЛЬНАЯ ТАБЛИЦА С ПОДПИСЯМИ СОСТАВИТЕЛЯ ###############
+####################################################################################
+
+table_final = (Inches(3), Inches(3))
+
+def add_table_final(doc): # новая таблица исходящих отчетов
+    table = doc.add_table(rows=4, cols=2)
+    table.style = 'Стиль5'
+    table.allow_autofit = False
+
+    # Устанавливаем фиксированный макет таблицы с правильным пространством имен
+    table._tbl.xpath('./w:tblPr')[0].append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'ФИО составителя:'
+
+    hdr_cells = table.rows[1].cells
+    hdr_cells[0].text = 'Номер и дата составления:'
+
+    hdr_cells = table.rows[2].cells
+    hdr_cells[0].text = 'Дата выдачи:'
+
+    hdr_cells = table.rows[3].cells
+    hdr_cells[0].text = 'Дата окончания:'
+
+
+    table.allow_autofit = False
+    table.autofit = False
+    table.style = 'Стиль5'
+
+    # --- Форматирование таблицы ---
+    for row in table.rows:
+        for idx, width in enumerate(table_final):
+            row.cells[idx].width = width
+            # Установка высоты строки (новый код)
+            row.height = Pt(20)  # Укажите нужную высоту в пунктах
+            row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY  # Фиксированная высота
+
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(11)
+
+
+    return table 

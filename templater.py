@@ -5,7 +5,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from docx_handler import add_new_section, add_new_section_landscape
-from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new, add_table_mtrx_ins, add_table_mtrx_outs, add_table_binaries
+from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new, add_table_mtrx_ins, add_table_mtrx_outs, add_table_binaries, add_table_final
 
 def fill_template(fsu, hardware):
 
@@ -142,10 +142,28 @@ def create_template(fsu, hardware):
     text = doc.add_paragraph('Возможна регистрация не более 200 сигналов.')
     text.style = 'ДОК Текст'
 
-    p = doc.add_paragraph('Сигналы для регистрации')
-    p.style = 'ДОК Таблица Название'
+    # Таблица Выходные сигналы общей логики
+    
+    if fsu.get_fsu_sys_statuses_sorted():
+        p = doc.add_paragraph('Системные сигналы')
+        p.style = 'ДОК Таблица Название'
+        add_table_reg(doc, generate = 0)
 
-    add_table_reg(doc)
+
+    # Таблица Выходные сигналы общей логики
+    p = doc.add_paragraph('Выходные сигналы общей логики')
+    p.style = 'ДОК Таблица Название'
+    add_table_reg(doc, generate = 1) # 0 - сист сигналы, 1 - статусы, 2 - вирт ключи и кнопки, 3 - входные сигналы
+
+    # Таблица Виртуальные ключи и клавиши
+    p = doc.add_paragraph('Виртуальные ключи и клавиши')
+    p.style = 'ДОК Таблица Название'
+    add_table_reg(doc, generate = 2)
+
+    # Таблица Входные дискретные сигналы
+    p = doc.add_paragraph('Входные дискретные сигналы')
+    p.style = 'ДОК Таблица Название'
+    add_table_reg(doc, generate = 3)
 
     #############################################################################
     # СОЗДАЕМ РАЗДЕЛ С ПАРАМЕТРИРОВАНИЕ ДИСКРЕТНЫХ ВХОДОВ И ВЫХОДНЫХ РЕЛЕ
@@ -252,5 +270,9 @@ def create_template(fsu, hardware):
     p.style = 'TAGS'
 
     ##################################################################
+
+    ########## ФИНАЛЬНАЯ ТАБЛИЦА С ПОДПИСЯМИ
+
+    add_table_final(doc)
 
     doc.save("temp.docx")
