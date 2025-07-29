@@ -13,7 +13,7 @@ class Application:
         self.init_button = None  # Будет хранить идентификатор кнопки
         self.setup_gui()
         self.re_ = None
-        self.sum_table_type = 1  # По умолчанию выбран тип 1
+        self.sum_table_type = 2  # По умолчанию выбран тип 2
         
     def setup_gui(self):
         dpg.create_context()
@@ -82,7 +82,7 @@ class Application:
 
     def set_sum_table_type(self, sender, app_data):
         """Установка типа суммарной таблицы"""
-        self.sum_table_type = 1 if app_data == "Тип 1" else 2
+        self.sum_table_type = 2 if app_data == "Тип 2" else 1
         Logger.info(f"Выбран тип суммарной таблицы: {app_data}")
 
     def renew_abbrs_ru(self):
