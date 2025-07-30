@@ -32,3 +32,6 @@
 4) аналогично 270
 5) fb2.py 238 строка             header = f'\\multicolumn{{9}}{{c|}}{{{self.description} ({self.name})}} \\\\\n\\hline\n' ->    header = f'\\multicolumn{{9}}{{c}}{{{self.description} ({self.name})}} \\\\\n\\hline\n'
 6) при этом изменена ширина последнего столца в app1.tex c 2,1cm -> 2.107
+
+**fix2** 
+По замечаниям Чебоксар изменена аббр ФСУ в файле dictionary.json
