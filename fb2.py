@@ -235,7 +235,7 @@ class FB2:
         if not self._is_signals_for_latex():
             return
         self._fb_signals_latex.append('\\rowcolor{gray!15} \n')
-        header = f'\\multicolumn{{9}}{{c|}}{{{self.description} ({self.name})}} \\\\\n\\hline\n'
+        header = f'\\multicolumn{{9}}{{c}}{{{self.description} ({self.name})}} \\\\\n\\hline\n'
         self._fb_signals_latex.append(header)
         for func in self.functions:
             self._fb_signals_latex.extend(func.get_formatted_signals_for_latex())

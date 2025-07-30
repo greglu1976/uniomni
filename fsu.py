@@ -109,7 +109,7 @@ class FSU:
             if data:
                 #section.append(f'\\multicolumn{{9}}{{c|}}{{{title}}} \\\\\n\\hline\n')
                 if title:
-                    section.append(f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{title}}}}} \\\\\n\\hline\n')
+                    section.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{title}}}}} \\\\\n\\hline\n')
                 for row in data:
                     section.append(_generate_row(row))
             return section
@@ -122,32 +122,32 @@ class FSU:
             table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики")) # Суммарная таблица сигналов ТИП 1
 
             if self._tables_of_add_device[0]:
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             else:
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
 
             table.extend(self.get_hardware_signals_for_summ_table_latex(type=1))
             if self._tables_of_add_device[0]:
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы устройства II архитектуры"}}}}} \\\\\n\\hline\n'))
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы устройства II архитектуры"}}}}} \\\\\n\\hline\n'))
                 table.extend(self._tables_of_add_device[1])
 
             #table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие системные сигналы"}}}}} \\\\\n\\hline\n'))
             #table.extend(_generate_section(self.get_fsu_sys_statuses_sorted())) # для таблицы 1 типа отдельно системные сигналы
         else:
-            table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов по функциям ТИП 2
             if self._tables_of_add_device[0]:
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             else:
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend('\\rowcolor{gray!15} \n')
-            table.extend((f'\\multicolumn{{9}}{{c|}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_hardware_signals_for_summ_table_latex(type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
 
             if self._tables_of_add_device[0]:
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства II архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства II архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
                 table.extend('\\rowcolor{gray!15} \n')
-                table.extend((f'\\multicolumn{{9}}{{c|}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
                 table.extend(self._tables_of_add_device[2])
 
             #table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие системные сигналы (СИСТ)"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
