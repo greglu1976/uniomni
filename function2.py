@@ -50,13 +50,22 @@ class Function2:
         self.df_setting = self.df_setting.reset_index(drop=True)
         self.df_status = self.df_status.reset_index(drop=True)
 
+    def _escape_latex_symbols(self, text):
+        """Экранирует специальные символы для LaTeX"""
+        if not isinstance(text, str):
+            return str(text)
+        # Используем математический режим для символов
+        text = text.replace('>', '$>$')
+        text = text.replace('<', '$<$')
+        return text
+
     def _get_settings(self):
         if self.df_setting is None:
             return
         for _, row in self.df_setting.iterrows():
             desc = row['FullDescription (Описание параметра для пояснения в ПО ЮНИТ Сервис)'].strip().replace('<<','«').replace('>>','»')
             short_desc = row['ShortDescription'].replace('<<','«').replace('>>','»')
-            applied_desc = row['AppliedDescription'].replace('<<','«').replace('>>','»')
+            applied_desc = row['AppliedDescription'] #.replace('<<','«').replace('>>','»')
             note = row['Note (Справочная информация)']
             units = row['units']
             min_value = row['minValue']
@@ -142,10 +151,19 @@ class Function2:
             # словарь для бланка уставок
             dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value}
             # словарь для руководства по эксплуатации
-            dict_re = {'Параметр на ИЧМ': desc +' (' + short_desc + ')', 'Условное обозначение на схеме': applied_desc, 'Значение / Диапазон': znach_diap.replace('-', '='), 'Ед.изм.': units, 'Шаг': step }
+            if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
+                znach_diap = znach_diap.replace('-', '=')
+            #applied_desc = '\\mbox{'+applied_desc+'}'    
+            dict_re = {'Параметр на ИЧМ': desc +' (' + short_desc + ')', 'Условное обозначение на схеме': self._escape_latex_symbols(applied_desc), 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step }
 
+            #if '-' in applied_desc:
+                #dict_bu = {'Описание': "desc", 'Наименование ПО': "short_desc", 'Наименование ФСУ': "applied_desc", 'Значение / Диапазон': "znach_diap", 'Ед.изм.': "units", 'Шаг': "step", #'Значение по умолчанию': "default_value"}
             self.list_bu.append(dict_bu)
             self.list_re.append(dict_re)            
+
+
+
+
 
     def _format_status(self, value):
         """Форматирование числового статуса в символьное представление
