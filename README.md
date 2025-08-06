@@ -42,3 +42,6 @@
 1) function2 145 строка добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
 2) function2 59 строка, -  стало applied_desc = row['AppliedDescription'] #.replace('<<','«').replace('>>','»') Не понятно на что влияет
 3) function2  добавил функцию def _escape_latex_symbols(self, text) для отработки ><. =>             dict_re = {'Параметр на ИЧМ': desc +' (' + short_desc + ')', 'Условное обозначение на схеме': self._escape_latex_symbols(applied_desc), 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step }
+
+**06.08.25**
+**v0.3.4 - add1** Идет доработка РЭ ОЛ конфиг файл
