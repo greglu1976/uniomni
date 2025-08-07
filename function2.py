@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import html
 
 class Function2:
     def __init__(self, df_signals=None,  name = '', description = '', iec_name='', fb_name = ''):
@@ -149,11 +150,15 @@ class Function2:
                     #default_value = str(default_value).replace('.', ',')
                     default_value = f"{default_value:.{0}f}".replace('.', ',')
 
-            znach_diap_bu = znach_diap   # Изм по зам. Халезова для бланка уставок    
+            znach_diap_bu = znach_diap   # Изм по зам. Халезова для бланка уставок 
+            default_value_for_word =  default_value 
             if isKey:                   
                 znach_diap_bu = re.sub(r'\d+ - ', '', znach_diap_bu)
+                znach_diap_bu = html.escape(znach_diap_bu)  # Экранируем <, >, &, ", '
+                default_value_for_word = html.escape(str(default_value)) # Убедимся, что это строка
+                #print(znach_diap_bu)
             # словарь для бланка уставок
-            dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap_bu, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value}
+            dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap_bu, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value_for_word}
             # словарь для руководства по эксплуатации
             if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
                 znach_diap = znach_diap.replace('-', '=')
