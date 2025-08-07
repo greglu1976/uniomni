@@ -21,6 +21,23 @@ from pathlib import Path
 
 from dropdowns import add_formatted_dropdown2
 
+def set_table_borders(table):
+    tblBorders = OxmlElement('w:tblBorders')
+    for border_name in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+        border = OxmlElement(f'w:{border_name}')
+        border.set(qn('w:val'), 'single')
+        border.set(qn('w:sz'), '8')  # 8 = 1pt (значение в восьмых долях пункта)
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), 'auto')
+        tblBorders.append(border)
+    
+    tblPr = table._tbl.tblPr
+    if tblPr is None:
+        tblPr = OxmlElement('w:tblPr')
+        table._tbl.insert(0, tblPr)
+    tblPr.append(tblBorders)
+
+
 def set_vertical_cell_direction(cell: _Cell, direction: str):
     # direction: tbRl -- top to bottom, btLr -- bottom to top
     assert direction in ("tbRl", "btLr")
@@ -88,15 +105,16 @@ def set_cell_border(cell: _Cell, **kwargs):
 
 
 ####################################################################################
-################################ ТАБЛИЦА ДЛЯ УСТАВОК ##############################
+################################ ТАБЛИЦА ДЛЯ УСТАВОК СТАРАЯ ##############################
 ####################################################################################
 
-table_settings = (Inches(0.28), Inches(1.23), Inches(0.9), Inches(0.5), Inches(1.5), Inches(0.55), Inches(0.45), Inches(0.9), Inches(1.05))  #задаем ширину столбцов таблицы вывода репортов
+table_settingsOLD = (Inches(0.28), Inches(1.23), Inches(0.9), Inches(0.5), Inches(1.5), Inches(0.55), Inches(0.45), Inches(0.9), Inches(1.05))  #задаем ширину столбцов таблицы вывода репортов
 
-def add_table_settings(doc):
+def add_table_settingsOLD(doc):
     table = doc.add_table(rows=5, cols=9)
     table.style = 'Сетка таблицы51'
     table.allow_autofit = False
+    set_table_borders(table)
 
     # Устанавливаем фиксированный макет таблицы с правильным пространством имен
     table._tbl.xpath('./w:tblPr')[0].append(
@@ -1370,3 +1388,121 @@ def add_table_final(doc): # новая таблица исходящих отч�
 
 
     return table 
+
+
+
+####################################################################################
+################################ ТАБЛИЦА ДЛЯ УСТАВОК ХАЛЕЗОВ 07-08-25 ##############################
+####################################################################################
+
+table_settings = (Inches(0.25), Inches(1.6), Inches(1.1), Inches(1.6), Inches(0.45), Inches(0.45), Inches(1.4), Inches(1), Inches(1), Inches(1), Inches(1))  #задаем ширину столбцов таблицы вывода репортов
+
+def add_table_settings(doc):
+    table = doc.add_table(rows=5, cols=11)
+    table.style = 'Сетка таблицы51'
+    table.allow_autofit = False
+    set_table_borders(table)
+
+    # Устанавливаем фиксированный макет таблицы с правильным пространством имен
+    table._tbl.xpath('./w:tblPr')[0].append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = '№'
+    hdr_cells[1].text = 'Наименование'
+    hdr_cells[3].text = 'Значение / Диапазон'
+    hdr_cells[4].text = 'Ед. изм.'
+    hdr_cells[5].text = 'Шаг'   
+    hdr_cells[6].text = 'Значение по умолчанию'
+    hdr_cells[7].text = 'Группы уставок'
+
+    for i in range(0,10):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    set_repeat_table_header(table.rows[0]) # повторение заголовка на след странице
+
+    # p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # p.runs[0].font.size = Pt(10)
+
+    hdr_cells = table.rows[1].cells # вторая строка заголовка таблицы
+    hdr_cells[1].text = 'ПО ЮС'
+    hdr_cells[2].text = 'ИЧМ'
+    hdr_cells[7].text = '1'
+    hdr_cells[8].text = '2'
+    hdr_cells[9].text = '3'
+    hdr_cells[10].text = '4'    
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[8].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[9].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[10].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # третья строка со служебными тегами
+    hdr_cells = table.rows[2].cells
+    #hdr_cells[2].text = '{%tr for param_name, param_data in input_value.properties.items() %}'
+    tag = f'for row in func.get_settings_for_bu()'
+    hdr_cells[2].text = '{%tr '+ tag + ' %}'
+    # четвертая строка со служебными тегами
+    hdr_cells = table.rows[3].cells
+    hdr_cells[0].text = '{{ loop.index }}'
+    hdr_cells[1].text = '{{ row["Описание"] }}'
+    hdr_cells[2].text = '{{ row["Наименование ПО"] }}'    
+    hdr_cells[3].text = '{{ row["Значение / Диапазон"]  }}'
+    hdr_cells[4].text = '{{ row["Ед.изм."] }}'
+    hdr_cells[5].text = '{{ row["Шаг"] }}'
+    hdr_cells[6].text = '{{ row["Значение по умолчанию"] }}'
+    #hdr_cells[8].text = '' #'{{ param_data.setpoint }}'
+
+ 
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    #hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # пятая строка со служебными тегами
+    hdr_cells = table.rows[4].cells
+    hdr_cells[0].text = '{%tr endfor %}'
+
+    set_repeat_table_header(table.rows[1])  # повторение заголовка на след странице
+    for i in range(0,9):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        #set_cell_border(hdr_cells[i], bottom={"val": "double"}) # подчеркиваем заголовок двойной чертой
+
+    # формируем финальный заголок слияниями ячеек
+    table.cell(0, 1).merge(table.cell(0, 2))
+    table.cell(0, 0).merge(table.cell(1, 0))
+    table.cell(0, 3).merge(table.cell(1, 3))
+    table.cell(0, 4).merge(table.cell(1, 4))
+    table.cell(0, 5).merge(table.cell(1, 5))
+    table.cell(0, 6).merge(table.cell(1, 6))
+    table.cell(0, 7).merge(table.cell(0, 10))
+
+    table.cell(2, 0).merge(table.cell(2, 10))
+    table.cell(4, 0).merge(table.cell(4, 10))
+
+    for row in table.rows:
+        for idx, width in enumerate(table_settings):
+            row.cells[idx].width = width
+    #add_row_table_reports(table, ('','','','','','')) # добавляем пустую строчку, чтобы двойное подчеркивание сохранить
+
+        # Устанавливаем высоту шрифта (11 пунктов) для всех ячеек таблицы
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)  # Устанавливаем размер шрифта 12 пунктов
+
+    return table
+
+####################################################################################
+################################ КОНЕЦ ТАБЛИЦА ДЛЯ УСТАВОК #########################
+####################################################################################
+ 

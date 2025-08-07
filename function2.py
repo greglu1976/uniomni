@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 class Function2:
     def __init__(self, df_signals=None,  name = '', description = '', iec_name='', fb_name = ''):
@@ -147,9 +148,12 @@ class Function2:
                     znach_diap = f"{min_val} ... {max_val}"
                     #default_value = str(default_value).replace('.', ',')
                     default_value = f"{default_value:.{0}f}".replace('.', ',')
-                    
+
+            znach_diap_bu = znach_diap   # Изм по зам. Халезова для бланка уставок    
+            if isKey:                   
+                znach_diap_bu = re.sub(r'\d+ - ', '', znach_diap_bu)
             # словарь для бланка уставок
-            dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value}
+            dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap_bu, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value}
             # словарь для руководства по эксплуатации
             if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
                 znach_diap = znach_diap.replace('-', '=')
