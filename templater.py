@@ -67,58 +67,13 @@ def create_template(fsu, hardware):
 
     ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
-    add_new_section(doc)
+    add_new_section_landscape(doc)
 
     p = doc.add_paragraph('УСТАВКИ РЗА')
     p.style = 'ДОК Заголовок 1'
 
     # 1 группа уставок
     p = doc.add_paragraph('Группа уставок №1'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
-    p.style = 'ДОК Заголовок 2'
-
-    p = doc.add_paragraph(r'{{ fb.get_description() }} ({{ fb.get_fb_name() }}) {% for func in fb.get_functions() if func.get_settings_for_bu() %}')
-    p.style = 'ДОК Заголовок 3'
-
-    p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')
-    p.style = 'ДОК Таблица Название'
-
-    add_table_settings(doc)
-
-    p = doc.add_paragraph(r'{% endfor %}{% endfor %}')
-    p.style = 'TAGS' 
-
-    # 2 группа уставок
-    p = doc.add_paragraph('Группа уставок №2'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
-    p.style = 'ДОК Заголовок 2'
-
-    p = doc.add_paragraph(r'{{ fb.get_description() }} ({{ fb.get_fb_name() }}) {% for func in fb.get_functions() if func.get_settings_for_bu() %}')
-    p.style = 'ДОК Заголовок 3'
-
-    p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')
-    p.style = 'ДОК Таблица Название'
-
-    add_table_settings(doc)
-
-    p = doc.add_paragraph(r'{% endfor %}{% endfor %}')
-    p.style = 'TAGS'  
-
-    # 3 группа уставок
-    p = doc.add_paragraph('Группа уставок №3'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
-    p.style = 'ДОК Заголовок 2'
-
-    p = doc.add_paragraph(r'{{ fb.get_description() }} ({{ fb.get_fb_name() }}) {% for func in fb.get_functions() if func.get_settings_for_bu() %}')
-    p.style = 'ДОК Заголовок 3'
-
-    p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')
-    p.style = 'ДОК Таблица Название'
-
-    add_table_settings(doc)
-
-    p = doc.add_paragraph(r'{% endfor %}{% endfor %}')
-    p.style = 'TAGS' 
-
-    # 4 группа уставок
-    p = doc.add_paragraph('Группа уставок №4'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
     p.style = 'ДОК Заголовок 2'
 
     p = doc.add_paragraph(r'{{ fb.get_description() }} ({{ fb.get_fb_name() }}) {% for func in fb.get_functions() if func.get_settings_for_bu() %}')
