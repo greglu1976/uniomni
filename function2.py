@@ -161,7 +161,11 @@ class Function2:
             dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap_bu, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value_for_word}
             # словарь для руководства по эксплуатации
             if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
+                protected_pattern = "КННш+КОНп-КОНш+КННп" # 
+                znach_diap = znach_diap.replace(protected_pattern, protected_pattern.replace("-", "@@"))
                 znach_diap = znach_diap.replace('-', '=')
+                znach_diap = znach_diap.replace("@@", "-")
+
             #applied_desc = '\\mbox{'+applied_desc+'}'    
             dict_re = {'Параметр на ИЧМ': desc +' (' + short_desc + ')', 'Условное обозначение на схеме': self._escape_latex_symbols(applied_desc), 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step }
 
