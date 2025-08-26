@@ -7,6 +7,8 @@ import themes
 from DeviceManager import DeviceManager
 from ExploitationGuideLatex import ExploitationGuideLatex
 
+from LatexDoc import LatexDoc
+
 class Application:
     def __init__(self):
         self.device_manager = DeviceManager()
@@ -60,6 +62,8 @@ class Application:
             dpg.add_button(label="Обновить перечень сокращений в РЭ", callback=self.renew_abbrs)
             dpg.add_button(label="Обновить перечень сокращений в РУ", callback=self.renew_abbrs_ru)
             dpg.add_spacer(height=5)
+            dpg.add_button(label="Создать единый проект latex для РЭ", callback=self.create_raw_tex)
+            dpg.add_spacer(height=5)
             dpg.add_button(label="Очистить логи", callback=Logger.clear_logs)
 
             # Сохраняем идентификатор комбобокса
@@ -77,7 +81,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.3.5 07.08.25", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.3.6 beta 26.08.25", width=1215, height=450)
         dpg.setup_dearpygui()
 
     def set_sum_table_type(self, sender, app_data):
@@ -126,6 +130,15 @@ class Application:
         else:
             self.re_.renew_sum_table_latex(table_type=self.sum_table_type)
             Logger.info(f'Суммарная таблица сигналов приложения А (тип {self.sum_table_type}) в РЭ обновлена')
+
+    def create_raw_tex(self):
+        if self.re_ is None:
+            Logger.error('Устройство не инициализировано!')
+        else:
+            path = self.re_.path_to_latex_desc / '_manual_latex'
+            raw_tex = LatexDoc(path)
+            Logger.info('Проект latex для РЭ создан')
+
 
     def load_config_callback(self):
         """Обработчик загрузки конфига"""
