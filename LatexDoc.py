@@ -4,7 +4,6 @@
 
 import re, shutil
 from pathlib import Path
-from utils import create_directories
 
 class LatexDoc:
     def __init__(self, path_to_latex_doc):
@@ -171,9 +170,6 @@ class LatexDoc:
         return normalized_path
 
     def _handle_tex(self):
-
-        # Создаем директории
-        create_directories()
 
         with open(self.path_to_latex_doc / 'general.tex', 'r', encoding='utf-8') as file:
             lines = file.readlines()

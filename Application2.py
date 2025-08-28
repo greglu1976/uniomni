@@ -2,7 +2,11 @@ import dearpygui.dearpygui as dpg
 import threading
 from logger import Logger
 
+
+
 import themes
+
+from utils import create_directories, save_obj, load_obj
 
 from DeviceManager import DeviceManager
 from ExploitationGuideLatex import ExploitationGuideLatex
@@ -61,9 +65,10 @@ class Application:
             dpg.add_button(label="Создать бланк уставок в docx", callback=self.generate_setting_blanc_docx)
             dpg.add_button(label="Обновить перечень сокращений в РЭ", callback=self.renew_abbrs)
             dpg.add_button(label="Обновить перечень сокращений в РУ", callback=self.renew_abbrs_ru)
-            dpg.add_spacer(height=5)
+            dpg.add_spacer(height=10)
             dpg.add_button(label="Создать единый проект latex для РЭ", callback=self.create_raw_tex)
-            dpg.add_spacer(height=5)
+            dpg.add_button(label="Загрузить объект РЭ из latex_build", callback=self.load_tex)
+            dpg.add_spacer(height=10)
             dpg.add_button(label="Очистить логи", callback=Logger.clear_logs)
 
             # Сохраняем идентификатор комбобокса
@@ -135,9 +140,22 @@ class Application:
         if self.re_ is None:
             Logger.error('Устройство не инициализировано!')
         else:
+            Logger.warning('Папка latex_build будет очищена...')
+
+            # Создаем директории
+            create_directories()
+            # Сохраняем в файл объект РЭ
+            save_obj(self.re_)
+
             path = self.re_.path_to_latex_desc / '_manual_latex'
             raw_tex = LatexDoc(path)
-            Logger.info('Проект latex для РЭ создан')
+            Logger.info('Проект latex для РЭ создан. См. папку latex_build')
+
+    def load_tex(self):
+        if self.re_ is not None:
+            Logger.warning('Устройство будет перезаписано объектом РЭ из latex_build...')
+        self.re_ = load_obj()    
+        Logger.info(f'Объект РЭ по пути {self.re_.path_to_latex_desc} загружен из latex_build...')
 
 
     def load_config_callback(self):
