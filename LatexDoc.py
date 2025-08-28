@@ -5,6 +5,8 @@
 import re, shutil
 from pathlib import Path
 
+from logger import Logger
+
 class LatexDoc:
     def __init__(self, path_to_latex_doc):
 
@@ -41,7 +43,7 @@ class LatexDoc:
 
                 # --- Проверка: уже обработанный файл? ---
                 if re.match(r'img\d+\.(pdf|png|jpg|jpeg|gif)$', img_ref, re.IGNORECASE):
-                    print(f"⚠ Пропускаем уже обработанный файл: {img_ref}")
+                    Logger.info(f"Пропускаем уже обработанный файл: {img_ref}")
                     continue
 
                 # --- Шаг 1: Определяем полный путь к исходному изображению ---
@@ -93,7 +95,7 @@ class LatexDoc:
                 
                 # --- Шаг 2: Проверяем существование ---
                 if full_img_path is None or not full_img_path.is_file():
-                    print(f"⚠ Файл изображения не найден: {img_ref}")
+                    Logger.error(f"Файл изображения не найден: {img_ref}")
                     continue
 
                 # --- Шаг 3: Определяем расширение и новое имя ---
@@ -104,9 +106,9 @@ class LatexDoc:
                 # --- Шаг 4: Копируем файл ---
                 try:
                     shutil.copy(full_img_path, dest_path)
-                    print(f"✅ Скопировано: {full_img_path} → {dest_path}")
+                    Logger.info(f"Скопировано: {full_img_path} в {dest_path}")
                 except Exception as e:
-                    print(f"❌ Ошибка копирования {full_img_path}: {e}")
+                    Logger.error(f"Ошибка копирования {full_img_path}: {e}")
                     continue
 
                 # --- Шаг 5: Формируем новый путь для LaTeX ---
@@ -130,13 +132,13 @@ class LatexDoc:
             with open(file_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     stripped = line.strip()
-                    # Пропускаем комментарии и пустые строки
-                    if not stripped or stripped.startswith('%'):
+                    #  Пропускаем комментарии и ПОКА НЕ !!! пустые строки - ломается верстка - например в КС контроле синхронизма
+                    if stripped.startswith('%'):
                         continue
                     # Добавляем оригинальную строку (не stripped!), но без \input обработки
                     target_list.append(line)
         except Exception as e:
-            print(f"⚠ Ошибка чтения файла {file_path}: {e}")
+            Logger.error(f"Ошибка чтения файла {file_path}: {e}")
 
     def _get_normalized_path(self, line):
         # Удаляем комментарии (всё после %)
@@ -221,20 +223,10 @@ class LatexDoc:
         #for line in raw_tex:
         self._process_images(raw_tex)
 
-
-
-        # Сохраняем ВРЕМЕННО
+        # Сохраняем
         with open('latex_build/raw.tex', 'w', encoding='utf-8') as f:
             f.writelines(raw_tex)
 
 
-        #print(raw_tex)
-        #for i, line in enumerate(raw_tex, 1):
-            #print(f"{i}: {line}")
 
 
-
-
-
-    def create_whole_doc(self):
-        pass
