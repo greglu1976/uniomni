@@ -22,9 +22,7 @@ def fill_template(fsu, hardware):
     doc.save("Бланк уставок.docx")
 
 
-def create_template(fsu, hardware):
-
-    doc = Document('origin.docx')
+def _create_config_old(doc):
 
     ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
@@ -65,7 +63,52 @@ def create_template(fsu, hardware):
     p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
     p.style = 'TAGS'
 
+def _create_config(fsu, hardware, doc):
+
+     ############################################################################
+    # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
+    add_new_section(doc)
+
+    p = doc.add_paragraph('КОНФИГУРАЦИЯ МОДУЛЕЙ')
+    p.style = 'ДОК Заголовок 1'
+
+    p = doc.add_paragraph('Модули'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}')
+    p.style = 'ДОК Заголовок 2'
+
+    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. {{ plate.get_name() }}'+r'{% for items in plate.get_inputs() if plate.get_inputs() %}')
+    p.style = 'ДОК Заголовок 3'
+
+    p = doc.add_paragraph(r'Дискретный вход {{ loop.index }}')
+    p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
+    p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_outputs() if plate.get_outputs() %}')
+    p.style = 'TAGS'
+
+    p = doc.add_paragraph(r'Выходное реле {{ loop.index }}')
+    p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
+    p = doc.add_paragraph(r'{% endfor %}')
+    p.style = 'TAGS'
+
+
+    p = doc.add_paragraph(r'{% set items = plate.get_info() %}' + r'{% if items %}')
+    p.style = 'TAGS'
+    p = doc.add_paragraph(r'Общие настройки конфигурации')
+    p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
+
+    p = doc.add_paragraph(r'{% endif %}{% endfor %}')
+    p.style = 'TAGS'
+
+
+def create_template(fsu, hardware):
+
+    doc = Document('origin.docx')
+
     ############################################################################
+    # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
+    _create_config(fsu, hardware, doc)
+
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
     add_new_section_landscape(doc)
 

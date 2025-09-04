@@ -23,8 +23,6 @@ class Hardware:
         self._parse_code_ied()
         self._parse_code_hmi()
 
-
-
     def _parse_code_ied(self):
         if self.info['order_card_ied']=='':
             return
