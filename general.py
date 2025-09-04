@@ -55,8 +55,8 @@ class Plate():
 
     def _start(self):
         if self.name == 'P02c':
-            gen_info = GeneralInfo('P02c')
-            self.gen_info.append(gen_info)
+            obj_info = GeneralInfo('P02c')
+            self.gen_info = obj_info.get_info()
         for i in range(1, self.inputs_number+1):
             temp = Bin_Input(self.slot, i)
             obj_in = temp.get_info()
