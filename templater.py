@@ -63,7 +63,7 @@ def _create_config_old(doc):
     p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
     p.style = 'TAGS'
 
-def _create_config(fsu, hardware, doc):
+def _create_config(doc):
 
      ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
@@ -75,11 +75,17 @@ def _create_config(fsu, hardware, doc):
     p = doc.add_paragraph('Модули'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}')
     p.style = 'ДОК Заголовок 2'
 
-    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. {{ plate.get_name() }}'+r'{% for items in plate.get_inputs() if plate.get_inputs() %}')
+    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. {{ plate.get_name() }}'+ r'{% set items = plate.get_info() %}' + r'{% if items %}')
     p.style = 'ДОК Заголовок 3'
 
-    p = doc.add_paragraph(r'Дискретный вход {{ loop.index }}')
+    p = doc.add_paragraph(r'Общие настройки конфигурации')
     p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
+    p = doc.add_paragraph(r'{% endif %}'+r'{% for items in plate.get_inputs() if plate.get_inputs() %}')
+    p.style = 'TAGS'
+
+    p1 = doc.add_paragraph(r'Дискретный вход {{ loop.index }}')
+    p1.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
     p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_outputs() if plate.get_outputs() %}')
     p.style = 'TAGS'
@@ -87,17 +93,22 @@ def _create_config(fsu, hardware, doc):
     p = doc.add_paragraph(r'Выходное реле {{ loop.index }}')
     p.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
+    p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_volts() if plate.get_volts() %}')
+    p.style = 'TAGS'
+
+    p = doc.add_paragraph(r'Измерительный вход напряжения {{ loop.index }}')
+    p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
+    p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_currents() if plate.get_currents() %}')
+    p.style = 'TAGS'
+
+    p = doc.add_paragraph(r'Измерительный токовый вход {{ loop.index }}')
+    p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
     p = doc.add_paragraph(r'{% endfor %}')
     p.style = 'TAGS'
 
-
-    p = doc.add_paragraph(r'{% set items = plate.get_info() %}' + r'{% if items %}')
-    p.style = 'TAGS'
-    p = doc.add_paragraph(r'Общие настройки конфигурации')
-    p.style = 'ДОК Таблица Название'
-    add_table_binaries(doc)
-
-    p = doc.add_paragraph(r'{% endif %}{% endfor %}')
+    p = doc.add_paragraph(r'{% endfor %}')
     p.style = 'TAGS'
 
 
@@ -107,7 +118,7 @@ def create_template(fsu, hardware):
 
     ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
-    _create_config(fsu, hardware, doc)
+    _create_config(doc)
 
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
     add_new_section_landscape(doc)
