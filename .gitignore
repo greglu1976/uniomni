@@ -2,4 +2,5 @@ __pycache__/
 арх/
 venv/
 output/
+latex_build/
 *.pkl

@@ -2,6 +2,8 @@
 
 from general import InOutPart
 
+from configdata import *
+
 class Hardware:
     def __init__(self, versions_bu, info):
 
@@ -22,6 +24,9 @@ class Hardware:
         self.hw_plates = []
         self._parse_code_ied()
         self._parse_code_hmi()
+
+        self.config_sync = ConfigSync() # захардкоженные данные по синхронизации устройства - полагается одни на все устройства
+
 
     def _parse_code_ied(self):
         if self.info['order_card_ied']=='':
@@ -106,3 +111,6 @@ class Hardware:
 
     def get_order_code_parsed(self):
         return self._order_code_parsed
+
+    def get_config_sync(self):
+        return self.config_sync.get_info()

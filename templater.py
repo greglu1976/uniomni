@@ -22,55 +22,26 @@ def fill_template(fsu, hardware):
     doc.save("Бланк уставок.docx")
 
 
-def _create_config_old(doc):
+def _create_config_sync(doc):
 
-    ############################################################################
-    # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
-    add_new_section(doc)
-
-    p = doc.add_paragraph('КОНФИГУРАЦИЯ ДИСКРЕТНЫХ ВХОДОВ И РЕЛЕ')
-    p.style = 'ДОК Заголовок 1'
-
-    p = doc.add_paragraph('Модули дискретных входов'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}' + r'{% if plate.get_inputs() %}')
+    p = doc.add_paragraph('Синхронизация времени')
     p.style = 'ДОК Заголовок 2'
 
-
-    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. Тип платы {{ plate.get_name() }}'+r'{% for items in plate.get_inputs() %}')
-    p.style = 'ДОК Заголовок 3'
-
-
-    p = doc.add_paragraph(r'Дискретный вход {{ loop.index }}')
+    p = doc.add_paragraph(r'Общие настройки синхронизации{% set items = hardware.get_config_sync()["Общие параметры"] %}')
     p.style = 'ДОК Таблица Название'
-
     add_table_binaries(doc)
 
-    p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
-    p.style = 'TAGS'
-
-    #################################################################################
-    p = doc.add_paragraph('Модули выходных реле'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}' + r'{% if plate.get_outputs() %}')
-    p.style = 'ДОК Заголовок 2'
-
-
-    p = doc.add_paragraph(r'Слот М{{ plate.get_slot() }}. Тип платы {{ plate.get_name() }}'+r'{% for items in plate.get_outputs() %}')
-    p.style = 'ДОК Заголовок 3'
-
-    p = doc.add_paragraph(r'Реле {{ loop.index }}')
+    p = doc.add_paragraph(r'Параметры летнего времени{% set items = hardware.get_config_sync()["Параметры летнего времени"] %}')
     p.style = 'ДОК Таблица Название'
-
     add_table_binaries(doc)
 
-    p = doc.add_paragraph(r'{% endfor %}{% endif %}{% endfor %}')
-    p.style = 'TAGS'
+    p = doc.add_paragraph(r'Параметры зимнего времени{% set items = hardware.get_config_sync()["Параметры зимнего времени"] %}')
+    p.style = 'ДОК Таблица Название'
+    add_table_binaries(doc)
 
-def _create_config(doc):
+def _create_config_modules(doc):
      ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
-
-    add_new_section(doc)
-
-    p = doc.add_paragraph('КОНФИГУРАЦИЯ МОДУЛЕЙ')
-    p.style = 'ДОК Заголовок 1'
 
     p = doc.add_paragraph('Модули'+r'{% for plate in hardware.get_hw_plates() if hardware.get_hw_plates() %}')
     p.style = 'ДОК Заголовок 2'
@@ -112,14 +83,22 @@ def _create_config(doc):
     p = doc.add_paragraph(r'{% endfor %}')
     p.style = 'TAGS'
 
-
 def create_template(fsu, hardware):
 
     doc = Document('origin.docx')
 
     ############################################################################
-    # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
-    _create_config(doc)
+    # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ
+    add_new_section(doc)
+    p = doc.add_paragraph('КОНФИГУРАЦИЯ')
+    p.style = 'ДОК Заголовок 1'
+
+    _create_config_sync(doc)
+
+    # конфигурация модулей
+    _create_config_modules(doc)
+
+
 
     # СОЗДАЕМ РАЗДЕЛ С УСТАВКАМИ РЗА
     add_new_section_landscape(doc)
@@ -127,14 +106,9 @@ def create_template(fsu, hardware):
     p = doc.add_paragraph('УСТАВКИ РЗ И А'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
     p.style = 'ДОК Заголовок 1'
 
-    # 1 группа уставок
-    #p = doc.add_paragraph('Группа уставок №1'+r'{% for fb in fsu.get_fbs() if fb.is_fb_settings_empty() %}')
-    #p.style = 'ДОК Заголовок 2'
-
     p = doc.add_paragraph(r'{{ fb.get_description() }} ({{ fb.get_fb_name() }}) {% for func in fb.get_functions() if func.get_settings_for_bu() %}')
     #p.style = 'ДОК Заголовок 3'
     p.style = 'ДОК Заголовок 2'
-
 
     p = doc.add_paragraph(r'{{ func.get_description() }}{% if func.get_name() %} ({{ func.get_name() }}){% endif %}')
     p.style = 'ДОК Таблица Название'
@@ -160,7 +134,6 @@ def create_template(fsu, hardware):
         p = doc.add_paragraph('Системные сигналы')
         p.style = 'ДОК Таблица Название'
         add_table_reg(doc, generate = 0)
-
 
     # Таблица Выходные сигналы общей логики
     p = doc.add_paragraph('Выходные сигналы общей логики')
@@ -229,7 +202,6 @@ def create_template(fsu, hardware):
     p = doc.add_paragraph(r'{% endfor %}')
     p.style = 'TAGS' 
 
-
     #############################################################################
     # СОЗДАЕМ РАЗДЕЛ НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ
     add_new_section_landscape(doc) # Создаем раздел для матрицы вх/вых
@@ -282,7 +254,6 @@ def create_template(fsu, hardware):
     p.style = 'TAGS'
 
     ##################################################################
-
     ########## ФИНАЛЬНАЯ ТАБЛИЦА С ПОДПИСЯМИ
 
     add_table_final(doc)
