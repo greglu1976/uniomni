@@ -66,6 +66,7 @@ def _create_config_old(doc):
 def _create_config(doc):
      ############################################################################
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ ВХОДОВ ВЫХОДОВ
+
     add_new_section(doc)
 
     p = doc.add_paragraph('КОНФИГУРАЦИЯ МОДУЛЕЙ')
@@ -80,28 +81,29 @@ def _create_config(doc):
     p = doc.add_paragraph(r'Общие настройки конфигурации')
     p.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
-    p = doc.add_paragraph(r'{% endif %}'+r'{% for items in plate.get_inputs() if plate.get_inputs() %}')
+    p = doc.add_paragraph(r'{% endif %}'+r'{% for dics in plate.get_inputs() if plate.get_inputs() %}' + r'{% set items = dics.data %}')
     p.style = 'TAGS'
 
-    p1 = doc.add_paragraph(r'Дискретный вход {{ loop.index }}')
+    p1 = doc.add_paragraph(r'Дискретный вход {{ dics.counter }}')
     p1.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
-    p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_outputs() if plate.get_outputs() %}')
+    p = doc.add_paragraph(r'{% endfor %}'+r'{% for dics in plate.get_outputs() if plate.get_outputs() %}'  + r'{% set items = dics.data %}')
     p.style = 'TAGS'
 
-    p = doc.add_paragraph(r'Выходное реле {{ loop.index }}')
+    p = doc.add_paragraph(r'Выходное реле {{ dics.counter }}')
     p.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
-    p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_volts() if plate.get_volts() %}')
+    p = doc.add_paragraph(r'{% endfor %}'+r'{% for dics in plate.get_volts() if plate.get_volts() %}' + r'{% set items = dics.data %}')
     p.style = 'TAGS'
 
-    p = doc.add_paragraph(r'Измерительный вход напряжения {{ loop.index }}')
+    p = doc.add_paragraph(r'Измерительный вход напряжения {{ dics.counter }}')
     p.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
-    p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_currents() if plate.get_currents() %}')
+    #p = doc.add_paragraph(r'{% endfor %}'+r'{% for items in plate.get_currents() if plate.get_currents() %}')
+    p = doc.add_paragraph(r'{% endfor %}'+r'{% for dics in plate.get_currents() if plate.get_currents() %}' + r'{% set items = dics.data %}')
     p.style = 'TAGS'
 
-    p = doc.add_paragraph(r'Измерительный токовый вход {{ loop.index }}')
+    p = doc.add_paragraph(r'Измерительный токовый вход {{ dics.counter }}')
     p.style = 'ДОК Таблица Название'
     add_table_binaries(doc)
     p = doc.add_paragraph(r'{% endfor %}')
