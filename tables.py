@@ -19,7 +19,7 @@ import json
 
 from pathlib import Path
 
-from dropdowns import add_formatted_dropdown2
+from dropdowns import add_formatted_dropdown2, add_formatted_dropdown3
 
 def set_table_borders(table):
     tblBorders = OxmlElement('w:tblBorders')
@@ -334,7 +334,7 @@ def add_table_reg(doc, generate): # новая таблица исходящих
 
 table_mtrx_outs = (Inches(2), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7))
 
-def add_table_mtrx_outs(doc, statuses): # новая таблица исходящих отчетов
+def add_table_mtrx_outs(doc, statuses, controls=[]): # новая таблица исходящих отчетов
     table = doc.add_table(rows=5, cols=6)
     table.style = 'Стиль6'
     table.allow_autofit = False
@@ -379,9 +379,10 @@ def add_table_mtrx_outs(doc, statuses): # новая таблица исходя
 
     #choices_start = ["Не выполняется", "По переднему фронту", "По заднему фронту", "По любому изменению"]
     par1 = hdr_cells[1].paragraphs[0]
-    add_formatted_dropdown2(
+    add_formatted_dropdown3(
         paragraph=par1,
-        choices=statuses,
+        inputs_choices=statuses,
+        controls_choices=controls,
         #alias= f"DropDown_{i}",
         #instruction_text=f"Выберите ",
     )
@@ -449,7 +450,7 @@ def add_table_mtrx_outs(doc, statuses): # новая таблица исходя
 
 table_mtrx_ins = (Inches(2), Inches(4))
 
-def add_table_mtrx_ins(doc, inputs): # новая таблица исходящих отчетов
+def add_table_mtrx_ins(doc, inputs, controls=[]): # новая таблица исходящих отчетов
     table = doc.add_table(rows=4, cols=2)
     table.style = 'Стиль6'
     table.allow_autofit = False
@@ -481,9 +482,10 @@ def add_table_mtrx_ins(doc, inputs): # новая таблица исходящ�
 
     #choices_start = ["Не выполняется", "По переднему фронту", "По заднему фронту", "По любому изменению"]
     par1 = hdr_cells[1].paragraphs[0]
-    add_formatted_dropdown2(
+    add_formatted_dropdown3(
         paragraph=par1,
-        choices=inputs,
+        inputs_choices=inputs,
+        controls_choices=controls,
     )
     hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
@@ -697,12 +699,12 @@ def add_table_leds_new(doc, statuses): # новая таблица исходя�
     hdr_cells_row2 = table.rows[3].cells
     hdr_cells_row2[0].text = 'Светодиод '+'{{ loop.index }}'  + ' (зеленый)'
 
-    choices = ["С фиксацией", "Без фиксации"]
+    choices = ["С фиксацией"]
     par2 = hdr_cells[1].paragraphs[0]
     add_formatted_dropdown2(
         paragraph=par2,
         choices=choices,
-        default='По умолчанию')
+        default='Без фиксации')
     hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     par1 = hdr_cells[2].paragraphs[0]
     add_formatted_dropdown2(
@@ -715,7 +717,7 @@ def add_table_leds_new(doc, statuses): # новая таблица исходя�
     add_formatted_dropdown2(
         paragraph=par21,
         choices=choices,
-        default='По умолчанию')
+        default='Без фиксации')
     hdr_cells_row2[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
     par12 = hdr_cells_row2[2].paragraphs[0]
     add_formatted_dropdown2(

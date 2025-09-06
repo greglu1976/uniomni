@@ -136,7 +136,7 @@ class InOutPart():
                 if main_nameC == 'С01' or main_nameC =='C01':
                     plate = Plate('C01', 'С01', 0, 0, 0, 0, i)
                     self.plates.append(plate)
-                    continue            
+                    break # Считаем, что после модуля процессора плат больше нет            
 
             if part.startswith('M') or part.startswith('М'):
                 main_name = part.split('.')[0]

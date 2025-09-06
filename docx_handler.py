@@ -1,31 +1,63 @@
 # вынесено сюда всякое создание разделов 
 
-from docx.enum.section import WD_ORIENTATION
+from docx.enum.section import WD_ORIENTATION, WD_SECTION
+from docx.shared import Inches
 
 def add_new_section(doc):
-    # Создаем раздел для РЗА
-    # Добавляем разрыв раздела
-    section = doc.sections[-1]  # Получаем текущий раздел
-    doc.add_section(section.start_type)  # Добавляем новый раздел
-    return doc
-
-def add_new_section_landscape(doc):
-    # Создаем раздел для РЗА
-    # Добавляем разрыв раздела
-    current_section = doc.sections[-1]  # Получаем текущий раздел
-    new_section = doc.add_section()
-    # Копируем параметры из текущего раздела
+    """Добавляет портретную секцию"""
+    if len(doc.sections) == 0:
+        return doc
+    
+    current_section = doc.sections[-1]
+    
+    # Добавляем разрыв страницы перед созданием новой секции
+    doc.add_paragraph()
+    
+    # Создаем новую секцию
+    new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+    
+    # Копируем основные настройки
+    new_section.orientation = WD_ORIENTATION.PORTRAIT
+    new_section.page_width = Inches(8.3)  # Стандартная ширина для портрета
+    new_section.page_height = Inches(11.7)  # Стандартная высота для портрета
+    
+    # Копируем поля
     new_section.left_margin = current_section.left_margin
     new_section.right_margin = current_section.right_margin
     new_section.top_margin = current_section.top_margin
     new_section.bottom_margin = current_section.bottom_margin
-    new_section.header_distance = current_section.header_distance
-    new_section.footer_distance = current_section.footer_distance
-    # Меняем ориентацию на альбомную
+    
+    return doc
+
+def add_new_section_landscape(doc):
+    """Добавляет альбомную секцию"""
+    if len(doc.sections) == 0:
+        return doc
+    
+    current_section = doc.sections[-1]
+    
+    # Добавляем разрыв страницы перед созданием новой секции
+    doc.add_paragraph()
+    
+    # Создаем новую секцию
+    new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+    
+    # Устанавливаем альбомную ориентацию
     new_section.orientation = WD_ORIENTATION.LANDSCAPE
-    # Меняем размеры страницы
-    new_section.page_width = current_section.page_height
-    new_section.page_height = current_section.page_width
+    new_section.page_width = Inches(11.7)   # Ширина становится высотой
+    new_section.page_height = Inches(8.3) # Высота становится шириной
+    
+    # Копируем поля
+    #new_section.left_margin = current_section.left_margin
+    #new_section.right_margin = current_section.right_margin
+    #new_section.top_margin = current_section.top_margin
+    #new_section.bottom_margin = current_section.bottom_margin
+
+    new_section.left_margin = current_section.top_margin
+    new_section.right_margin = current_section.bottom_margin
+    new_section.top_margin = current_section.right_margin
+    new_section.bottom_margin = current_section.left_margin
+
     return doc
 
 def add_new_section_test(doc):

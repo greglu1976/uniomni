@@ -24,9 +24,10 @@ class Hardware:
         self.hw_plates = []
         self._parse_code_ied()
         self._parse_code_hmi()
-
-        self.config_sync = ConfigSync() # захардкоженные данные по синхронизации устройства - полагается одни на все устройства
-
+        # захардкоженные данные по синхронизации устройства - полагается одни на все устройства
+        self.config_sync = ConfigSync() 
+        self.config_cpu = ConfigCPU()
+        self.config_disturb = ConfigDisturb()         
 
     def _parse_code_ied(self):
         if self.info['order_card_ied']=='':
@@ -112,5 +113,12 @@ class Hardware:
     def get_order_code_parsed(self):
         return self._order_code_parsed
 
+################################################# ГЕТТЕРЫ ЗАХАРДКОЖЕННЫХ ДАННЫХ ОПИСАНИЯ КОНФИГУРАЦИИ
     def get_config_sync(self):
         return self.config_sync.get_info()
+
+    def get_config_cpu(self):
+        return self.config_cpu.get_info()
+
+    def get_config_disturb(self):
+        return self.config_disturb.get_info()

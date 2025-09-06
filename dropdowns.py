@@ -86,6 +86,63 @@ def add_formatted_dropdown2(paragraph, choices, default="Не назначено
 
 
 
+def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], default="Не назначено", alias="", instruction_text=""):
+    # Формируем элементы списка с разделителями
+    list_items = []
+    
+    # Добавляем inputs
+    if inputs_choices:
+        list_items.append('<w:listItem w:displayText="──────── Сигналы РЗиА ────────" w:value="INPUTS_HEADER" w:disabled="true"/>')
+        for choice in inputs_choices:
+            list_items.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
+    
+    # Добавляем controls
+    if controls_choices:
+        if inputs_choices:  # Добавляем разделитель только если есть оба списка
+            list_items.append('<w:listItem w:displayText=" " w:value="SPACER" w:disabled="true"/>')
+        list_items.append('<w:listItem w:displayText="────── Общие сигналы ФС ──────" w:value="CONTROLS_HEADER" w:disabled="true"/>')
+        for choice in controls_choices:
+            list_items.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
+    
+    sdt = parse_xml(f'''
+        <w:sdt xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+            <w:sdtPr>
+                <w:alias w:val="{alias}"/>
+                <w:tag w:val="{alias}"/>
+                <w:id w:val="{abs(hash(alias))}"/>
+                <w:dropDownList>
+                    <w:listItem w:displayText="{default}" w:value=""/>
+                    {''.join(list_items)}
+                </w:dropDownList>
+                <w:showingPlcHdr/>
+                <w:placeholder>
+                    <w:docPart w:val="{instruction_text}"/>
+                </w:placeholder>
+            </w:sdtPr>
+            <w:sdtContent>
+                <w:r>
+                    <w:rPr>
+                        <w:color w:val="808080"/>
+                        <w:sz w:val="24"/>
+                        <w:i/>
+                        <w:spacing w:val="10"/>
+                    </w:rPr>
+                    <w:t>{default}</w:t>
+                </w:r>
+            </w:sdtContent>
+        </w:sdt>
+    ''')
+    
+    paragraph._p.append(sdt)
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
