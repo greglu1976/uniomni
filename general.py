@@ -1,6 +1,7 @@
 # ОПИСАНИЕ ПЛАТ
 
 from inouts import *
+from plates import *
 
 class Plate():
     def __init__(self, name, rus_name, inputs_number, outputs_number, volts_number, curr_number, slot):
@@ -17,10 +18,14 @@ class Plate():
         self.volts_number = volts_number 
         self.curr_number = curr_number                 
         self.slot = slot
+        self._statuses = {} # для бланка уставок - параметрирование
 
         self._start()
 
     def _start(self):
+
+        self._statuses = get_plate_data(self.name, self.slot) # забираем захарденные данные по плате
+
         if self.name == 'P02c':
             obj_info = GeneralInfo('P02c')
             self.gen_info = obj_info.get_info()
@@ -98,6 +103,11 @@ class Plate():
         return self.volts
     def get_currents(self):
         return self.currents
+
+    @property
+    def statuses(self):
+        """Геттер для статусов."""
+        return self._statuses
 
 class InOutPart():
     def __init__(self, order_card_ied):

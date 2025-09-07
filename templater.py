@@ -306,8 +306,8 @@ def create_template(fsu, hardware):
     # СОЗДАЕМ РАЗДЕЛ С ПАРАМЕТРИРОВАНИЕ СВЕТОДИОДОВ И ФК
     _create_section_leds(fsu, doc) 
 
-    #for plate in hardware.get_hw_plates():
-        #print(plate.get_name())
+    for plate in hardware.get_hw_plates():
+        print(plate.statuses)
 
 
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ
@@ -317,6 +317,7 @@ def create_template(fsu, hardware):
     _create_section_disturb(fsu, doc)
 
     # ДОБАВЛЯЕМ ФИНАЛЬНУЮ ТАБЛИЦУ С ПОДПИСЯМИ
+    add_new_section(doc)
     add_table_final(doc)
 
     doc.save("temp.docx")
