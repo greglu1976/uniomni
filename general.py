@@ -26,7 +26,7 @@ class Plate():
     def _start(self):
 
         self._statuses = get_plate_data(self.name, self.slot) # забираем захарденные данные по плате
-        print(self.statuses)
+        #print(self.statuses)
 
         if self.name == 'P02c':
             obj_info = GeneralInfo('P02c')

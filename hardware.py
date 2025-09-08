@@ -8,7 +8,7 @@ class Hardware:
     def __init__(self, versions_bu, info):
 
         self.versions_bu = versions_bu
-        self.info = info
+        self._info = info
 
         self.terminal_short_name = ''                   # короткое обозначение терминала, например ЮНИТ-М300-Т
         self.terminal_description = info['title_name']  # описание терминала на титульном листе
@@ -30,14 +30,14 @@ class Hardware:
         self.config_disturb = ConfigDisturb()         
 
     def _parse_code_ied(self):
-        if self.info['order_card_ied']=='':
+        if self._info['order_card_ied']=='':
             return
-        parts = self.info['order_card_ied'].split('-')
+        parts = self._info['order_card_ied'].split('-')
         self._order_code_parsed = parts
         self.terminal_short_name = f"{parts[0]}-{parts[1]}-{parts[2]}"
 
         # ИНИЦИАЛИЗИРУЕМ ПЛАТЫ ВХОДОВ ВЫХОДОВ ПО КОДУ ЗАКАЗА
-        inouts = InOutPart(self.info['order_card_ied'])
+        inouts = InOutPart(self._info['order_card_ied'])
         self.hw_plates = inouts.get_plates()
 
         for plate in self.hw_plates:
@@ -51,27 +51,11 @@ class Hardware:
                 'num_of_outputs':plate.get_num_of_outputs()}
                 self.outputs.append(dict_temp)
                 continue            
-
-        #for i, part in enumerate(parts[3:], start=1):  # start=4 для нумерации с 4
-            #print(f"{i}. {part}")  # Пример обработки
-
-            #if part.startswith('K') or part.startswith('К') or part=='P02c' or part=='Р02с' : # значит плата выходов
-                #dict_temp = {'desc': f'Слот М{i}. Тип платы {part}',
-                #'num_of_outputs':self.num_of_bins.get(part)}
-                #self.outputs.append(dict_temp)
-                #continue
-
-            #if part.startswith('B') or part.startswith('В'): # значит плата выходов
-                #dict_temp = {'desc': f'Слот М{i}. Тип платы {part}', 
-                #'num_of_inputs':self.num_of_bins.get(part)}
-               #self.inputs.append(dict_temp)
-                #continue            
-  
-
+      
     def _parse_code_hmi(self):
-        if self.info['order_card_hmi']=='':
+        if self._info['order_card_hmi']=='':
             return
-        parts = self.info['order_card_hmi'].split('-')
+        parts = self._info['order_card_hmi'].split('-')
         self.hmi_short_name = f"{parts[0]}-{parts[1]}"
 
         for i, part in enumerate(parts[3:], start=1):  # start=4 для нумерации с 4
@@ -99,7 +83,7 @@ class Hardware:
         return self.terminal_description +'\n«' + self.terminal_short_name + '»'   
 
     def get_code_for_bu(self):
-        return self.info['code_bu'] 
+        return self._info['code_bu'] 
 
     def get_terminal_short_name(self):
         return self.terminal_short_name
@@ -112,6 +96,10 @@ class Hardware:
 
     def get_order_code_parsed(self):
         return self._order_code_parsed
+
+    @property
+    def info(self):
+        return self._info    
 
 ################################################# ГЕТТЕРЫ ЗАХАРДКОЖЕННЫХ ДАННЫХ ОПИСАНИЯ КОНФИГУРАЦИИ
     def get_config_sync(self):

@@ -18,7 +18,10 @@ class FSU:
         self._table_for_latex_type = 1
         self._summ_table_latex = None
 
-        self._tables_of_add_device = tuple() # возвращаемые таблицы второго устройства от объекта класса AdditionalHardware     
+        self._tables_of_add_device = tuple() # возвращаемые таблицы второго устройства от объекта класса AdditionalHardware 
+
+        self._hw_objs = None # для передачи данных по платам из объекта класса Hardware
+        self._add_hw_objs = None
 
     def get_summ_table_latex(self):
         if self._summ_table_latex is None:  # Если таблица ещё не генерировалась
@@ -121,13 +124,15 @@ class FSU:
         if self._table_for_latex_type == 1:
             table.extend(_generate_section(self.get_fsu_statuses_sorted(), "Общие сигналы функциональной логики")) # Суммарная таблица сигналов ТИП 1
 
-            if self._tables_of_add_device[0]:
+            if self._add_hw_objs:
+            #if self._tables_of_add_device[0]:
                 table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             else:
                 table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
 
             table.extend(self.get_hardware_signals_for_summ_table_latex(type=1))
-            if self._tables_of_add_device[0]:
+            if self._add_hw_objs:
+            #if self._tables_of_add_device[0]:
                 table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы устройства II архитектуры"}}}}} \\\\\n\\hline\n'))
                 table.extend(self._tables_of_add_device[1])
 
@@ -136,19 +141,22 @@ class FSU:
         else:
             table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов по функциям ТИП 2
-            if self._tables_of_add_device[0]:
+            #if self._tables_of_add_device[0]:
+            if self._add_hw_objs:    
                 table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             else:
                 table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend('\\rowcolor{gray!15} \n')
             table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
-            table.extend(self.get_hardware_signals_for_summ_table_latex(type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
+            table.extend(self.get_hardware_signals_for_summ_table_latex(self._hw_objs, type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
 
-            if self._tables_of_add_device[0]:
+            #if self._tables_of_add_device[0]:
+            if self._add_hw_objs:    
                 table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства II архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
                 table.extend('\\rowcolor{gray!15} \n')
                 table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
-                table.extend(self._tables_of_add_device[2])
+                #table.extend(self._tables_of_add_device[2])
+                table.extend(self.get_hardware_signals_for_summ_table_latex(self._add_hw_objs, type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
 
             #table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие системные сигналы (СИСТ)"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             #table.extend('\\rowcolor{gray!15} \n')
@@ -202,66 +210,27 @@ class FSU:
     def set_order_code_parsed(self, order_code):
         self.order_code_parsed = order_code
 
-    def _get_slots(self):
-        slot = 1
-        plate = 3
-        #print(self.order_code_parsed)
+    def set_hw_objs(self, objs):
+        self._hw_objs = objs
 
-        while True:
-            current_plate = self.order_code_parsed[plate]
-            if current_plate == 'x' or current_plate == 'х':
-                slot+=1
-                plate+=1
-                continue
-            if current_plate in ['P02c', 'Р02с']:
-                self._slots.append({'num': slot, 'purpose': 'supply'})
-                slot+=1
-                plate+=1 
-                continue
-            if current_plate in [ 'P02', 'Р02']:
-                self._slots.append({'num': slot, 'purpose': 'supply'})
-                slot+=1
-                plate+=1                
-                continue            
-            if 'B' in current_plate or 'В' in current_plate:
-                self._slots.append({'num': slot, 'purpose': 'inputs'})
-                slot+=1
-                plate+=1                
-                continue                
-            if 'K' in current_plate or 'К' in current_plate:
-                self._slots.append({'num': slot, 'purpose': 'outputs'})
-                slot+=1
-                plate+=1                
-                continue
-            if 'M' in current_plate or 'М' in current_plate:
-                self._slots.append({'num': slot, 'purpose': 'analogs'})
-                slot+=1
-                plate+=1                
-                continue
-            if 'C' in current_plate or 'С' in current_plate:
-                self._slots.append({'num': slot, 'purpose': 'cpu'})
-                break
+    def set_add_hw_objs(self, objs):
+        self._add_hw_objs = objs
 
-    def get_hardware_signals_for_summ_table_latex(self, type=1):
-        # часть вторая - генерируем из словаря latex разметку
-        if not self._slots:
-            self._get_slots()
-        prefix = 'СИСТ / Диагностика: ' if type ==1 else ''   
-        latex_slots = []
-        for slot in self._slots:
-            if slot['purpose'] == 'supply':
-                latex_slots.append(f'\\raggedright  {prefix}Неисправность 12 В & \centering Слот М'+ str(slot['num']) +' Неиспр.12В & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                latex_slots.append(f'\\raggedright  {prefix}Неисправность внешнего питания & \centering Слот М'+ str(slot['num']) +' Нет внеш.питания & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                latex_slots.append(f'\\raggedright  {prefix}Критическая ошибка & \centering Слот М'+ str(slot['num']) +' Неисп.внеш.питания & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                continue
-            if slot['purpose'] == 'inputs' or slot['purpose'] == 'outputs':
-                latex_slots.append(f'\\raggedright  {prefix}Отказ модуля & \centering Слот М'+ str(slot['num']) +' Отказ модуля & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                latex_slots.append(f'\\raggedright  {prefix}Критическая ошибка & \centering Слот М'+ str(slot['num']) +' Модуль не определен & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                continue
-            if slot['purpose'] == 'analogs':
-                latex_slots.append(f'\\raggedright  {prefix}Отказ модуля & \centering Слот М'+ str(slot['num']) +' Отказ модуля & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                latex_slots.append(f'\\raggedright  {prefix}Критическая ошибка & \centering Слот М'+ str(slot['num']) +' Модуль не определен & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')
-                latex_slots.append(f'\\raggedright  {prefix}Неисправность АЦП & \centering Слот М'+ str(slot['num']) +' Неисправность АЦП & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')               
-            if slot['purpose'] == 'cpu':
-                pass
-        return latex_slots                                        
+##################################### СИГНАЛЫ ПО МОДУЛЯМ ЖЕЛЕЗА #################################################################
+    def get_hardware_signals_for_summ_table_latex(self, objs, type=1):
+        latex_slots_new = []
+        prefix = 'СИСТ / Диагностика: ' if type ==1 else '' 
+        for plate in objs:
+            plate_statuses_dict = plate.statuses
+            if plate_statuses_dict:
+                for item in plate_statuses_dict['general_data']:
+                    latex_slots_new.append(f'\\raggedright {item["Наименование"]} & \centering {item["Обозначение"]} & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')                    
+            for obj in plate.all_objects:
+                obj1 = obj.get_statuses()
+                if obj1:
+                    for data in obj1:
+                        latex_slots_new.append(f'\\raggedright {data["Наименование"]} & \centering {data["Обозначение"]} & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')                       
+
+        return latex_slots_new                                        
+
+ 

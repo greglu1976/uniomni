@@ -6,10 +6,11 @@
 import pandas as pd
 from logger import Logger
 
-
+from hardware import Hardware
 
 class AdditionalHardware():
-    def __init__(self, path_to_hardware_desc):
+    def __init__(self, info, path_to_hardware_desc):
+
         self.path_to_hardware_desc = path_to_hardware_desc
 
         self.is_ied2 = False # фиксация наличия второго устройсва в Руководстве по эсплуатации
