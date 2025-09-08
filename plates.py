@@ -95,8 +95,6 @@ def get_C01_data(slot):
         ]
     }
 
-
-
 def get_plate_data(name, slot):
     if name == 'K001':
         return get_K001_data(slot)    

@@ -22,6 +22,8 @@ class FSU:
 
         self._hw_objs = None # для передачи данных по платам из объекта класса Hardware
         self._add_hw_objs = None
+        self._hw_order_card = None
+        self._add_hw_order_card = None
 
     def get_summ_table_latex(self):
         if self._summ_table_latex is None:  # Если таблица ещё не генерировалась
@@ -142,19 +144,20 @@ class FSU:
             table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов по функциям ТИП 2
             #if self._tables_of_add_device[0]:
-            if self._add_hw_objs:    
-                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства I архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            if self._add_hw_objs:
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства " + self._hw_order_card}}}}} \\\\\n\\hline\n'))    
+                #table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства "}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             else:
-                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
-            table.extend('\\rowcolor{gray!15} \n')
-            table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            #table.extend('\\rowcolor{gray!15} \n')
+            #table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_hardware_signals_for_summ_table_latex(self._hw_objs, type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
 
             #if self._tables_of_add_device[0]:
             if self._add_hw_objs:    
-                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Системные сигналы (СИСТ) устройства II архитектуры"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
-                table.extend('\\rowcolor{gray!15} \n')
-                table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства " + self._add_hw_order_card}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                #table.extend('\\rowcolor{gray!15} \n')
+                #table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
                 #table.extend(self._tables_of_add_device[2])
                 table.extend(self.get_hardware_signals_for_summ_table_latex(self._add_hw_objs, type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
 
@@ -216,6 +219,12 @@ class FSU:
     def set_add_hw_objs(self, objs):
         self._add_hw_objs = objs
 
+    def set_hw_order_card(self, order):
+        self._hw_order_card = order
+
+    def set_add_hw_order_card(self, order):
+        self._add_hw_order_card = order
+
 ##################################### СИГНАЛЫ ПО МОДУЛЯМ ЖЕЛЕЗА #################################################################
     def get_hardware_signals_for_summ_table_latex(self, objs, type=1):
         latex_slots_new = []
@@ -223,6 +232,8 @@ class FSU:
         for plate in objs:
             plate_statuses_dict = plate.statuses
             if plate_statuses_dict:
+                latex_slots_new.append('\\rowcolor{gray!15} \n')
+                latex_slots_new.append((f'\\multicolumn{{9}}{{c}}{{\\textbf{{Слот М{plate.get_slot()}. {plate.get_name()}}}}} \\\\\n\\hline\n'))
                 for item in plate_statuses_dict['general_data']:
                     latex_slots_new.append(f'\\raggedright {item["Наименование"]} & \centering {item["Обозначение"]} & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')                    
             for obj in plate.all_objects:
