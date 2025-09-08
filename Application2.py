@@ -86,7 +86,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.3.6 beta 26.08.25", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.3.8 08.09.25", width=1215, height=450)
         dpg.setup_dearpygui()
 
     def set_sum_table_type(self, sender, app_data):

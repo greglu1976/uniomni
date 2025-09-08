@@ -1,7 +1,7 @@
 # вынесено сюда всякое создание разделов 
 
 from docx.enum.section import WD_ORIENTATION, WD_SECTION
-from docx.shared import Inches
+from docx.shared import Inches, Mm
 
 def add_new_section(doc):
     """Добавляет портретную секцию"""
@@ -22,11 +22,21 @@ def add_new_section(doc):
     new_section.page_height = Inches(11.7)  # Стандартная высота для портрета
     
     # Копируем поля
-    new_section.left_margin = current_section.left_margin
-    new_section.right_margin = current_section.right_margin
-    new_section.top_margin = current_section.top_margin
-    new_section.bottom_margin = current_section.bottom_margin
-    
+    #new_section.left_margin = current_section.left_margin
+    #new_section.right_margin = current_section.right_margin
+    #new_section.top_margin = current_section.top_margin
+    #new_section.bottom_margin = current_section.bottom_margin
+
+    # Задаем поля в миллиметрах
+    new_section.left_margin = Mm(20)    # 2.0 см
+    new_section.right_margin = Mm(10)   # 2.0 см
+    new_section.top_margin = Mm(14)     # 2.5 см
+    new_section.bottom_margin = Mm(10)  # 2.5 см
+    new_section.gutter = Mm(0) # ПЕРЕПЛЕТ
+    #new_section.gutter_position = -1 #(left = 0, top = 1, right = 2)
+    new_section.header_distance = Mm(0)
+
+
     return doc
 
 def add_new_section_landscape(doc):
@@ -46,17 +56,13 @@ def add_new_section_landscape(doc):
     new_section.orientation = WD_ORIENTATION.LANDSCAPE
     new_section.page_width = Inches(11.7)   # Ширина становится высотой
     new_section.page_height = Inches(8.3) # Высота становится шириной
-    
-    # Копируем поля
-    #new_section.left_margin = current_section.left_margin
-    #new_section.right_margin = current_section.right_margin
-    #new_section.top_margin = current_section.top_margin
-    #new_section.bottom_margin = current_section.bottom_margin
 
-    new_section.left_margin = current_section.top_margin
-    new_section.right_margin = current_section.bottom_margin
-    new_section.top_margin = current_section.right_margin
-    new_section.bottom_margin = current_section.left_margin
+    # Задаем поля в миллиметрах
+    new_section.left_margin = Mm(10)    # 2.0 см
+    new_section.right_margin = Mm(10)   # 2.0 см
+    new_section.top_margin = Mm(20)     # 2.5 см
+    new_section.bottom_margin = Mm(10)  # 2.5 см
+    new_section.header_distance = Mm(10)
 
     return doc
 

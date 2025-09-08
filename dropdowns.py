@@ -86,13 +86,13 @@ def add_formatted_dropdown2(paragraph, choices, default="Не назначено
 
 
 
-def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], default="Не назначено", alias="", instruction_text=""):
+def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], default="Не назначено", alias="", instruction_text="", first_divider = 'Сигналы РЗиА', second_divider='Общие сигналы ФС'):
     # Формируем элементы списка с разделителями
     list_items = []
     
     # Добавляем inputs
     if inputs_choices:
-        list_items.append('<w:listItem w:displayText="──────── Сигналы РЗиА ────────" w:value="INPUTS_HEADER" w:disabled="true"/>')
+        list_items.append(f'<w:listItem w:displayText="──────── {first_divider} ────────" w:value="INPUTS_HEADER" w:disabled="true"/>')
         for choice in inputs_choices:
             list_items.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
     
@@ -100,7 +100,7 @@ def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], defa
     if controls_choices:
         if inputs_choices:  # Добавляем разделитель только если есть оба списка
             list_items.append('<w:listItem w:displayText=" " w:value="SPACER" w:disabled="true"/>')
-        list_items.append('<w:listItem w:displayText="────── Общие сигналы ФС ──────" w:value="CONTROLS_HEADER" w:disabled="true"/>')
+        list_items.append(f'<w:listItem w:displayText="────── {second_divider} ──────" w:value="CONTROLS_HEADER" w:disabled="true"/>')
         for choice in controls_choices:
             list_items.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
     

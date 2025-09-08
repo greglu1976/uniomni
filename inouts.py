@@ -5,7 +5,7 @@ class Bin_Input:
     def __init__(self, slot, binary_number):
         self.binary_number = binary_number
         self.slot = slot
-
+        self._statuses = []
     def get_info(self):
         l = [
         {'Описание':'Режим работы входа', 'Наименование ПО':f'Слот М{self.slot}. ДВ{self.binary_number}. Режим', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 = Не активен\n 1 = Активен', 'Ед. изм.':'-', 'Шаг':'-', 'Значение по умолчанию':'Не активен'},
@@ -14,6 +14,12 @@ class Bin_Input:
         {'Описание':'Назначение входа', 'Наименование ПО':f'Слот М{self.slot}. ДВ{self.binary_number}. Описание', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 ... 31', 'Ед. изм.':'Символ', 'Шаг':'-', 'Значение по умолчанию':'-'}
         ]
         return l
+    def get_statuses(self):
+        if not self._statuses:
+            self._statuses = [
+                {"Наименование": "Статус", "Обозначение":f"Слот М{self.slot}. ДВ{self.binary_number}. Статус" },
+            ]
+        return self._statuses   
     def get_number(self):
         return self.binary_number     
 
@@ -21,7 +27,7 @@ class Bin_Output:
     def __init__(self, slot, binary_number):
         self.binary_number = binary_number
         self.slot = slot
-
+        self._statuses = []        
     def get_info(self):
         l = [
         {'Описание':'Режим работы реле', 'Наименование ПО':f'Слот М{self.slot}. Реле{self.binary_number}. Режим', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 = Выведено\n 1 = Без фиксации\n 2 = С фиксацией\n 3 = Импульсный', 'Ед. изм.':'-', 'Шаг':'-', 'Значение по умолчанию':'Без фиксации'},
@@ -29,6 +35,12 @@ class Bin_Output:
         {'Описание':'Назначение реле', 'Наименование ПО':f'Слот М{self.slot}. Реле{self.binary_number}. Описание', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 ... 31', 'Ед. изм.':'Символ', 'Шаг':'-', 'Значение по умолчанию':'-'}
         ]
         return l
+    def get_statuses(self):
+        if not self._statuses:
+            self._statuses = [
+                {"Наименование": "Статус", "Обозначение":f"Слот М{self.slot}. Реле{self.binary_number}. Статус" }
+            ]
+        return self._statuses         
     def get_number(self):
         return self.binary_number         
 
@@ -37,6 +49,7 @@ class VoltInput:
     def __init__(self, slot, binary_number):
         self.binary_number = binary_number
         self.slot = slot
+        self._statuses = []         
     def get_info(self):
         l = [
         {'Описание':'Вид представляемой величины', 'Наименование ПО':f'Вид представляемой величины {self.binary_number}', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 ... 6', 'Ед. изм.':'-', 'Шаг':'1', 'Значение по умолчанию':'0'},
@@ -51,6 +64,10 @@ class VoltInput:
         {'Описание':'Пользовательское имя сигнала для отображения', 'Наименование ПО':f'Имя сигнала для отображения в схемах {self.binary_number}', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 ... 99', 'Ед. изм.':'Символ', 'Шаг':'-', 'Значение по умолчанию':''}                                                      
         ]
         return l
+    def get_statuses(self):
+        if not self._statuses:
+            self._statuses = []
+        return self._statuses         
     def get_number(self):
         return self.binary_number         
 
@@ -59,6 +76,7 @@ class CurrInput:
     def __init__(self, slot, binary_number):
         self.binary_number = binary_number
         self.slot = slot
+        self._statuses = []          
     def get_info(self):
         l = [
         {'Описание':'Вид представляемой величины', 'Наименование ПО':f'Вид представляемой величины {self.binary_number}', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 ... 6', 'Ед. изм.':'-', 'Шаг':'1', 'Значение по умолчанию':'0'},
@@ -73,6 +91,10 @@ class CurrInput:
         {'Описание':'Пользовательское имя сигнала для отображения', 'Наименование ПО':f'Имя сигнала для отображения в схемах {self.binary_number}', 'Наименование ФСУ':'-', 'Значение / Диапазон':' 0 ... 99', 'Ед. изм.':'Символ', 'Шаг':'-', 'Значение по умолчанию':''}                                                      
         ]
         return l
+    def get_statuses(self):
+        if not self._statuses:
+            self._statuses = []
+        return self._statuses           
     def get_number(self):
         return self.binary_number   
 

@@ -20,11 +20,13 @@ class Plate():
         self.slot = slot
         self._statuses = {} # для бланка уставок - параметрирование
 
+        self.consist_of_modules = [] # здесь все объекты платы (дискрет входы выходы, изм входы выходы)
         self._start()
 
     def _start(self):
 
         self._statuses = get_plate_data(self.name, self.slot) # забираем захарденные данные по плате
+        print(self.statuses)
 
         if self.name == 'P02c':
             obj_info = GeneralInfo('P02c')
@@ -37,6 +39,7 @@ class Plate():
         
         for i in range(self.inputs_number):
             temp = Bin_Input(self.slot, counter)
+            self.consist_of_modules.append(temp)
             obj_in = {
                 'data': temp.get_info(),
                 'counter': counter
@@ -47,6 +50,7 @@ class Plate():
         
         for a in range(self.outputs_number):
             temp = Bin_Output(self.slot, counter)
+            self.consist_of_modules.append(temp)
             obj_out = {
                 'data': temp.get_info(),
                 'counter': counter
@@ -57,6 +61,7 @@ class Plate():
         
         for k in range(self.volts_number):
             temp = VoltInput(self.slot, counter)
+            self.consist_of_modules.append(temp)
             obj_volts = {
                 'data': temp.get_info(),
                 'counter': counter
@@ -67,6 +72,7 @@ class Plate():
         
         for t in range(self.curr_number):
             temp = CurrInput(self.slot, counter)
+            self.consist_of_modules.append(temp)
             obj_currs = {
                 'data': temp.get_info(),
                 'counter': counter
@@ -103,6 +109,10 @@ class Plate():
         return self.volts
     def get_currents(self):
         return self.currents
+
+    @property
+    def all_objects(self):
+        return self.consist_of_modules
 
     @property
     def statuses(self):

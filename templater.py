@@ -7,6 +7,8 @@ from docx import Document
 from docx_handler import add_new_section, add_new_section_landscape
 from tables import add_table_settings, add_table_reg, add_table_fks, add_table_leds_new, add_table_mtrx_ins, add_table_mtrx_outs, add_table_binaries, add_table_final
 
+from xml.sax.saxutils import escape # для экранирования в дропдаун списке всяких << >>
+
 def fill_template(fsu, hardware):
 
     doc = DocxTemplate("temp.docx")
@@ -207,7 +209,27 @@ def _create_section_inouts(fsu, doc):
     p.style = 'TAGS' 
 
 # РАЗДЕЛ СВЕТОДИОДОВ И ФК
-def _create_section_leds(fsu, doc):
+def _create_section_leds(hardware, fsu, doc):
+    # для начала соберем данные по платам
+    plates_data = []
+    for plate in hardware.get_hw_plates():
+        if plate.statuses:
+            #print(plate.statuses)
+            general_data_list = plate.statuses['general_data']
+            for status_dict in general_data_list:
+                # Каждый status_dict - это словарь с ключами 'Наименование' и 'Обозначение'
+                #print(f"Обозначение: {status_dict['Обозначение']}")
+                escaped_value = escape(status_dict['Обозначение'])
+                plates_data.append(escaped_value)
+        if plate.all_objects:
+            for obj in plate.all_objects:
+                statuses = obj.get_statuses()
+                if statuses:
+                    for status_dict in statuses:
+                        #print(status_dict['Обозначение'])
+                        escaped_value = escape(status_dict['Обозначение'])
+                        plates_data.append(escaped_value)
+
     #############################################################################
     # СОЗДАЕМ РАЗДЕЛ НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ
     add_new_section_landscape(doc) # Создаем раздел для матрицы вх/вых
@@ -232,7 +254,7 @@ def _create_section_leds(fsu, doc):
     statuses = set([item['Полное наименование сигнала'] for item in statuses_])
     statuses = sorted(list(statuses))
 
-    add_table_leds_new(doc, statuses)
+    add_table_leds_new(doc, statuses, plates_data)
 
     p = doc.add_paragraph(r'{% endfor %}')
     p.style = 'TAGS'    
@@ -304,10 +326,7 @@ def create_template(fsu, hardware):
     _create_section_inouts(fsu, doc)
 
     # СОЗДАЕМ РАЗДЕЛ С ПАРАМЕТРИРОВАНИЕ СВЕТОДИОДОВ И ФК
-    _create_section_leds(fsu, doc) 
-
-    for plate in hardware.get_hw_plates():
-        print(plate.statuses)
+    _create_section_leds(hardware, fsu, doc) 
 
 
     # СОЗДАЕМ РАЗДЕЛ С КОНФИГУРАЦИЕЙ
