@@ -233,14 +233,14 @@ class FSU:
             plate_statuses_dict = plate.statuses
             if plate_statuses_dict:
                 latex_slots_new.append('\\rowcolor{gray!15} \n')
-                latex_slots_new.append((f'\\multicolumn{{9}}{{c}}{{\\textbf{{Слот М{plate.get_slot()}. {plate.get_name()}}}}} \\\\\n\\hline\n'))
+                latex_slots_new.append((f'\\multicolumn{{9}}{{c}}{{{{Слот М{plate.get_slot()}. {plate.get_name()}}}}} \\\\\n\\hline\n'))
                 for item in plate_statuses_dict['general_data']:
-                    latex_slots_new.append(f'\\raggedright {item["Наименование"]} & \centering {item["Обозначение"]} & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')                    
+                    latex_slots_new.append(f'\\raggedright {item["Наименование"]} & \centering {item["Обозначение"]} & \centering -- & \centering -- & \centering + & \centering -- & \centering + & \centering + & \centering \\arraybackslash + \\\\ \hline \n')                    
             for obj in plate.all_objects:
                 obj1 = obj.get_statuses()
                 if obj1:
                     for data in obj1:
-                        latex_slots_new.append(f'\\raggedright {data["Наименование"]} & \centering {data["Обозначение"]} & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering -- & \centering \\arraybackslash -- \\\\ \hline \n')                       
+                        latex_slots_new.append(f'\\raggedright {data["Наименование"]} & \centering {data["Обозначение"]} & \centering -- & \centering -- & \centering + & \centering -- & \centering + & \centering + & \centering \\arraybackslash + \\\\ \hline \n')                       
 
         return latex_slots_new                                        
 
