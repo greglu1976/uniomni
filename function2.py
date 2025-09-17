@@ -171,7 +171,7 @@ class Function2:
                 #print(znach_diap_bu)
             # словарь для бланка уставок
             dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap_bu, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value_for_word}
-            print(dict_bu)
+            #print(dict_bu)
             # словарь для руководства по эксплуатации
             if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
                 protected_pattern = "КННш+КОНп-КОНш+КННп" # 
