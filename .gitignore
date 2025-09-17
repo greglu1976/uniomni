@@ -4,3 +4,7 @@ venv/
 output/
 latex_build/
 *.pkl
+*.dwl
+*.dwl2
+~$*.doc*
+~$*.dot*

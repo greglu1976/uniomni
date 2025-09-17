@@ -61,6 +61,18 @@ class Function2:
         text = text.replace('<', '$<$')
         return text
 
+    def _escape_xml_symbols(self, text):
+        """Экранирует специальные символы для XML/DOCX"""
+        if not isinstance(text, str):
+            text = str(text)
+        # Экранируем все специальные XML символы
+        text = text.replace('&', '&amp;')
+        text = text.replace('<', '&lt;')
+        text = text.replace('>', '&gt;')
+        text = text.replace('"', '&quot;')
+        text = text.replace("'", '&apos;')
+        return text
+
     def _get_settings(self):
         if self.df_setting is None:
             return
@@ -159,6 +171,7 @@ class Function2:
                 #print(znach_diap_bu)
             # словарь для бланка уставок
             dict_bu = {'Описание': desc, 'Наименование ПО': short_desc, 'Наименование ФСУ': applied_desc, 'Значение / Диапазон': znach_diap_bu, 'Ед.изм.': units, 'Шаг': step, 'Значение по умолчанию': default_value_for_word}
+            print(dict_bu)
             # словарь для руководства по эксплуатации
             if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
                 protected_pattern = "КННш+КОНп-КОНш+КННп" # 
@@ -173,10 +186,6 @@ class Function2:
                 #dict_bu = {'Описание': "desc", 'Наименование ПО': "short_desc", 'Наименование ФСУ': "applied_desc", 'Значение / Диапазон': "znach_diap", 'Ед.изм.': "units", 'Шаг': "step", #'Значение по умолчанию': "default_value"}
             self.list_bu.append(dict_bu)
             self.list_re.append(dict_re)            
-
-
-
-
 
     def _format_status(self, value):
         """Форматирование числового статуса в символьное представление
@@ -211,7 +220,7 @@ class Function2:
             short_desc = row['ShortDescription'].strip().replace('<<','«').replace('>>','»')
 
             dict = {
-            'Полное наименование сигнала': self.fb_name + ' / ' + self.name + ': ' + desc, 
+            'Полное наименование сигнала': self._escape_xml_symbols(self.fb_name + ' / ' + self.name + ': ' + desc), 
             'Наименование сигналов на ФСУ': short_desc, 
             'Дискретные входы': self._format_status(row['DigitalInput']),
             'Выходные реле': self._format_status(row['DigitalOutput']),
