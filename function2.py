@@ -220,6 +220,7 @@ class Function2:
             short_desc = row['ShortDescription'].strip().replace('<<','«').replace('>>','»')
 
             dict = {
+            'Полное наименование сигнала latex': self.fb_name + ' / ' + self.name + ': ' + desc, 
             'Полное наименование сигнала': self._escape_xml_symbols(self.fb_name + ' / ' + self.name + ': ' + desc), 
             'Наименование сигналов на ФСУ': short_desc, 
             'Дискретные входы': self._format_status(row['DigitalInput']),
@@ -312,7 +313,7 @@ class Function2:
         self._func_signals_latex.append(self.header_for_latex)    
         for row in self.list_status:
             row_str = '\\raggedright '
-            row_str += row['Полное наименование сигнала'].split(':')[1].replace('_', r'\_')
+            row_str += row['Полное наименование сигнала latex'].split(':')[1].replace('_', r'\_')
             row_str += ' & \\centering '
             row_str += row['Наименование сигналов на ФСУ'].replace('_', r'\_')
             row_str += ' & \\centering '
