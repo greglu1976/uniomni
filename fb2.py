@@ -50,8 +50,20 @@ class FB2:
         if not self.path.exists():
             print(f"⚠ Файл {self.path} не найден, пропускаем")
             return
+        
+        # Определяем типы данных для столбцов, которые должны быть целыми числами
+        dtype_dict = {
+            'DigitalInput': 'Int64',
+            'DigitalOutput': 'Int64', 
+            'LED': 'Int64',
+            'FunctionalButton': 'Int64',
+            'Logger': 'Int64',
+            'Disturber': 'Int64',
+            'StartDisturber': 'Int64'
+        }
+
         # Загружаем все листы из файла в отдельные датафреймы
-        self.raw_controls_df = pd.read_excel(self.path, sheet_name='Controls', header=1)
+        self.raw_controls_df = pd.read_excel(self.path, sheet_name='Controls', header=1, dtype=dtype_dict)
         self.raw_statuses_df =  pd.read_excel(self.path, sheet_name='Status information', header=1)   
         self.raw_settings_df =  pd.read_excel(self.path, sheet_name='Settings', header=1) 
         self.raw_info_df =  pd.read_excel(self.path, sheet_name='TechInfo', header=1)
@@ -148,6 +160,7 @@ class FB2:
             logger = row['Logger']
             disturber = row['Disturber']
             start_disturber = row['StartDisturber']
+            print(short_desc, led, logger, disturber, start_disturber)
             dict = {
             'Полное наименование сигнала': desc, 
             'Наименование сигналов на ФСУ': short_desc, 
