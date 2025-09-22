@@ -160,7 +160,7 @@ class FB2:
             logger = row['Logger']
             disturber = row['Disturber']
             start_disturber = row['StartDisturber']
-            print(short_desc, led, logger, disturber, start_disturber)
+            #print(short_desc, led, logger, disturber, start_disturber)
             dict = {
             'Полное наименование сигнала': desc, 
             'Наименование сигналов на ФСУ': short_desc, 
