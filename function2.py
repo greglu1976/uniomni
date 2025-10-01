@@ -174,10 +174,35 @@ class Function2:
             #print(dict_bu)
             # словарь для руководства по эксплуатации
             if isKey: # добавлено , чтобы -45 град не менял на =45. (После отработки исполнения ОЛ)
-                protected_pattern = "КННш+КОНп-КОНш+КННп" # 
-                znach_diap = znach_diap.replace(protected_pattern, protected_pattern.replace("-", "@@"))
+                #protected_pattern = "КННш+КОНп-КОНш+КННп" # 
+                protected_patterns = [
+                    "КННш+КОНп-КОНш+КННп",
+                    "КННш+КОНвв-КОНш+КННвв",
+                    "С контролем от БК-б",
+                    "С контролем от БК-м",
+                    "ВВ-СВ", 
+                    "СВ-ВВ",
+                    "ВВ - СВ", 
+                    "СВ - ВВ",
+                ]
+
+                # Временная замена защищенных паттернов
+                for pattern in protected_patterns:
+                    if pattern in znach_diap:
+                        znach_diap = znach_diap.replace(pattern, pattern.replace("-", "@@"))
+
+                # Основная замена
                 znach_diap = znach_diap.replace('-', '=')
-                znach_diap = znach_diap.replace("@@", "-")
+
+                # Возвращаем защищенные паттерны
+                for pattern in protected_patterns:
+                    protected_temp = pattern.replace("-", "@@")
+                    if protected_temp in znach_diap:
+                        znach_diap = znach_diap.replace(protected_temp, pattern)
+
+                #znach_diap = znach_diap.replace(protected_pattern, protected_pattern.replace("-", "@@"))
+                #znach_diap = znach_diap.replace('-', '=')
+                #znach_diap = znach_diap.replace("@@", "-")
 
             #applied_desc = '\\mbox{'+applied_desc+'}'    
             dict_re = {'Параметр на ИЧМ': desc +' (' + short_desc + ')', 'Условное обозначение на схеме': self._escape_latex_symbols(applied_desc), 'Значение / Диапазон': znach_diap, 'Ед.изм.': units, 'Шаг': step }
