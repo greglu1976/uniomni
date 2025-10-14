@@ -259,3 +259,6 @@ class FB2:
             self._create_formatted_signals_for_latex()
         #print(self._fb_signals_latex)
         return self._fb_signals_latex
+    
+    def get_description(self):
+        return self.description

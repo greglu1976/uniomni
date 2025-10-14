@@ -1,5 +1,6 @@
 # Класс описывающий содержимое схемы ФСУ устройства
 # состоит из объектов FB , которые состоят в свою очередь из объектов function
+from collections import defaultdict
 
 class FSU:
     def __init__(self):
@@ -189,7 +190,7 @@ class FSU:
     def _create_system_formatted_signals_for_latex(self,fb):
         self._fsu_system_signals_latex.extend(fb.get_formatted_signals_for_latex())
 
-    def _create_formatted_signals_for_latex(self):
+    def _create_formatted_signals_for_latexOLD(self):
         if not self._is_signals_for_latex():
             return
         for fb in self.fbs:
@@ -197,6 +198,57 @@ class FSU:
                 self._create_system_formatted_signals_for_latex(fb)
                 continue
             self._fsu_signals_latex.extend(fb.get_formatted_signals_for_latex())
+
+    def _create_formatted_signals_for_latex(self):
+        if not self._is_signals_for_latex():
+            return
+
+        # Обработка системных блоков
+        for fb in self.fbs:
+            if 'СИСТ' in fb.get_fb_name():
+                self._create_system_formatted_signals_for_latex(fb)
+
+        # Группировка несистемных FB по (description, name)
+        groups = defaultdict(list)  # ключ: (desc, name), значение: список всех сигналов (dict)
+
+        for fb in self.fbs:
+            if 'СИСТ' in fb.get_fb_name():
+                continue
+
+            # Получаем все сигналы от всех функций этого FB
+            all_statuses = []
+            for func in fb.get_functions():
+                all_statuses.extend(func.get_list_status())
+
+            if not all_statuses:
+                continue
+
+            key = (fb.get_description(), fb.get_fb_name())
+            groups[key].extend(all_statuses)
+
+        # Теперь формируем LaTeX
+        for (desc, name), signals in groups.items():
+            # Заголовок блока
+            self._fsu_signals_latex.append('\\rowcolor{gray!15} \n')
+            self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{desc} ({name})}} \\\\\n\\hline\n')
+
+            # Сигналы
+            for item in signals:
+                line = (
+                    f'\\raggedright {item["Полное наименование сигнала latex"].split(":")[1].strip()} & '
+                    f'\\centering {item["Наименование сигналов на ФСУ"]} & '
+                    f'\\centering {item["Дискретные входы"].replace("-", "--").replace("*", r"$\ast$")} & '
+                    f'\\centering {item["Выходные реле"].replace("-", "--").replace("*", r"$\ast$")} & '
+                    f'\\centering {item["Светодиоды"].replace("-", "--").replace("*", r"$\ast$")} & '
+                    f'\\centering {item["ФК"].replace("-", "--").replace("*", r"$\ast$")} & '
+                    f'\\centering {item["РС"].replace("-", "--").replace("*", r"$\ast$")} & '
+                    f'\\centering {item["РАС"].replace("-", "--").replace("*", r"$\ast$")} & '
+                    f'\\centering \\arraybackslash {item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$")} \\\\ \\hline\n'
+                )
+                self._fsu_signals_latex.append(line)
+
+
+
 
     def get_system_formatted_signals_for_latex(self):
         return self._fsu_system_signals_latex
