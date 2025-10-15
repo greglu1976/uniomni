@@ -224,41 +224,63 @@ class FSU:
                 continue
 
             key = (fb.get_description(), fb.get_fb_name())
+
             # Сохраняем каждую функцию отдельно с её сигналами
             for func in functions:
                 func_data = {
-                    'func_description': func.get_description(),  # описание функции
+                    'func_description': 'Общие сигналы' if func.get_description()=='Общие уставки' else func.get_description(),  # описание функции
                     'func_name': func.get_name(),  # название функции
                     'signals': func.get_list_status()  # сигналы этой функции
                 }
                 groups[key].append(func_data)
 
         # Теперь формируем LaTeX
-        for (desc, name), functions_data in groups.items():
-            #print(desc, name)
-            # Заголовок блока
+        for (fb_desc, fb_name), functions_data in groups.items():
+            # Заголовок блока ФБ
             self._fsu_signals_latex.append('\\rowcolor{gray!15} \n')
-            self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{desc} ({name})}} \\\\\n\\hline\n')
+            self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{fb_desc} ({fb_name})}} \\\\\n\\hline\n')
 
-            # Обрабатываем каждую функцию отдельно
+            num_funcs = len(functions_data)
+
             for func_data in functions_data:
-                func_description = func_data['func_description']
+                func_desc = func_data['func_description']
                 func_name = func_data['func_name']
                 signals = func_data['signals']
                 
                 if not signals:
                     continue
-                    
-                # Добавляем подзаголовок функции (если нужно)
-                if len(functions_data) > 1:  # если в FB больше одной функции
-                    #self._fsu_signals_latex.append('\\hline\n')
+
+                # Проверяем, является ли функция "представителем" ФБ
+                is_representative = (func_name == fb_name and func_desc == fb_desc)
+
+                if num_funcs == 1:
+                    # Одна функция: подзаголовок только если НЕ представитель
+                    if not is_representative:
+                        escaped_desc = func_desc.replace('_', '\\_')
+                        escaped_name = func_name.replace('_', '\\_')
+                        self._fsu_signals_latex.append('\\rowcolor{gray!5} \n')
+                        self._fsu_signals_latex.append(
+                            f'\\multicolumn{{9}}{{c}}{{{{{escaped_desc} ({escaped_name})}}}} \\\\\n\\hline\n'
+                        )
+                    # Иначе — ничего не выводим (избегаем дубля)
+                else:
+                    # Несколько функций: всегда выводим подзаголовок
+                    if is_representative:
+                        # Заменяем на "Общие сигналы", используем имя ФБ в скобках
+                        display_desc = "Общие сигналы"
+                        display_name = fb_name  # ← важно: не func_name, а fb_name
+                    else:
+                        display_desc = func_desc
+                        display_name = func_name
+
+                    escaped_desc = display_desc.replace('_', '\\_')
+                    escaped_name = display_name.replace('_', '\\_')
                     #self._fsu_signals_latex.append('\\rowcolor{gray!5} \n')
-                    escaped_func_description = func_description.replace('_', '\\_')
-                    escaped_func_name = func_name.replace('_', '\\_')
-                    self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{{{escaped_func_description} ({escaped_func_name})}}}} \\\\\n\\hline\n')
-                    #self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{l}}{{\\textit{{{func_name}}}}} \\\\\n')
-                
-                # Сигналы текущей функции
+                    self._fsu_signals_latex.append(
+                        f'\\multicolumn{{9}}{{c}}{{{{{escaped_desc} ({escaped_name})}}}} \\\\\n\\hline\n'
+                    )
+
+                # Сигналы функции
                 for item in signals:
                     line = (
                         '\\raggedright ' + item["Полное наименование сигнала latex"].split(":")[1].strip() + ' & '
@@ -272,9 +294,6 @@ class FSU:
                         '\\centering \\arraybackslash ' + item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$") + ' \\\\ \\hline\n'
                     )
                     self._fsu_signals_latex.append(line)
-
-
-
 
 
 
