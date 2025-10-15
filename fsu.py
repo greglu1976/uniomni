@@ -235,20 +235,17 @@ class FSU:
             # Сигналы
             for item in signals:
                 line = (
-                    f'\\raggedright {item["Полное наименование сигнала latex"].split(":")[1].strip()} & '
-                    f'\\centering {item["Наименование сигналов на ФСУ"]} & '
-                    f'\\centering {item["Дискретные входы"].replace("-", "--").replace("*", r"$\ast$")} & '
-                    f'\\centering {item["Выходные реле"].replace("-", "--").replace("*", r"$\ast$")} & '
-                    f'\\centering {item["Светодиоды"].replace("-", "--").replace("*", r"$\ast$")} & '
-                    f'\\centering {item["ФК"].replace("-", "--").replace("*", r"$\ast$")} & '
-                    f'\\centering {item["РС"].replace("-", "--").replace("*", r"$\ast$")} & '
-                    f'\\centering {item["РАС"].replace("-", "--").replace("*", r"$\ast$")} & '
-                    f'\\centering \\arraybackslash {item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$")} \\\\ \\hline\n'
+                    '\\raggedright ' + item["Полное наименование сигнала latex"].split(":")[1].strip() + ' & '
+                    '\\centering ' + item["Наименование сигналов на ФСУ"] + ' & '
+                    '\\centering ' + item["Дискретные входы"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                    '\\centering ' + item["Выходные реле"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                    '\\centering ' + item["Светодиоды"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                    '\\centering ' + item["ФК"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                    '\\centering ' + item["РС"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                    '\\centering ' + item["РАС"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                    '\\centering \\arraybackslash ' + item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$") + ' \\\\ \\hline\n'
                 )
                 self._fsu_signals_latex.append(line)
-
-
-
 
     def get_system_formatted_signals_for_latex(self):
         return self._fsu_system_signals_latex
