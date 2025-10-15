@@ -18,6 +18,9 @@ class Application:
         self.device_manager = DeviceManager()
         self.init_button = None  # Будет хранить идентификатор кнопки
         self.setup_gui()
+
+        self.load_config_callback()
+
         self.re_ = None
         self.sum_table_type = 2  # По умолчанию выбран тип 2
         
@@ -33,44 +36,7 @@ class Application:
         dpg.bind_font(default_font)
         
         # Главное окно
-        with dpg.window(label="Главное окно", width=400, height=450):
-            dpg.add_button(
-                label="Считать config.ini",
-                callback=self.load_config_callback,
-                width=200
-            )
-            dpg.add_spacer(height=5)
-            
-            # Сохраняем идентификатор кнопки
-            self.init_button = dpg.add_button(
-                label="Инициализировать устройство",
-                callback=self.start_device_task,
-                enabled=False
-            )
-
-            dpg.add_button(label="Обновить таблицы с уставками в РЭ", callback=self.renew_setting_tables_re)
-            
-            # Группа для выбора типа суммарной таблицы
-            with dpg.group(horizontal=True):
-                dpg.add_text("Тип суммарной таблицы:")
-                dpg.add_radio_button(
-                    items=["Тип 1", "Тип 2"],
-                    default_value="Тип 2",
-                    callback=self.set_sum_table_type,
-                    horizontal=True
-                )
-                
-            dpg.add_button(label="Обновить суммарную таблицу сигналов приложения А в РЭ", callback=self.renew_sum_table_latex)
-            dpg.add_button(label="Создать суммарную таблицу сигналов в docx", callback=self.generate_sum_table_docx)
-            dpg.add_button(label="Создать бланк уставок в docx", callback=self.generate_setting_blanc_docx)
-            dpg.add_button(label="Обновить перечень сокращений в РЭ", callback=self.renew_abbrs)
-            dpg.add_button(label="Обновить перечень сокращений в РУ", callback=self.renew_abbrs_ru)
-            dpg.add_spacer(height=10)
-            dpg.add_button(label="Создать единый проект latex для РЭ", callback=self.create_raw_tex)
-            dpg.add_button(label="Загрузить объект РЭ из latex_build", callback=self.load_tex)
-            dpg.add_spacer(height=10)
-            dpg.add_button(label="Очистить логи", callback=Logger.clear_logs)
-
+        with dpg.window(label="Главное окно", width=400, height=450, pos=[10, 10]):
             # Сохраняем идентификатор комбобокса
             self.device_combo = dpg.add_combo(
                 label="Устройство",
@@ -78,21 +44,59 @@ class Application:
                 width=300,
                 enabled=False
             )
+            dpg.add_spacer(height=5)
+       
+            # Сохраняем идентификатор кнопки
+            self.init_button = dpg.add_button(
+                label="Инициализировать устройство",
+                callback=self.start_device_task,
+                enabled=False, 
+                width=300
+            )
+            dpg.add_separator() 
+            dpg.add_spacer(height=5)  
+            dpg.add_button(label="Обновить таблицы с уставками в РЭ", callback=self.renew_setting_tables_re, width=300)
+            dpg.add_button(label="Обновить суммарную таблицу сигналов в РЭ", callback=self.renew_sum_table_latex, width=300)
+            dpg.add_button(label="Обновить перечень сокращений в РЭ", callback=self.renew_abbrs, width=300)            
+            dpg.add_spacer(height=5) 
+            dpg.add_separator()
+            dpg.add_spacer(height=5)              
+            #dpg.add_button(label="Создать суммарную таблицу сигналов в docx", callback=self.generate_sum_table_docx)
+            dpg.add_button(label="Создать бланк уставок в docx", callback=self.generate_setting_blanc_docx, width=300)
+            dpg.add_spacer(height=5) 
+            dpg.add_separator()
+            dpg.add_spacer(height=5)  
+            dpg.add_button(label="Обновить перечень сокращений в РУ", callback=self.renew_abbrs_ru, width=300)
+            dpg.add_spacer(height=5) 
+            dpg.add_separator()            
+            dpg.add_spacer(height=5)
+            dpg.add_button(label="Создать единый проект latex для РЭ", callback=self.create_raw_tex, width=300)
+            dpg.add_button(label="Загрузить объект РЭ из latex_build", callback=self.load_tex, width=300)
+            dpg.add_spacer(height=5)
+            dpg.add_separator() 
+            dpg.add_spacer(height=5)             
+            dpg.add_button(label="Очистить логи", callback=Logger.clear_logs, width=300)
+            dpg.add_spacer(height=5)
+            dpg.add_separator() 
+            dpg.add_spacer(height=5)
+
+            dpg.add_button(
+                label="Считать config.ini",
+                callback=self.load_config_callback,
+                width=300
+            )
 
         # Окно логов
-        with dpg.window(label="Логи", width=800, height=400, pos=[400, 0], tag="log_window"):
+        with dpg.window(label="Логи", width=800, height=400, pos=[420, 10], tag="log_window"):
             with dpg.child_window(tag="log_container", height=325):
                 dpg.add_group(tag="log_content")  # для добавления строк
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.4.0hf3 01.10.25", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.4.1 15.10.25", width=1250, height=500)
         dpg.setup_dearpygui()
 
-    def set_sum_table_type(self, sender, app_data):
-        """Установка типа суммарной таблицы"""
-        self.sum_table_type = 2 if app_data == "Тип 2" else 1
-        Logger.info(f"Выбран тип суммарной таблицы: {app_data}")
+
 
     def renew_abbrs_ru(self):
         if self.re_ is None:
@@ -127,14 +131,14 @@ class Application:
             Logger.error('Устройство не инициализировано!')
         else:
             self.re_.renew_setting_tables_re()
-            Logger.info('Таблицы с уставками в РЭ обновлены')
+            Logger.info('Таблицы с уставками в РЭ обработаны')
 
     def renew_sum_table_latex(self):
         if self.re_ is None:
             Logger.error('Устройство не инициализировано!')
         else:
             self.re_.renew_sum_table_latex(table_type=self.sum_table_type)
-            Logger.info(f'Суммарная таблица сигналов приложения А (тип {self.sum_table_type}) в РЭ обновлена')
+            Logger.info(f'Суммарная таблица сигналов приложения А (тип {self.sum_table_type}) в РЭ обработана')
 
     def create_raw_tex(self):
         if self.re_ is None:

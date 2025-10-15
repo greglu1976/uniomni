@@ -142,21 +142,21 @@ class FSU:
             #table.extend((f'\\multicolumn{{9}}{{c|}}{{\\textbf{{{"Общие системные сигналы"}}}}} \\\\\n\\hline\n'))
             #table.extend(_generate_section(self.get_fsu_sys_statuses_sorted())) # для таблицы 1 типа отдельно системные сигналы
         else:
-            table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+            table.append((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_formatted_signals_for_latex()) # Суммарная таблица сигналов по функциям ТИП 2
             #if self._tables_of_add_device[0]:
             if self._add_hw_objs:
-                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства " + self._hw_order_card}}}}} \\\\\n\\hline\n'))    
+                table.append((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства " + self._hw_order_card}}}}} \\\\\n\\hline\n'))    
                 #table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства "}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             else:
-                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.append((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства"}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             #table.extend('\\rowcolor{gray!15} \n')
             #table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
             table.extend(self.get_hardware_signals_for_summ_table_latex(self._hw_objs, type=2)) # Сборка сигналов, зависящих от исполнения устройства (по платам)
 
             #if self._tables_of_add_device[0]:
             if self._add_hw_objs:    
-                table.extend((f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства " + self._add_hw_order_card}}}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
+                table.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Диагностические сигналы модулей в составе устройства " + self._add_hw_order_card}}}}} \\\\\n\\hline\n') # Суммарная таблица сигналов ТИП 2
                 #table.extend('\\rowcolor{gray!15} \n')
                 #table.extend((f'\\multicolumn{{9}}{{c}}{{{"Диагностические сигналы (Диагностика)"}}} \\\\\n\\hline\n')) # Суммарная таблица сигналов ТИП 2
                 #table.extend(self._tables_of_add_device[2])
@@ -191,8 +191,7 @@ class FSU:
         self._fsu_system_signals_latex.extend(fb.get_formatted_signals_for_latex())
 
 #######################################################################
-
-
+## СТАРАЯ ФУНКЦИЯ ФОРМИРОВАНИЯ СИГНАЛОВ СТАТУСОВ , НЕ УЧИТЫВАЕТ АРНТ ##
     def _create_formatted_signals_for_latexOLD(self):
         if not self._is_signals_for_latex():
             return
@@ -201,6 +200,8 @@ class FSU:
                 self._create_system_formatted_signals_for_latex(fb)
                 continue
             self._fsu_signals_latex.extend(fb.get_formatted_signals_for_latex())
+#######################################################################
+
 
 
     def _create_formatted_signals_for_latex(self):
@@ -225,62 +226,64 @@ class FSU:
 
             key = (fb.get_description(), fb.get_fb_name())
 
-            # Сохраняем каждую функцию отдельно с её сигналами
+            # Собираем все функции для данного ФБ
             for func in functions:
                 func_data = {
-                    'func_description': 'Общие сигналы' if func.get_description()=='Общие уставки' else func.get_description(),  # описание функции
-                    'func_name': func.get_name(),  # название функции
-                    'signals': func.get_list_status()  # сигналы этой функции
+                    'func_description': 'Общие сигналы' if func.get_description()=='Общие уставки' else func.get_description(),
+                    #'func_description': func.get_description(),
+                    'func_name': func.get_name(),
+                    'signals': func.get_list_status()
                 }
                 groups[key].append(func_data)
 
-        # Теперь формируем LaTeX
+        # Теперь формируем LaTeX с правильной группировкой функций
         for (fb_desc, fb_name), functions_data in groups.items():
             # Заголовок блока ФБ
             self._fsu_signals_latex.append('\\rowcolor{gray!15} \n')
             self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{fb_desc} ({fb_name})}} \\\\\n\\hline\n')
 
-            num_funcs = len(functions_data)
-
+            # Группируем функции внутри ФБ по (func_description, func_name)
+            func_groups = defaultdict(list)
             for func_data in functions_data:
-                func_desc = func_data['func_description']
-                func_name = func_data['func_name']
-                signals = func_data['signals']
-                
+                func_key = (func_data['func_description'], func_data['func_name'])
+                func_groups[func_key].extend(func_data['signals'])
+
+            # Обрабатываем сгруппированные функции
+            num_func_groups = len(func_groups)
+            
+            for (func_desc, func_name), signals in func_groups.items():
                 if not signals:
                     continue
 
                 # Проверяем, является ли функция "представителем" ФБ
                 is_representative = (func_name == fb_name and func_desc == fb_desc)
 
-                if num_funcs == 1:
+                if num_func_groups == 2:
                     # Одна функция: подзаголовок только если НЕ представитель
                     if not is_representative:
                         escaped_desc = func_desc.replace('_', '\\_')
                         escaped_name = func_name.replace('_', '\\_')
                         self._fsu_signals_latex.append('\\rowcolor{gray!5} \n')
                         self._fsu_signals_latex.append(
-                            f'\\multicolumn{{9}}{{c}}{{{{{escaped_desc} ({escaped_name})}}}} \\\\\n\\hline\n'
+                            f'\\multicolumn{{9}}{{c}}{{{escaped_desc} ({escaped_name})}} \\\\\n\\hline\n'
                         )
-                    # Иначе — ничего не выводим (избегаем дубля)
                 else:
                     # Несколько функций: всегда выводим подзаголовок
                     if is_representative:
                         # Заменяем на "Общие сигналы", используем имя ФБ в скобках
                         display_desc = "Общие сигналы"
-                        display_name = fb_name  # ← важно: не func_name, а fb_name
+                        display_name = fb_name
                     else:
                         display_desc = func_desc
                         display_name = func_name
 
                     escaped_desc = display_desc.replace('_', '\\_')
                     escaped_name = display_name.replace('_', '\\_')
-                    #self._fsu_signals_latex.append('\\rowcolor{gray!5} \n')
                     self._fsu_signals_latex.append(
-                        f'\\multicolumn{{9}}{{c}}{{{{{escaped_desc} ({escaped_name})}}}} \\\\\n\\hline\n'
+                        f'\\multicolumn{{9}}{{c}}{{{escaped_desc} ({escaped_name})}} \\\\\n\\hline\n'
                     )
 
-                # Сигналы функции
+                # Выводим все сигналы для данной функции
                 for item in signals:
                     line = (
                         '\\raggedright ' + item["Полное наименование сигнала latex"].split(":")[1].strip() + ' & '
@@ -294,7 +297,6 @@ class FSU:
                         '\\centering \\arraybackslash ' + item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$") + ' \\\\ \\hline\n'
                     )
                     self._fsu_signals_latex.append(line)
-
 
 
     def get_system_formatted_signals_for_latex(self):
