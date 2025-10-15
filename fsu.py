@@ -190,6 +190,9 @@ class FSU:
     def _create_system_formatted_signals_for_latex(self,fb):
         self._fsu_system_signals_latex.extend(fb.get_formatted_signals_for_latex())
 
+#######################################################################
+
+
     def _create_formatted_signals_for_latexOLD(self):
         if not self._is_signals_for_latex():
             return
@@ -198,6 +201,7 @@ class FSU:
                 self._create_system_formatted_signals_for_latex(fb)
                 continue
             self._fsu_signals_latex.extend(fb.get_formatted_signals_for_latex())
+
 
     def _create_formatted_signals_for_latex(self):
         if not self._is_signals_for_latex():
@@ -209,43 +213,70 @@ class FSU:
                 self._create_system_formatted_signals_for_latex(fb)
 
         # Группировка несистемных FB по (description, name)
-        groups = defaultdict(list)  # ключ: (desc, name), значение: список всех сигналов (dict)
+        groups = defaultdict(list)  # ключ: (desc, name), значение: список функций с их сигналами
 
         for fb in self.fbs:
             if 'СИСТ' in fb.get_fb_name():
                 continue
 
-            # Получаем все сигналы от всех функций этого FB
-            all_statuses = []
-            for func in fb.get_functions():
-                all_statuses.extend(func.get_list_status())
-
-            if not all_statuses:
+            functions = fb.get_functions()
+            if not functions:
                 continue
 
             key = (fb.get_description(), fb.get_fb_name())
-            groups[key].extend(all_statuses)
+            # Сохраняем каждую функцию отдельно с её сигналами
+            for func in functions:
+                func_data = {
+                    'func_description': func.get_description(),  # описание функции
+                    'func_name': func.get_name(),  # название функции
+                    'signals': func.get_list_status()  # сигналы этой функции
+                }
+                groups[key].append(func_data)
 
         # Теперь формируем LaTeX
-        for (desc, name), signals in groups.items():
+        for (desc, name), functions_data in groups.items():
+            #print(desc, name)
             # Заголовок блока
             self._fsu_signals_latex.append('\\rowcolor{gray!15} \n')
             self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{desc} ({name})}} \\\\\n\\hline\n')
 
-            # Сигналы
-            for item in signals:
-                line = (
-                    '\\raggedright ' + item["Полное наименование сигнала latex"].split(":")[1].strip() + ' & '
-                    '\\centering ' + item["Наименование сигналов на ФСУ"] + ' & '
-                    '\\centering ' + item["Дискретные входы"].replace("-", "--").replace("*", r"$\ast$") + ' & '
-                    '\\centering ' + item["Выходные реле"].replace("-", "--").replace("*", r"$\ast$") + ' & '
-                    '\\centering ' + item["Светодиоды"].replace("-", "--").replace("*", r"$\ast$") + ' & '
-                    '\\centering ' + item["ФК"].replace("-", "--").replace("*", r"$\ast$") + ' & '
-                    '\\centering ' + item["РС"].replace("-", "--").replace("*", r"$\ast$") + ' & '
-                    '\\centering ' + item["РАС"].replace("-", "--").replace("*", r"$\ast$") + ' & '
-                    '\\centering \\arraybackslash ' + item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$") + ' \\\\ \\hline\n'
-                )
-                self._fsu_signals_latex.append(line)
+            # Обрабатываем каждую функцию отдельно
+            for func_data in functions_data:
+                func_description = func_data['func_description']
+                func_name = func_data['func_name']
+                signals = func_data['signals']
+                
+                if not signals:
+                    continue
+                    
+                # Добавляем подзаголовок функции (если нужно)
+                if len(functions_data) > 1:  # если в FB больше одной функции
+                    #self._fsu_signals_latex.append('\\hline\n')
+                    #self._fsu_signals_latex.append('\\rowcolor{gray!5} \n')
+                    escaped_func_description = func_description.replace('_', '\\_')
+                    escaped_func_name = func_name.replace('_', '\\_')
+                    self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{c}}{{{{{escaped_func_description} ({escaped_func_name})}}}} \\\\\n\\hline\n')
+                    #self._fsu_signals_latex.append(f'\\multicolumn{{9}}{{l}}{{\\textit{{{func_name}}}}} \\\\\n')
+                
+                # Сигналы текущей функции
+                for item in signals:
+                    line = (
+                        '\\raggedright ' + item["Полное наименование сигнала latex"].split(":")[1].strip() + ' & '
+                        '\\centering ' + item["Наименование сигналов на ФСУ"] + ' & '
+                        '\\centering ' + item["Дискретные входы"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                        '\\centering ' + item["Выходные реле"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                        '\\centering ' + item["Светодиоды"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                        '\\centering ' + item["ФК"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                        '\\centering ' + item["РС"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                        '\\centering ' + item["РАС"].replace("-", "--").replace("*", r"$\ast$") + ' & '
+                        '\\centering \\arraybackslash ' + item["Пуск РАС"].replace("-", "--").replace("*", r"$\ast$") + ' \\\\ \\hline\n'
+                    )
+                    self._fsu_signals_latex.append(line)
+
+
+
+
+
 
     def get_system_formatted_signals_for_latex(self):
         return self._fsu_system_signals_latex
