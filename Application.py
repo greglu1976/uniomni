@@ -10,7 +10,7 @@ from core.SettingBlanc import SettingBlanc
 
 from core.Manual import Manual
 
-from xlsx2fbdata import process_all_xlsx_files
+from utils.xlsx2fbdata import process_all_xlsx_files
 
 class Application:
     def __init__(self):
