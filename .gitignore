@@ -1,10 +1,4 @@
-__pycache__/
-арх/
-venv/
-output/
-latex_build/
-*.pkl
-*.dwl
-*.dwl2
-~$*.doc*
-~$*.dot*
+/venv
+/arch
+/__pycache__
+*/__pycache__

@@ -1,5 +1,5 @@
 
-from Application2 import Application
+from Application import Application
 
 
 if __name__ == "__main__":
