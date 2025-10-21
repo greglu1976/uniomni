@@ -107,3 +107,26 @@ tag v0.4.1fixed - финальный релиз ветки 0.4 core2
 tag v0.5.0
 
 Работа с БД SQLite
+
+**21.10.25**
+tag v0.5.1
+1. Добавлен вывод в конфигурации в бланке уставок второй столбец для входов и выходов как - Слот М1. Реле1 ... 
+Внесены изменения **FBData.py**
+85  self.slot_number = None
+
+390 if self.slot_number is not None and any(keyword in func_name for keyword in ['ДВ', 'Реле']):
+        updated_settings = [
+            (param[0], f'Слот М{self.slot_number}. {func_name}. {param[1]}', *param[2:])
+            for param in settings
+        ]
+    else:
+        updated_settings = settings
+    settings = updated_settings
+
+504
+    def set_slot_number(self, slot_number):
+        self.slot_number = slot_number
+
+Внесены изменения **Modules.py**
+21        obj.set_slot_number(count)
+

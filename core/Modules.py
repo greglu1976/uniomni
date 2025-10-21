@@ -18,6 +18,7 @@ class Modules:
             count += 1
             if module_name != 'х':
                 obj = self.manager.load_fb_data(module_name)
+                obj.set_slot_number(count)
                 self.modules.append({
                     'obj': obj,
                     'slot_number': count,

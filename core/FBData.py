@@ -82,6 +82,7 @@ class FBData:
         self.statuses = [BaseRecord(item) for item in data.get("Status information", [])]
         self.settings = [BaseRecord(item) for item in data.get("Settings", [])]
         self.info = TechInfo(data.get("TechInfo", {}))
+        self.slot_number = None
 
     # 🔧 МЕТОДЫ ДЛЯ РАБОТЫ С ДАННЫМИ
 
@@ -383,10 +384,19 @@ class FBData:
         
         for func_name in self.info.get_function_names():
             settings = self.get_parameters_for_setting_table(func_name)
-            #print(settings)
             if not settings:
                 continue
-                
+
+            if self.slot_number is not None and any(keyword in func_name for keyword in ['ДВ', 'Реле']):
+                updated_settings = [
+                    (param[0], f'Слот М{self.slot_number}. {func_name}. {param[1]}', *param[2:])
+                    for param in settings
+                ]
+            else:
+                updated_settings = settings
+
+            settings = updated_settings
+
             func_description = self.get_func_description_by_name(func_name)
             
             # Определяем категорию по названию функции
@@ -491,10 +501,8 @@ class FBData:
 
 
 
-
-
-
-
+    def set_slot_number(self, slot_number):
+        self.slot_number = slot_number
 
 
 if __name__ == "__main__":
