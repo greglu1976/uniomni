@@ -114,11 +114,6 @@ class Application:
         dpg.create_viewport(title="Omni v0.5.0 10.10.25", width=1215, height=450)
         dpg.setup_dearpygui()
 
-    def set_sum_table_type(self, sender, app_data):
-        """Установка типа суммарной таблицы"""
-        self.sum_table_type = 2 if app_data == "Тип 2" else 1
-        Logger.info(f"Выбран тип суммарной таблицы: {app_data}")
-
     def renew_abbrs_ru(self):
         if self.device is None:
             Logger.error('Устройство не инициализировано!')
@@ -127,7 +122,7 @@ class Application:
             if manual.renew_abbrs_ru()==0:
                 Logger.info('Перечень сокращений в РУ обновлен')
             else:
-                Logger.error('При обновлении перечня сокращений бланка уставок возникли ошибки')               
+                Logger.error('При обновлении перечня сокращений РУ возникли ошибки')               
 
     def renew_abbrs(self):
         if self.device is None:
@@ -162,7 +157,6 @@ class Application:
             manual.renew_sum_table_latex(self.device)
             #self.re_.renew_sum_table_latex(table_type=self.sum_table_type)
             #Logger.info('Суммарная таблица сигналов приложения в РЭ обновлена')
-
 
     def add_to_sqlite(self):
         Logger.info('Запуск задачи обновления БД')
@@ -253,7 +247,6 @@ class Application:
         except Exception as e:
             Logger.error(f"Ошибка при создании устройства: {str(e)}")
             return False
-
 
 
     def run(self):

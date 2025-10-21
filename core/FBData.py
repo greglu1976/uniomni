@@ -383,6 +383,7 @@ class FBData:
         
         for func_name in self.info.get_function_names():
             settings = self.get_parameters_for_setting_table(func_name)
+            #print(settings)
             if not settings:
                 continue
                 
