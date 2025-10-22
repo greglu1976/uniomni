@@ -205,7 +205,8 @@ class Modules:
                 if status.type == 'BOOL':
                     full_desc = status.full_description
                     short_desc_temp = status.short_description.replace('<<', r'\verb|<<|').replace('>>', r'\verb|>>|')
-                    short_desc = f"Слот М{slot_number}. {short_desc_temp}"
+                    node_name = 'Общие сигналы' if status.node_name_rus=='Модуль' else status.node_name_rus # v0.5.1hf1                   
+                    short_desc = f"Слот М{slot_number}. {node_name}. {short_desc_temp}" # v0.5.1hf1
                     digital_input = format_status(status.digital_input)
                     digital_output = format_status(status.digital_output)
                     led = format_status(status.led)

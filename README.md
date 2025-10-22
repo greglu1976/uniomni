@@ -130,3 +130,11 @@ tag v0.5.1
 Внесены изменения **Modules.py**
 21        obj.set_slot_number(count)
 
+**22.10.25**
+tag v0.5.1hf1
+1. Исправление в рендере таблицы суммарных сигналов latex 
+Modules.py line 208
+                    node_name = 'Общие сигналы' if status.node_name_rus=='Модуль' else status.node_name_rus # v0.5.1hf1                   
+                    short_desc = f"Слот М{slot_number}. {node_name}. {short_desc_temp}" # v0.5.1hf1 
+
+                    
