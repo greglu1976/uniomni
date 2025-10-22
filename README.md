@@ -137,4 +137,24 @@ Modules.py line 208
                     node_name = 'Общие сигналы' if status.node_name_rus=='Модуль' else status.node_name_rus # v0.5.1hf1                   
                     short_desc = f"Слот М{slot_number}. {node_name}. {short_desc_temp}" # v0.5.1hf1 
 
-                    
+
+tag v0.5.1hf2
+1. Важное изменение - теперь поиск по тегам %===t1 осуществляется по ВСЕЙ базе данных!   
+FSU.py line 25
+        self.all_fbs_in_db = [] # для всех ФБ
+
+        all_names = self.manager.get_all_device_names()
+        for name in all_names:
+            obj = self.manager.load_fb_data(name)
+            self.all_fbs_in_db.append(obj) 
+line 343 
+        for fb in self.all_fbs_in_db: #self.fbs:  - здесь выборка со всей базы данных , а не из значений в fsu.json
+2. Добавлен вывод в лог ошибки при обнаружении '?' в статусах
+3. Добавлена проверка на None 
+general.py
+line 25
+    if value is None:
+        Logger.error('Пустое значение в столбцах статусов!')
+        return '?'
+4. В FSU.py и Modules.py это отрабатывается с выводом в лог
+5. В fsu.json добавлен ФБ "LVLINAUA" в СВ-2.1

@@ -3,6 +3,7 @@ import html
 from core.SQLiteFBDataManager import SQLiteFBDataManager
 from core.FSUManager import FSUManager
 
+from logger.logger import Logger
 from utils.general import format_status 
 
 class FSU:
@@ -20,6 +21,14 @@ class FSU:
             self.fbs.append(obj)
 
         self.merged_fbs = self._merge_fbs_by_settings() # ФУНКЦИЯ ОБЪЕДИНЕНИЯ ФБ и Функ для блака уставок DOCX - (из -за кривости АРНТ!)
+
+        self.all_fbs_in_db = [] # для всех ФБ
+
+        all_names = self.manager.get_all_device_names()
+        for name in all_names:
+            obj = self.manager.load_fb_data(name)
+            self.all_fbs_in_db.append(obj)        
+
 
         #for fb in self.fbs:
             #print(fb.info.russian_name)
@@ -185,6 +194,15 @@ class FSU:
                 logger = format_status(control.logger)
                 disturber = format_status(control.disturber)
                 start_disturber = format_status(control.start_disturber)
+
+                statuses = [
+                    digital_input, digital_output, led, 
+                    functional_button, logger, disturber, start_disturber
+                ]
+                if any(status == '?' for status in statuses):
+                    Logger.error(f"Обнаружены значения '?' в статусах! {full_desc}")
+
+
                 if control.type == 'BOOL' and control.reserved1 == "button":
                     controls_buttons.append([full_desc, short_desc, digital_input, digital_output, led, functional_button, logger, disturber, start_disturber])
                 else:
@@ -294,6 +312,14 @@ class FSU:
                         disturber = format_status(status.disturber)
                         start_disturber = format_status(status.start_disturber)
 
+                        statuses_for_test = [
+                            digital_input, digital_output, led, 
+                            functional_button, logger, disturber, start_disturber
+                        ]
+                        if any(status == '?' for status in statuses_for_test):
+                            Logger.error(f"Обнаружены значения '?' в статусах: {func_name} / {func_description}")
+
+
                         func_statuses.append([
                             full_desc, short_desc, digital_input, digital_output,
                             led, functional_button, logger, disturber, start_disturber
@@ -314,7 +340,7 @@ class FSU:
     # Генерация таблицы в формате LATEX для подраздела РЭ с выбором функции   
     def get_table_settings_latex(self, func_iec_name, fb_iec_name):
         #print(func_iec_name, fb_iec_name)
-        for fb in self.fbs:
+        for fb in self.all_fbs_in_db: #self.fbs:
             if fb.info.iec61850_name == fb_iec_name:
                 #print(fb.get_all_iec_names())
                 for iec_name in fb.get_all_iec_names():

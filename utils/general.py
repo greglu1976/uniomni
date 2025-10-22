@@ -1,5 +1,6 @@
 # Общие вспомогательные функции
 
+from logger.logger import Logger
 
 def format_status(value):
     """Форматирование числового статуса в символьное представление
@@ -21,5 +22,8 @@ def format_status(value):
         '2': '*',
         '3': '-'  # Символ плюса в кружочке (U+2295)
     }
+    if value is None:
+        Logger.error('Пустое значение в столбцах статусов!')
+        return '?'
     str_value = str(int(float(str(value).strip())))
     return status_mapping.get(str_value, '?')

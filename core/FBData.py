@@ -103,7 +103,7 @@ class FBData:
         all_items = self.controls + self.statuses + self.settings
         return [item for item in all_items if item.node_name_rus == name]
 
-    def find_parameter_by_iecname(self, name: str) -> Optional[BaseRecord]:
+    def find_parameter_by_iecname(self, name: str) -> Optional[BaseRecord]: # ПРОВЕРИТЬ РАБОТОСПОСОБНОСТЬ с LLN0
         """Находит параметр по iec name обработанный столбец Name GEB"""
         all_items = self.statuses + self.settings
         if name == "LLN0":

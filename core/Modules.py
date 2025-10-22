@@ -5,6 +5,8 @@ from core.SQLiteFBDataManager import SQLiteFBDataManager
 
 from utils.general import format_status 
 
+from logger.logger import Logger
+
 class Modules:
     def __init__(self, db_path="fbdata.db", order_code=''):
         self.db_path = db_path
@@ -214,6 +216,14 @@ class Modules:
                     logger = format_status(status.logger)
                     disturber = format_status(status.disturber)
                     start_disturber = format_status(status.start_disturber)
+
+                    statuses_for_test = [
+                        digital_input, digital_output, led, 
+                        fk, logger, disturber, start_disturber
+                    ]
+                    #print(statuses_for_test)
+                    if any(status == '?' for status in statuses_for_test):
+                        Logger.error(f"Обнаружены значения '?' в статусах! {full_desc}")
 
                     statuses.append([full_desc, short_desc, digital_input, digital_output, led, fk, logger, disturber, start_disturber])
 
