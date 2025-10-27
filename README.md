@@ -131,14 +131,14 @@ tag v0.5.1
 21        obj.set_slot_number(count)
 
 **22.10.25**
-tag v0.5.1hf1
+_tag v0.5.1hf1_
 1. Исправление в рендере таблицы суммарных сигналов latex 
 Modules.py line 208
                     node_name = 'Общие сигналы' if status.node_name_rus=='Модуль' else status.node_name_rus # v0.5.1hf1                   
                     short_desc = f"Слот М{slot_number}. {node_name}. {short_desc_temp}" # v0.5.1hf1 
 
 
-tag v0.5.1hf2
+_tag v0.5.1hf2_
 1. Важное изменение - теперь поиск по тегам %===t1 осуществляется по ВСЕЙ базе данных!   
 FSU.py line 25
         self.all_fbs_in_db = [] # для всех ФБ
@@ -158,3 +158,9 @@ line 25
         return '?'
 4. В FSU.py и Modules.py это отрабатывается с выводом в лог
 5. В fsu.json добавлен ФБ "LVLINAUA" в СВ-2.1
+
+
+**27.10.25**
+_tag v0.5.1hf3_
+
+1. Изменен FBData для выдачи уставок заданных в миллисекундах в секунды для бланка уставок docx и РЭ latex

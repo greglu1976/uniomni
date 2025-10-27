@@ -319,16 +319,34 @@ class FBData:
             full_desc = html.escape(par.full_description) #.replace('<<', '«').replace('>>','»')
             short_desc =  html.escape(par.short_description) #.replace('<<', '«').replace('>>','»')
 
-            default_value = self._format_by_step(par.default_value, par.step)
+            # Переводим мс в секунды
+            units = par.units
+            step = par.step
+            default_value = par.default_value
+            min_value = par.min_value
+            max_value = par.max_value
+            if units == 'мс':
+                units = 'с'
+                step = par.step / 1000
+                default_value = par.default_value / 1000
+                min_value = par.min_value / 1000
+                max_value = par.max_value / 1000
 
-            note = self._parse_enum_string_simple(par.note, par.default_value)
+
+            default_value = self._format_by_step(default_value, step)
+            #default_value = self._format_by_step(par.default_value, par.step)
+            note = self._parse_enum_string_simple(par.note, default_value)
+            #note = self._parse_enum_string_simple(par.note, par.default_value)
+
             # Применяем html.escape чтобы заэкранировать <> в ЗИЧ есть например
             default_value = html.escape(note[1]) if par.note else default_value
-            znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(par.min_value, par.step)).replace('.',',') + ' ... ' + (self._format_by_step(par.max_value, par.step)).replace('.',',')
-            units = par.units or '-'
+            #znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(par.min_value, par.step)).replace('.',',') + ' ... ' + (self._format_by_step(par.max_value, par.step)).replace('.',',')
+            znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(min_value, step)).replace('.',',') + ' ... ' + (self._format_by_step(max_value, step)).replace('.',',')
+            units = units or '-'
             if is_symbol:
                 units = '-'
-            step = str(int(float(par.step))) if par.step and float(par.step).is_integer() else str(par.step)
+            #step = str(int(float(par.step))) if par.step and float(par.step).is_integer() else str(par.step)                
+            step = str(int(float(step))) if step and float(step).is_integer() else str(step)
             step = step if (not par.note and not is_symbol) else '-'
             znach_diap = znach_diap if not is_symbol else f'Строка из {znach_diap} символов'
             params_list.append((full_desc, short_desc, znach_diap, units, step.replace('.',','), default_value.replace('.',',')))
@@ -483,23 +501,39 @@ class FBData:
             short_desc = par.short_description.replace('<<', r'\verb|<<|').replace('>>', r'\verb|>>|')
             applied_desc = par.applied_description.replace('<<', r'\verb|<<|').replace('>>', r'\verb|>>|') if par.applied_description else '-'
 
-            default_value = self._format_by_step(par.default_value, par.step)
+            # Переводим мс в секунды
+            units = par.units
+            step = par.step
+            default_value = par.default_value
+            min_value = par.min_value
+            max_value = par.max_value
+            if units == 'мс':
+                units = 'с'
+                step = par.step / 1000
+                default_value = par.default_value / 1000
+                min_value = par.min_value / 1000
+                max_value = par.max_value / 1000
 
-            note = self._parse_enum_string_simple(par.note, par.default_value)
+            #default_value = self._format_by_step(par.default_value, par.step)
+            default_value = self._format_by_step(default_value, step)
+            #note = self._parse_enum_string_simple(par.note, par.default_value)
+            note = self._parse_enum_string_simple(par.note, default_value)
+
             # Применяем html.escape чтобы заэкранировать <> в ЗИЧ есть например
             default_value = html.escape(note[1]) if par.note else default_value
-            znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(par.min_value, par.step)).replace('.',',') + ' ... ' + (self._format_by_step(par.max_value, par.step)).replace('.',',')
-            units = par.units or '-'
+            #znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(par.min_value, par.step)).replace('.',',') + ' ... ' + (self._format_by_step(par.max_value, par.step)).replace('.',',')
+            znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(min_value, step)).replace('.',',') + ' ... ' + (self._format_by_step(max_value, step)).replace('.',',')
+            #units = par.units or '-'
+            units = units or '-'
             if is_symbol:
                 units = '-'
-            step = str(int(float(par.step))) if par.step and float(par.step).is_integer() else str(par.step)
+            #step = str(int(float(par.step))) if par.step and float(par.step).is_integer() else str(par.step)                
+            step = str(int(float(step))) if step and float(step).is_integer() else str(step)
             step = step if (not par.note and not is_symbol) else '-'
             znach_diap = znach_diap if not is_symbol else f'Строка из {znach_diap} символов'
             params_list.append((f'{full_desc} ({short_desc})', applied_desc, znach_diap, units, step.replace('.',','), default_value.replace('.',',')))
 
         return params_list
-
-
 
     def set_slot_number(self, slot_number):
         self.slot_number = slot_number
