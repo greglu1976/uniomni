@@ -39,6 +39,7 @@ class Application:
         
     def setup_gui(self):
         dpg.create_context()
+
         # Подключаем светлую тему
         light_theme = themes.create_theme_imgui_light()
         dpg.bind_theme(light_theme)        
