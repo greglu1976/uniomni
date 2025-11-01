@@ -285,8 +285,10 @@ class FBData:
 
         all_descriptions = '\n'.join(f"{k} = {v}" for k, v in sorted(value_dict.items()))        
         #all_descriptions = '\n '.join(descriptions)
+        #print('value_dict', value_dict, 'default_value', default_value)
         default_description = value_dict.get(default_value, "")
         #print(all_descriptions)
+        #print( '>', enum_str, '>>', all_descriptions, '>>>', default_description, '<<<')
         return all_descriptions, default_description
 
     def _format_by_step(self, value: float, step: float) -> str:
@@ -322,24 +324,32 @@ class FBData:
             # Переводим мс в секунды
             units = par.units
             step = par.step
-            default_value = par.default_value
+            default_value_num = par.default_value
             min_value = par.min_value
             max_value = par.max_value
             if units == 'мс':
                 units = 'с'
                 step = par.step / 1000
-                default_value = par.default_value / 1000
+                default_value_num = par.default_value / 1000
                 min_value = par.min_value / 1000
                 max_value = par.max_value / 1000
 
+            # Форматированное значение для отображения
+            default_value_formatted = self._format_by_step(default_value_num, step)
+            # Для enum передаем ЧИСЛОВОЕ значение
+            default_value_for_enum = int(default_value_num) if default_value_num is not None else 0
+            note = self._parse_enum_string_simple(par.note, int(default_value_for_enum))
 
-            default_value = self._format_by_step(default_value, step)
+            # Выбираем значение по умолчанию: либо из enum, либо форматированное
+            default_value_display = html.escape(note[1]) if par.note else default_value_formatted
+
+            #default_value = self._format_by_step(default_value, step)
             #default_value = self._format_by_step(par.default_value, par.step)
-            note = self._parse_enum_string_simple(par.note, default_value)
+            #note = self._parse_enum_string_simple(par.note, default_value)
             #note = self._parse_enum_string_simple(par.note, par.default_value)
 
             # Применяем html.escape чтобы заэкранировать <> в ЗИЧ есть например
-            default_value = html.escape(note[1]) if par.note else default_value
+            #default_value = html.escape(note[1]) if par.note else default_value
             #znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(par.min_value, par.step)).replace('.',',') + ' ... ' + (self._format_by_step(par.max_value, par.step)).replace('.',',')
             znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(min_value, step)).replace('.',',') + ' ... ' + (self._format_by_step(max_value, step)).replace('.',',')
             units = units or '-'
@@ -349,7 +359,7 @@ class FBData:
             step = str(int(float(step))) if step and float(step).is_integer() else str(step)
             step = step if (not par.note and not is_symbol) else '-'
             znach_diap = znach_diap if not is_symbol else f'Строка из {znach_diap} символов'
-            params_list.append((full_desc, short_desc, znach_diap, units, step.replace('.',','), default_value.replace('.',',')))
+            params_list.append((full_desc, short_desc, znach_diap, units, step.replace('.',','), default_value_display.replace('.',',')))
 
         return params_list
 

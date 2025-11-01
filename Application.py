@@ -112,7 +112,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.5.1hf3 27.10.25", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.5.2 01.11.25", width=1215, height=450)
         dpg.setup_dearpygui()
 
     def renew_abbrs_ru(self):
