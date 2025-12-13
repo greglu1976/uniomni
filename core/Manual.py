@@ -354,7 +354,7 @@ class Manual:
         # Список сигналов ЖЕЛЕЗА
         statuses_list = device.modules.get_statuses_for_latex_sum_table()
         if statuses_list:
-            table.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Дискретные сигналы модулей в составе устройства"}}}}} \\\\\n\\hline\n')
+            table.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Дискретные сигналы блоков в составе устройства"}}}}} \\\\\n\\hline\n')
             for module in device.modules.get_statuses_for_latex_sum_table():
                 table.append('\\rowcolor{gray!15}\n')
                 header = f'\\multicolumn{{9}}{{c}}{{{module["module"]}}} \\\\\n\\hline\n'
