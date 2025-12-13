@@ -183,9 +183,9 @@ class SettingBlanc:
             p.style = 'ДОК Таблица Название'
             add_table_binaries(doc)
 
-        #### МОДУЛЬ ЦП ####
+        #### БЛОК ЦП ####
         if aux_funcs.get_config_cpu():
-            p = doc.add_paragraph('Модуль ЦП')
+            p = doc.add_paragraph('Блок ЦП')
             p.style = 'ДОК Заголовок 2'
 
             p = doc.add_paragraph(r'Резервирование{% set items = aux_funcs.get_config_cpu()["Резервирование"] %}')

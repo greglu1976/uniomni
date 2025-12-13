@@ -466,7 +466,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     par21 = hdr_cells_row2[1].paragraphs[0]
@@ -482,7 +482,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells_row2[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     # первая строка
@@ -492,7 +492,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER    
     par23 = hdr_cells[4].paragraphs[0]
 
@@ -501,7 +501,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
     par24 = hdr_cells[5].paragraphs[0]
 
@@ -510,7 +510,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
     par25 = hdr_cells[6].paragraphs[0]
 
@@ -519,7 +519,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
 
 
@@ -530,7 +530,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей',)
+        second_divider= 'Сигналы от блоков',)
     hdr_cells_row2[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     par14 = hdr_cells_row2[4].paragraphs[0]
 
@@ -539,7 +539,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells_row2[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     par15 = hdr_cells_row2[5].paragraphs[0]
 
@@ -548,7 +548,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells_row2[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     par16 = hdr_cells_row2[6].paragraphs[0]
     add_formatted_dropdown3(
@@ -556,7 +556,7 @@ def add_table_leds_new(doc, statuses, plates_data): # новая таблица 
         inputs_choices=statuses,
         controls_choices = plates_data,
         first_divider= 'Сигналы РЗиА',
-        second_divider= 'Сигналы от модулей')
+        second_divider= 'Сигналы от блоков')
     hdr_cells_row2[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     # пятая строка со служебными тегами
