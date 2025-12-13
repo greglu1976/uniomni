@@ -176,3 +176,5 @@ _tag v0.5.2hf1_
 
 1. Изменена строка рендера в latex Manual.py 
 357 table.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Дискретные сигналы блоков в составе устройства"}}}}} \\\\\n\\hline\n') вместо модулей стало блоков
+2. Modules.py
+210 node_name = 'Общие сигналы' if (status.node_name_rus=='Модуль' or status.node_name_rus=='Блок') else status.node_name_rus # v0.5.1hf1,0.5.2hf1 
