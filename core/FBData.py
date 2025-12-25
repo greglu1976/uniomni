@@ -530,9 +530,11 @@ class FBData:
             note = self._parse_enum_string_simple(par.note, default_value)
 
             # Применяем html.escape чтобы заэкранировать <> в ЗИЧ есть например
-            default_value = html.escape(note[1]) if par.note else default_value
+            #default_value = html.escape(note[1]) if par.note else default_value
+            default_value = note[1] if par.note else default_value # ПОХОЖЕ НЕ ТРЕБУЕТСЯ ЭКРАНИРОВАТЬ ЛАТЕХ! В ЗИЧ проблемы
             #znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(par.min_value, par.step)).replace('.',',') + ' ... ' + (self._format_by_step(par.max_value, par.step)).replace('.',',')
-            znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(min_value, step)).replace('.',',') + ' ... ' + (self._format_by_step(max_value, step)).replace('.',',')
+            #znach_diap = html.escape(note[0]) if par.note else (self._format_by_step(min_value, step)).replace('.',',') + ' ... ' + (self._format_by_step(max_value, step)).replace('.',',')
+            znach_diap = note[0] if par.note else (self._format_by_step(min_value, step)).replace('.',',') + ' ... ' + (self._format_by_step(max_value, step)).replace('.',',')
             #units = par.units or '-'
             units = units or '-'
             if is_symbol:
