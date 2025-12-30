@@ -74,6 +74,32 @@ class Manual:
     def _render_latex_settings_block(self, settings_data, header):
         table = []
         if header is not None and header != "":
+            head_latex = '\\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \\hline \n'
+            table.append(head_latex)
+        
+        for i, row in enumerate(settings_data):
+            # Добавляем \hline перед всеми строками, кроме первой
+            if i > 0:
+                table.append('\\hline\n')
+                
+            str_ = '\\centering '
+            str_ += row[0].replace('_', r'\_')
+            str_ += ' & \\centering '
+            str_ += row[1].replace('-', r'--').replace('_', r'\_')
+            str_ += ' & \\centering '
+            str_ += row[2].replace('\n', r'\\')
+            str_ += ' & \\centering '
+            str_ += row[3].replace('-', r'--').replace('%', r'\%')
+            str_ += ' & \\centering \\arraybackslash '
+            str_ += row[4].replace('-', r'--')
+            str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
+            table.append(str_)
+        
+        return table
+    # Старая функция - добавляет hline после последней строки 30.12.25 Вынесена в архив
+    def _render_latex_settings_blockOLD(self, settings_data, header):
+        table = []
+        if header is not None and header != "":
             head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \hline \n'
             table.append(head_latex)
         for row in settings_data:
@@ -89,9 +115,12 @@ class Manual:
             str_ += row[4].replace('-', r'--')
             str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
             table.append(str_)  # Добавляем строку таблицы
+            #print(str_)
             table.append('\\hline\n')  # Добавляем \hline отдельным элементом
         #print(table)
         return table
+    ########################################################################################
+
 
     def _parse_start_tag(self, tag_line):
         """
