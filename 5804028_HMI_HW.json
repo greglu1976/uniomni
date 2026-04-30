@@ -1,0 +1,416 @@
+{
+  "Buttons":[
+    {
+      "Name":"Функциональная кнопка 1",
+      "Value":33025,
+      "Status":"HMI_Button1_Status",
+      "Description":"HMI_Button1_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 2",
+      "Value":33026,
+      "Status":"HMI_Button2_Status",
+      "Description":"HMI_Button2_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 3",
+      "Value":33027,
+      "Status":"HMI_Button3_Status",
+      "Description":"HMI_Button3_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 4",
+      "Value":33028,
+      "Status":"HMI_Button4_Status",
+      "Description":"HMI_Button4_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 5",
+      "Value":33029,
+      "Status":"HMI_Button5_Status",
+      "Description":"HMI_Button5_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 6",
+      "Value":33030,
+      "Status":"HMI_Button6_Status",
+      "Description":"HMI_Button6_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 7",
+      "Value":33031,
+      "Status":"HMI_Button7_Status",
+      "Description":"HMI_Button7_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 8",
+      "Value":33032,
+      "Status":"HMI_Button8_Status",
+      "Description":"HMI_Button8_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 9",
+      "Value":33033,
+      "Status":"HMI_Button9_Status",
+      "Description":"HMI_Button9_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 10",
+      "Value":33034,
+      "Status":"HMI_Button10_Status",
+      "Description":"HMI_Button10_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 11",
+      "Value":33035,
+      "Status":"HMI_Button11_Status",
+      "Description":"HMI_Button11_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 12",
+      "Value":33036,
+      "Status":"HMI_Button12_Status",
+      "Description":"HMI_Button12_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 13",
+      "Value":33037,
+      "Status":"HMI_Button13_Status",
+      "Description":"HMI_Button13_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 14",
+      "Value":33038,
+      "Status":"HMI_Button14_Status",
+      "Description":"HMI_Button14_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 15",
+      "Value":33039,
+      "Status":"HMI_Button15_Status",
+      "Description":"HMI_Button15_Description"
+    },
+    {
+      "Name":"Функциональная кнопка 16",
+      "Value":33040,
+      "Status":"HMI_Button16_Status",
+      "Description":"HMI_Button16_Description"
+    }
+  ],
+  "Leds":[
+    {
+      "Name":"Светодиод 1",
+      "Value":16897,
+      "Status":"HMI_LED1_Status",
+      "Description":"HMI_LED1_Description",
+      "Fixation":"HMI_LED1_Fixation",
+      "Color":"HMI_LED1_Color"
+    },
+    {
+      "Name":"Светодиод 2",
+      "Value":16898,
+      "Status":"HMI_LED2_Status",
+      "Description":"HMI_LED2_Description",
+      "Fixation":"HMI_LED2_Fixation",
+      "Color":"HMI_LED2_Color"
+    },
+    {
+      "Name":"Светодиод 3",
+      "Value":16899,
+      "Status":"HMI_LED3_Status",
+      "Description":"HMI_LED3_Description",
+      "Fixation":"HMI_LED3_Fixation",
+      "Color":"HMI_LED3_Color"
+    },
+    {
+      "Name":"Светодиод 4",
+      "Value":16900,
+      "Status":"HMI_LED4_Status",
+      "Description":"HMI_LED4_Description",
+      "Fixation":"HMI_LED4_Fixation",
+      "Color":"HMI_LED4_Color"
+    },
+    {
+      "Name":"Светодиод 5",
+      "Value":16901,
+      "Status":"HMI_LED5_Status",
+      "Description":"HMI_LED5_Description",
+      "Fixation":"HMI_LED5_Fixation",
+      "Color":"HMI_LED5_Color"
+    },
+    {
+      "Name":"Светодиод 6",
+      "Value":16902,
+      "Status":"HMI_LED6_Status",
+      "Description":"HMI_LED6_Description",
+      "Fixation":"HMI_LED6_Fixation",
+      "Color":"HMI_LED6_Color"
+    },
+    {
+      "Name":"Светодиод 7",
+      "Value":16903,
+      "Status":"HMI_LED7_Status",
+      "Description":"HMI_LED7_Description",
+      "Fixation":"HMI_LED7_Fixation",
+      "Color":"HMI_LED7_Color"
+    },
+    {
+      "Name":"Светодиод 8",
+      "Value":16904,
+      "Status":"HMI_LED8_Status",
+      "Description":"HMI_LED8_Description",
+      "Fixation":"HMI_LED8_Fixation",
+      "Color":"HMI_LED8_Color"
+    },
+    {
+      "Name":"Светодиод 9",
+      "Value":16905,
+      "Status":"HMI_LED9_Status",
+      "Description":"HMI_LED9_Description",
+      "Fixation":"HMI_LED9_Fixation",
+      "Color":"HMI_LED9_Color"
+    },
+    {
+      "Name":"Светодиод 10",
+      "Value":16906,
+      "Status":"HMI_LED10_Status",
+      "Description":"HMI_LED10_Description",
+      "Fixation":"HMI_LED10_Fixation",
+      "Color":"HMI_LED10_Color"
+    },
+    {
+      "Name":"Светодиод 11",
+      "Value":16907,
+      "Status":"HMI_LED11_Status",
+      "Description":"HMI_LED11_Description",
+      "Fixation":"HMI_LED11_Fixation",
+      "Color":"HMI_LED11_Color"
+    },
+    {
+      "Name":"Светодиод 12",
+      "Value":16908,
+      "Status":"HMI_LED12_Status",
+      "Description":"HMI_LED12_Description",
+      "Fixation":"HMI_LED12_Fixation",
+      "Color":"HMI_LED12_Color"
+    },
+    {
+      "Name":"Светодиод 13",
+      "Value":16909,
+      "Status":"HMI_LED13_Status",
+      "Description":"HMI_LED13_Description",
+      "Fixation":"HMI_LED13_Fixation",
+      "Color":"HMI_LED13_Color"
+    },
+    {
+      "Name":"Светодиод 14",
+      "Value":16910,
+      "Status":"HMI_LED14_Status",
+      "Description":"HMI_LED14_Description",
+      "Fixation":"HMI_LED14_Fixation",
+      "Color":"HMI_LED14_Color"
+    },
+    {
+      "Name":"Светодиод 15",
+      "Value":16911,
+      "Status":"HMI_LED15_Status",
+      "Description":"HMI_LED15_Description",
+      "Fixation":"HMI_LED15_Fixation",
+      "Color":"HMI_LED15_Color"
+    },
+    {
+      "Name":"Светодиод 16",
+      "Value":16912,
+      "Status":"HMI_LED16_Status",
+      "Description":"HMI_LED16_Description",
+      "Fixation":"HMI_LED16_Fixation",
+      "Color":"HMI_LED16_Color"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 1",
+      "Value":16641,
+      "Status":"HMI_Button1_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 2",
+      "Value":16642,
+      "Status":"HMI_Button2_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 3",
+      "Value":16643,
+      "Status":"HMI_Button3_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 4",
+      "Value":16644,
+      "Status":"HMI_Button4_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 5",
+      "Value":16645,
+      "Status":"HMI_Button5_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 6",
+      "Value":16646,
+      "Status":"HMI_Button6_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 7",
+      "Value":16647,
+      "Status":"HMI_Button7_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 8",
+      "Value":16648,
+      "Status":"HMI_Button8_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 9",
+      "Value":16649,
+      "Status":"HMI_Button9_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 10",
+      "Value":16650,
+      "Status":"HMI_Button10_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 11",
+      "Value":16651,
+      "Status":"HMI_Button11_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 12",
+      "Value":16652,
+      "Status":"HMI_Button12_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 13",
+      "Value":16653,
+      "Status":"HMI_Button13_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 14",
+      "Value":16654,
+      "Status":"HMI_Button14_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 15",
+      "Value":16655,
+      "Status":"HMI_Button15_LEDStatus"
+    },
+    {
+      "Name":"Светодиод функциональной кнопки 16",
+      "Value":16656,
+      "Status":"HMI_Button16_LEDStatus"
+    }
+  ],
+  "ButtonToLedRelations": [
+    {
+        "Button" : 33025,
+        "Led" : 16641
+    },
+    {
+        "Button" : 33026,
+        "Led" : 16642
+    },
+    {
+        "Button" : 33027,
+        "Led" : 16643
+    },
+    {
+        "Button" : 33028,
+        "Led" : 16644
+    },
+    {
+        "Button" : 33029,
+        "Led" : 16645
+    },
+    {
+        "Button" : 33030,
+        "Led" : 16646
+    },
+    {
+        "Button" : 33031,
+        "Led" : 16647
+    },
+    {
+        "Button" : 33032,
+        "Led" : 16648
+    },
+    {
+        "Button" : 33033,
+        "Led" : 16649
+    },
+    {
+        "Button" : 33034,
+        "Led" : 16650
+    },
+    {
+        "Button" : 33035,
+        "Led" : 16651
+    },
+    {
+        "Button" : 33036,
+        "Led" : 16652
+    },
+    {
+        "Button" : 33037,
+        "Led" : 16653
+    },
+    {
+        "Button" : 33038,
+        "Led" : 16654
+    },
+    {
+        "Button" : 33039,
+        "Led" : 16655
+    },
+    {
+        "Button" : 33040,
+        "Led" : 16656
+    }
+  ],
+  "ButtonsScenarios":[
+    {
+      "Name":"Установка в 0",
+      "Value":0
+    },
+    {
+      "Name":"Установка в 1",
+      "Value":1
+    },
+    {
+      "Name":"Состояние кнопки",
+      "Value":2
+    },
+    {
+      "Name":"Инвертировать",
+      "Value":3
+    }
+  ],
+  "LedsScenarios":[
+    {
+      "Name":"Без фиксации",
+      "Value":1
+    },
+    {
+      "Name":"С фиксацией",
+      "Value":2
+    }
+  ],
+  "LedsColors":[
+    {
+      "Name":"Красный",
+      "Hex":"#FF0000",
+      "Value":1
+    },
+    {
+      "Name":"Зеленый",
+      "Hex":"#008000",
+      "Value":2
+    }
+  ]
+}

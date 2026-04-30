@@ -6,7 +6,7 @@ from logger.logger import Logger
 
 from core.Device import Device
 from core.DeviceDataManager import DeviceDataManager
-from core.SettingBlanc import SettingBlanc
+from core.SettingBlanc2 import SettingBlanc
 
 from core.Manual import Manual
 
@@ -112,7 +112,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.5.3 30.12.25", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.6.0 30.04.26", width=1215, height=450)
         dpg.setup_dearpygui()
 
     def renew_abbrs_ru(self):

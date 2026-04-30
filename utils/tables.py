@@ -918,3 +918,106 @@ def add_table_final(doc): # новая таблица исходящих отч�
 
 
     return table 
+
+
+
+table_settings_core4 = (Inches(0.25), Inches(1.6), Inches(1.1), Inches(1.6), Inches(0.45), Inches(0.45), Inches(1.4), Inches(1), Inches(1), Inches(1), Inches(1)) 
+
+def add_table_settings_core4(doc):
+    """
+    Создает таблицу уставок для Core4
+    """
+    table = doc.add_table(rows=2, cols=11)
+    table.style = 'Сетка таблицы51'
+    table.allow_autofit = False
+    set_table_borders(table)
+    
+    # Устанавливаем фиксированный макет таблицы
+    tbl_pr = table._tbl.xpath('./w:tblPr')[0]
+    # Удаляем старый tblLayout если есть, чтобы избежать дублирования
+    for elem in tbl_pr.xpath('./w:tblLayout'):
+        tbl_pr.remove(elem)
+    
+    tbl_pr.append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+    
+
+
+    # --- ЗАПОЛНЕНИЕ ЗАГОЛОВКОВ ---
+    
+    # ПЕРВАЯ СТРОКА ЗАГОЛОВКА
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = '№'
+    hdr_cells[1].text = 'Наименование'
+    hdr_cells[3].text = 'Значение / Диапазон'
+    hdr_cells[4].text = 'Ед. изм.'
+    hdr_cells[5].text = 'Шаг'   
+    hdr_cells[6].text = 'Значение по умолчанию'
+    hdr_cells[7].text = 'Группы уставок'
+
+
+    # Настраиваем стиль и выравнивание
+    # Индексы, которые должны быть по ЦЕНТРУ: 
+    # 0 (№), 1 (Наименование), 3 (Значение), 4 (Ед.изм), 5 (Шаг), 6 (По умолч.), 7 (Группы)
+
+    for i in range(0,10):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+
+    set_repeat_table_header(table.rows[0])
+
+    # ВТОРАЯ СТРОКА ЗАГОЛОВКА (подзаголовки)
+    hdr_cells_2 = table.rows[1].cells
+    hdr_cells_2[1].text = 'ПО ЮС'
+    hdr_cells_2[2].text = 'ИЧМ'
+    hdr_cells_2[7].text = '1'
+    hdr_cells_2[8].text = '2'
+    hdr_cells_2[9].text = '3'
+    hdr_cells_2[10].text = '4'
+    
+    # Выравнивание для второй строки
+    for idx in [1, 2, 3, 7, 8, 9, 10]:
+        hdr_cells_2[idx].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # --- СЛИЯНИЕ ЯЧЕЕК ---
+    # Важно: порядок слияния может иметь значение. Обычно лучше сливать сверху вниз или слева направо.
+    table.cell(0, 1).merge(table.cell(0, 2))       # Наименование (охватывает кол 1 и 2)
+    table.cell(0, 0).merge(table.cell(1, 0))       # № (вертикальное слияние)
+    table.cell(0, 3).merge(table.cell(1, 3))       # Значение (вертикальное)
+    table.cell(0, 4).merge(table.cell(1, 4))       # Ед. изм. (вертикальное)
+    table.cell(0, 5).merge(table.cell(1, 5))       # Шаг (вертикальное)
+    table.cell(0, 6).merge(table.cell(1, 6))       # По умолчанию (вертикальное)
+    table.cell(0, 7).merge(table.cell(0, 10))      # Группы уставок (горизонтальное слияние 7-10)
+
+
+    # --- УСТАНОВКА ШИРИНЫ СТОЛБЦОВ (КЛЮЧЕВОЕ ИЗМЕНЕНИЕ) ---
+    # Вместо установки ширины каждой ячейке, устанавливаем ширину каждому столбцу.
+    # Это работает корректно даже при фиксированном макете и слияниях.
+    for col_idx, width in enumerate(table_settings_core4):
+        # Получаем объект столбца
+        column = table.columns[col_idx]
+        # Устанавливаем ширину столбца
+        column.width = width
+        
+        # Дополнительно можно продублировать установку ширины для первой ячейки столбца,
+        # так как некоторые версии Word/библиотек лучше реагируют на cell.width
+        # Но column.width является основным драйвером при fixed layout.
+        try:
+            table.cell(0, col_idx).width = width
+        except IndexError:
+            pass # Если ячейка была удалена из-за слияния, пропускаем
+
+
+    # --- УСТАНОВКА ШРИФТА ---
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)
+
+
+    return table
