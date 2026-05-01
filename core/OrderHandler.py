@@ -20,6 +20,8 @@ class OrderHandler:
         self.mapping = {}
         self._create_mapping_from_structure()
 
+        self.fsu_signals = []
+        self.fsu_di_signals = []
     def _extrude_settings_group1(self):
         """Извлекает структуру 'Группа уставок 1' из JSON"""
         for root_node in self.data:
@@ -332,4 +334,44 @@ class OrderHandler:
         return self.settings_group1
     def get_mapping(self):
         return self.mapping
+
+
+    # возвращает список дискретных сигналов 
+    def get_fsu_signals(self):
+        if self.fsu_signals:
+            return self.fsu_signals
+
+        gen_signals = []
+        for data in self.data:
+            if data["Name"] == "MeasurementsTree":
+                m = data["Nodes"]
+                for node in m:
+                    if node["Name"] == "Сигналы функциональной логики":
+                        n = node["Nodes"]
+                        for o in n:
+                            if o["Name"] == "Общие сигналы ФС":
+                                gen_signals = o["Nodes"]
+
+        pass_data = ["GOOSE", "HMI_", "FB_", "BitTest_"] # не выдаем сигналы с такими префиксмаи
         
+        
+        for signal in gen_signals:
+
+            sig_data = self.config_handler.get_param_info(signal["Name"])
+            if "DI_" in sig_data["name"]:
+                self.fsu_di_signals.append(sig_data)
+                continue
+
+            if sig_data["command"] == True or sig_data["size"]!=1:
+                continue
+                # Проверяем, начинается ли имя с любого из префиксов
+            if any(signal["Name"].startswith(prefix) for prefix in pass_data):
+                continue
+            if "HMI" in signal["Name"] or "ACS" in signal["Name"] or "APCSRst" in signal["Name"]:
+                continue
+            if signal["Name"] in ["IRF", "Test", "Test_blocked", "Loc", "cError", "ncError"]:
+                continue
+
+            self.fsu_signals.append(sig_data)
+
+        return self.fsu_signals, self.fsu_di_signals
