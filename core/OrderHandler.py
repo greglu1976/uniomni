@@ -342,9 +342,9 @@ class OrderHandler:
 
 
     # возвращает список дискретных сигналов 
-    def _drag_gen_sigs_of_func_logic(self):
+    def _drag_gen_sigs_of_func_logic(self, tree_name = "MeasurementsTree"):
         for data in self.data:
-            if data["Name"] == "MeasurementsTree":
+            if data["Name"] == tree_name:
                 m = data["Nodes"]
                 for node in m:
                     if node["Name"] == "Сигналы функциональной логики":
@@ -391,37 +391,108 @@ class OrderHandler:
     def get_fsu_out_signals(self):
         if self.fsu_out_signals:
             return self.fsu_out_signals
-        if not self.general_sigs_of_func_logic or self.general_sigs_of_func_logic==[]:
-            self._drag_gen_sigs_of_func_logic()
 
-        sigs_list = []
-        for o in self.general_sigs_of_func_logic:
-            if o["Name"] != "Общие сигналы ФС":
-                sigs_list.append(o)
-                
+        # Находим "Сигналы функциональной логики"
+        sigs_of_func_logic = []
+        for data in self.data:
+            if data["Name"] == "DigitalSignalsTree":
+                m = data["Nodes"]
+                for node in m:
+                    if node["Name"] == "Сигналы функциональной логики":
+                        sigs_of_func_logic = node["Nodes"]
+                        break
+                break
 
-        for signal in sigs_list:
+    def get_fsu_out_signals(self):
+        if self.fsu_out_signals:
+            return self.fsu_out_signals
 
-            sig_data = self.config_handler.find_parameters_by_rus_name(signal["Name"].split("_")[0])
-            if signal["Name"].startswith("ВКл:") or signal["Name"].startswith("GOOSE") or signal["Name"].startswith("ВКн:"):
+        # Находим "Сигналы функциональной логики"
+        sigs_of_func_logic = []
+        for data in self.data:
+            if data["Name"] == "DigitalSignalsTree":
+                m = data["Nodes"]
+                for node in m:
+                    if node["Name"] == "Сигналы функциональной логики":
+                        sigs_of_func_logic = node["Nodes"]
+                        break
+                break
+
+        def collect_subfunctions(nodes):
+            """Рекурсивно собирает подфункции с их параметрами"""
+            subfunctions = []
+            
+            for node in nodes:
+                if node.get("Type") == "Group":
+                    # Собираем параметры только для этой конкретной группы
+                    params_data = []
+                    for child in node.get("Nodes", []):
+                        if child.get("Type") == "Parameter":
+                            t = self.config_handler.get_param_info(child["Name"])
+                            if t.get("size") == 1:
+                                params_data.append(t.get("appliedDescription", ""))
+                        elif child.get("Type") == "Group":
+                            # Если внутри есть вложенные группы, рекурсивно собираем их
+                            params_data.extend(collect_flat_params(child))
+                    
+                    subfunctions.append({
+                        "name": node["Name"],
+                        "data": params_data
+                    })
+            
+            return subfunctions
+
+        def collect_flat_params(node):
+            """Собирает параметры из узла и всех его вложенных групп (плоский список)"""
+            params = []
+            for child in node.get("Nodes", []):
+                if child.get("Type") == "Parameter":
+                    t = self.config_handler.get_param_info(child["Name"])
+                    if t.get("size") == 1:
+                        params.append(t.get("appliedDescription", ""))
+                elif child.get("Type") == "Group":
+                    params.extend(collect_flat_params(child))
+            return params
+
+        # Словарь для группировки по функциям
+        functions_dict = {}
+
+        for signal in sigs_of_func_logic:
+            signal_name = signal.get("Name", "")
+            
+            # Пропускаем ненужные сигналы
+            if (signal_name == "Общие сигналы ФС" or 
+                "GOOSE" in signal_name or 
+                "ВКл:" in signal_name or 
+                "ВКн:" in signal_name):
                 continue
 
-            _sig = []
-            for sig in sig_data:
-                t = self.config_handler.get_param_info(sig)
-                if t["group"]!="setting" and t["size"]==1:# and "_" not in t["appliedDescription"] and "_operOutFunction" not in t["name"]:
-                    #print(t)#["appliedDescription"])
-                    _sig.append(t)#["appliedDescription"])
+            function_name = signal_name.split("_")[0]
 
-            dic = { # Здесь можно дополнить полным обозначением функции - ключ указать еще один
-                signal["Name"].split("_")[0] : _sig,
+            # Собираем подфункции
+            subfunctions = []
+            if "Nodes" in signal:
+                for node in signal["Nodes"]:
+                    if node.get("Type") == "Group":
+                        # Собираем параметры для этой подгруппы
+                        params_data = collect_flat_params(node)
+                        subfunctions.append({
+                            "name": node["Name"],
+                            "data": params_data
+                        })
 
-            }
+            # Группируем
+            if function_name not in functions_dict:
+                functions_dict[function_name] = {
+                    "function": function_name,
+                    "subfunctions": []
+                }
+            
+            # Добавляем найденные подфункции
+            functions_dict[function_name]["subfunctions"].extend(subfunctions)
 
-            self.fsu_out_signals.append(dic)
-
+        self.fsu_out_signals = list(functions_dict.values())
         return self.fsu_out_signals
-
 
 
 

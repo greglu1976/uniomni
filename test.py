@@ -17,6 +17,4 @@ for sig in di_sigs:
     #print(sig["appliedDescription"], sig["name"])
 
 sigs = order_data.get_fsu_out_signals()
-for sig in sigs:
-    if "КРВ" in sig:
-        print(sig["КРВ"])
+print(sigs)
