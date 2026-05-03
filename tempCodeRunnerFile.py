@@ -1,2 +1,2 @@
 
-    pass
+    #print(sig["appliedDescription"], sig["name"])

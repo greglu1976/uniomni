@@ -406,8 +406,16 @@ class OrderHandler:
             if signal["Name"].startswith("ВКл:") or signal["Name"].startswith("GOOSE") or signal["Name"].startswith("ВКн:"):
                 continue
 
-            dic = {
-                signal["Name"].split("_")[0] : sig_data
+            _sig = []
+            for sig in sig_data:
+                t = self.config_handler.get_param_info(sig)
+                if t["group"]!="setting" and t["size"]==1:# and "_" not in t["appliedDescription"] and "_operOutFunction" not in t["name"]:
+                    #print(t)#["appliedDescription"])
+                    _sig.append(t)#["appliedDescription"])
+
+            dic = { # Здесь можно дополнить полным обозначением функции - ключ указать еще один
+                signal["Name"].split("_")[0] : _sig,
+
             }
 
             self.fsu_out_signals.append(dic)
