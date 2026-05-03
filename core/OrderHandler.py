@@ -22,6 +22,11 @@ class OrderHandler:
 
         self.fsu_signals = []
         self.fsu_di_signals = []
+        self.fsu_out_signals = []
+
+
+        self.general_sigs_of_func_logic = [] # Общие сигналы функциональной логики вытащенные из GROUPING
+
     def _extrude_settings_group1(self):
         """Извлекает структуру 'Группа уставок 1' из JSON"""
         for root_node in self.data:
@@ -337,20 +342,27 @@ class OrderHandler:
 
 
     # возвращает список дискретных сигналов 
-    def get_fsu_signals(self):
-        if self.fsu_signals:
-            return self.fsu_signals
-
-        gen_signals = []
+    def _drag_gen_sigs_of_func_logic(self):
         for data in self.data:
             if data["Name"] == "MeasurementsTree":
                 m = data["Nodes"]
                 for node in m:
                     if node["Name"] == "Сигналы функциональной логики":
-                        n = node["Nodes"]
-                        for o in n:
-                            if o["Name"] == "Общие сигналы ФС":
-                                gen_signals = o["Nodes"]
+                        self.general_sigs_of_func_logic = node["Nodes"]
+                        break
+
+    def get_fsu_signals(self):
+        if self.fsu_signals:
+            return self.fsu_signals
+
+        if not self.general_sigs_of_func_logic or self.general_sigs_of_func_logic==[]:
+            self._drag_gen_sigs_of_func_logic()
+
+        gen_signals = []
+        
+        for o in self.general_sigs_of_func_logic:
+            if o["Name"] == "Общие сигналы ФС":
+                gen_signals = o["Nodes"]
 
         pass_data = ["GOOSE", "HMI_", "FB_", "BitTest_"] # не выдаем сигналы с такими префиксмаи
         
@@ -375,3 +387,34 @@ class OrderHandler:
             self.fsu_signals.append(sig_data)
 
         return self.fsu_signals, self.fsu_di_signals
+    
+    def get_fsu_out_signals(self):
+        if self.fsu_out_signals:
+            return self.fsu_out_signals
+        if not self.general_sigs_of_func_logic or self.general_sigs_of_func_logic==[]:
+            self._drag_gen_sigs_of_func_logic()
+
+        sigs_list = []
+        for o in self.general_sigs_of_func_logic:
+            if o["Name"] != "Общие сигналы ФС":
+                sigs_list.append(o)
+                
+
+        for signal in sigs_list:
+
+            sig_data = self.config_handler.find_parameters_by_rus_name(signal["Name"].split("_")[0])
+            if signal["Name"].startswith("ВКл:") or signal["Name"].startswith("GOOSE") or signal["Name"].startswith("ВКн:"):
+                continue
+
+            dic = {
+                signal["Name"].split("_")[0] : sig_data
+            }
+
+            self.fsu_out_signals.append(dic)
+
+        return self.fsu_out_signals
+
+
+
+
+ 
