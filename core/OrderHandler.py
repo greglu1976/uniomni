@@ -496,4 +496,35 @@ class OrderHandler:
 
 
 
- 
+    # Собираем данные по платам в слотах
+    def get_slots_data(self):
+        sigs_of_func_logic = []
+        for data in self.data:
+            if data["Name"] == "DigitalSignalsTree":
+                m = data["Nodes"]
+                for node in m:
+                    if "Слот" in node["Name"]:
+                        #print(node["Name"])
+                        sigs = node["Nodes"]
+                        #print(sigs)
+                        
+                        # Extract only parameter names
+                        param_names = []
+                        for item in sigs:
+                            if item["Type"] == "Parameter":
+                                param_names.append(item["Name"])
+                            elif item["Type"] == "Group" and "Nodes" in item:
+                                # If there are nested parameters in groups
+                                for nested in item["Nodes"]:
+                                    if nested["Type"] == "Parameter":
+                                        param_names.append(nested["Name"])
+                        
+                        a = {
+                            node["Name"]: param_names
+                        }
+                        sigs_of_func_logic.append(a)
+                        
+                break
+        
+        return sigs_of_func_logic
+            

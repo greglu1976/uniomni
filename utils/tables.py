@@ -942,8 +942,6 @@ def add_table_settings_core4(doc):
         parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
     )
     
-
-
     # --- ЗАПОЛНЕНИЕ ЗАГОЛОВКОВ ---
     
     # ПЕРВАЯ СТРОКА ЗАГОЛОВКА
@@ -1019,5 +1017,200 @@ def add_table_settings_core4(doc):
                 for run in paragraph.runs:
                     run.font.size = Pt(10)
 
+    return table
+
+
+
+####################################################################################
+############################ ТАБЛИЦА ДЛЯ МАТРИЦЫ ДИСКРЕТНЫХ ВХОДОВ ###############
+####################################################################################
+
+
+# Константа ширины колонок
+TABLE_WIDTHS_MTRX_INS_CORE4 = (Inches(2), Inches(4))
+
+def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, sigs, di_sigs):
+    """
+    Создает статическую таблицу для одного слота без использования Jinja2.
+    
+    :param doc: Объект Document
+    :param slot_name: Имя слота (для заголовка или контекста)
+    :param inputs_list: Список описаний входов (например, ['Слот M8. ДВ1', ...])
+    :param sigs: Список доступных сигналов для dropdown (из get_fsu_signals)
+    :param di_sigs: Список дискретных сигналов (если нужно разделить логику)
+    :return: Объект Table
+    """
+    
+    if not inputs_list:
+        return None
+
+    # Создаем таблицу: 1 строка заголовка + N строк данных
+    num_rows = len(inputs_list) + 1
+    table = doc.add_table(rows=num_rows, cols=2)
+    table.style = 'Стиль6'
+    table.allow_autofit = False
+
+    # Фиксируем макет таблицы
+    try:
+        tbl_pr = table._tbl.xpath('./w:tblPr')[0]
+        tbl_layout = parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+        tbl_pr.append(tbl_layout)
+    except Exception:
+        pass # Игнорируем ошибки настройки XML, если таблица простая
+
+    # --- СТРОКА 0: ЗАГОЛОВКИ ---
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Дискретный вход'
+    hdr_cells[1].text = 'Назначенный сигнал'
+
+    for i in range(2):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        # Если функция доступна
+        if 'set_cell_vertical_alignment' in globals():
+            set_cell_vertical_alignment(hdr_cells[i], align="center")
+
+    # Настройка повторения заголовка (если поддерживается)
+    if 'set_repeat_table_header' in globals():
+        set_repeat_table_header(table.rows[0])
+
+    # --- ЗАПОЛНЕНИЕ ДАННЫХ ---
+    for idx, input_desc in enumerate(inputs_list):
+        row_idx = idx + 1
+        row_cells = table.rows[row_idx].cells
+        
+        # Левая ячейка: Описание входа
+        row_cells[0].text = input_desc
+        p_left = row_cells[0].paragraphs[0]
+        p_left.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT # Или CENTER, по вкусу
+        # Можно задать стиль для обычных ячеек, если нужно
+        # p_left.style = 'Normal'
+
+        # Правая ячейка: Выпадающий список / Элемент управления
+        par_right = row_cells[1].paragraphs[0]
+        
+        # Вызываем вашу функцию добавления dropdown
+        # Предполагаем, что она модифицирует paragraph на месте
+        if 'add_formatted_dropdown3' in globals():
+            add_formatted_dropdown3(
+                paragraph=par_right,
+                inputs_choices=sigs,      # Передаем общие сигналы
+                controls_choices=di_sigs, # Передаем дискретные сигналы
+            )
+        else:
+            # Заглушка, если функции нет
+            par_right.text = "[Нет сигнала]"
+            
+        par_right.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # --- НАСТРОЙКА ШИРИНЫ КОЛОНОК ---
+    for row in table.rows:
+        try:
+            row.cells[0].width = TABLE_WIDTHS_MTRX_INS_CORE4[0]
+            row.cells[1].width = TABLE_WIDTHS_MTRX_INS_CORE4[1]
+        except Exception:
+            pass
+
+    return table
+
+
+
+
+# Ширина колонок для таблицы выходов: [Имя реле, Сигнал 1, Сигнал 2, ..., Сигнал 5]
+TABLE_WIDTHS_OUTS = (Inches(2), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7))
+
+def add_table_mtrx_outs_core4(doc, outputs_list, sigs_list):
+    """
+    Создает статическую таблицу параметрирования выходных реле.
+    Каждая строка - одно реле.
+    Колонки: Имя реле + 5 колонок с dropdown для выбора сигналов.
+    """
+    if not outputs_list:
+        return
+    
+    num_rows = len(outputs_list) + 2  # 2 строки заголовка + данные
+    table = doc.add_table(rows=num_rows, cols=6)
+    table.style = 'Стиль6'
+    table.allow_autofit = False
+
+    # Фиксируем макет
+    try:
+        tbl_pr = table._tbl.xpath('./w:tblPr')[0]
+        tbl_layout = parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+        tbl_pr.append(tbl_layout)
+    except Exception:
+        pass
+
+    # --- СТРОКА 0: ГЛАВНЫЕ ЗАГОЛОВКИ ---
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Выходное реле'
+    hdr_cells[1].text = 'Назначенные сигналы'
+
+    for i in range(0, 6):
+        p = hdr_cells[i].paragraphs[0]
+        try: p.style = 'ДОК Таблица Заголовок'
+        except: pass
+        if 'set_cell_vertical_alignment' in globals():
+            set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # --- СТРОКА 1: ПОДЗАГОЛОВКИ (номера 1-5) ---
+    hdr_cells2 = table.rows[1].cells
+    hdr_cells2[1].text = '1'
+    hdr_cells2[2].text = '2'
+    hdr_cells2[3].text = '3'
+    hdr_cells2[4].text = '4'
+    hdr_cells2[5].text = '5'
+    
+    for i in range(1, 6):
+        p = hdr_cells2[i].paragraphs[0]
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        try: p.style = 'ДОК Таблица Заголовок'
+        except: pass
+        if 'set_cell_vertical_alignment' in globals():
+            set_cell_vertical_alignment(hdr_cells2[i], align="center")
+
+    # --- ОБЪЕДИНЕНИЕ ЯЧЕЕК ---
+    # Объединяем "Выходное реле" вертикально (строка 0 и строка 1)
+    table.cell(0, 0).merge(table.cell(1, 0))
+    
+    # Объединяем "Назначенные сигналы" горизонтально (колонки 1-5 в строке 0)
+    table.cell(0, 1).merge(table.cell(0, 5))
+
+    # --- ЗАПОЛНЕНИЕ ДАННЫХ ---
+    for idx, output_name in enumerate(outputs_list):
+        row_idx = idx + 2
+        row_cells = table.rows[row_idx].cells
+        
+        # Колонка 0: Имя реле
+        row_cells[0].text = output_name
+        row_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+        # Колонки 1-5: Выпадающие списки
+        for col_idx in range(1, 6):
+            par = row_cells[col_idx].paragraphs[0]
+            par.clear()
+            
+            if 'add_formatted_dropdown2' in globals():
+                add_formatted_dropdown2(
+                    paragraph=par,
+                    choices=sigs_list,
+                )
+            else:
+                par.text = ""
+            
+            par.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # --- ПОВТОРЕНИЕ ЗАГОЛОВКОВ НА СЛЕДУЮЩИХ СТРАНИЦАХ ---
+    if 'set_repeat_table_header' in globals():
+        set_repeat_table_header(table.rows[0])  # Первая строка
+        set_repeat_table_header(table.rows[1])  # Вторая строка (как в старом коде)
+
+    # --- ПРИМЕНЕНИЕ ШИРИНЫ КОЛОНОК ---
+    for row in table.rows:
+        for idx, width in enumerate(TABLE_WIDTHS_OUTS):
+            if idx < len(row.cells):
+                row.cells[idx].width = width
 
     return table

@@ -16,5 +16,7 @@ for sig in di_sigs:
     pass
     #print(sig["appliedDescription"], sig["name"])
 
-sigs = order_data.get_fsu_out_signals()
-print(sigs)
+#sigs = order_data.get_fsu_out_signals()
+#print(sigs)
+
+sigs = order_data.get_slots_data()

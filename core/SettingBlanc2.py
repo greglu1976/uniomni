@@ -2,11 +2,13 @@
 # Требует инициализации
 # для генерации бланка уставок в него нужно передать объект класса Device
 
+import re
+
 from docxtpl import DocxTemplate
 from docx import Document
 
 from utils.docx_handler import add_new_section, add_new_section_landscape
-from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4
+from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4
 
 from xml.sax.saxutils import escape # для экранирования в дропдаун списке всяких << >>
 
@@ -15,12 +17,16 @@ from docxtpl import DocxTemplate
 from logger.logger import Logger
 
 from core.OrderHandler import OrderHandler
+from core.MainConfigHandler import MainConfigHandler
 
 class SettingBlanc:
     def __init__(self, code='', versions=[{"edition":"X.X", "data": "XX.XX.XXXX"}]):
         self.code = code
         self.versions = versions
         self.base_structure = None  # Будет хранить структуру из get_all_settings()
+
+        self.order_handler = OrderHandler()
+        self.config_handler = MainConfigHandler.from_json_file("meta.json")
 
     # НОВАЯ ФУНКЦИЯ ДЛЯ CORE4
     def _create_section_settings(self, doc):
@@ -179,7 +185,7 @@ class SettingBlanc:
 
     def get_all_settings(self):
         """Собирает структуру уставок из заказа"""
-        self.order_handler = OrderHandler()
+
         self.maps = self.order_handler.get_mapping()
         
         ordered_fbs = list(self.maps.keys())
@@ -198,7 +204,7 @@ class SettingBlanc:
         Logger.info(f"Загружено {len(base_structure)} блоков уставок")
         return base_structure
 
-    def create_template(self, device):
+    def create_template(self):
         """
         Создает шаблон для Core4 (без использования docxtpl)
         """
@@ -210,7 +216,8 @@ class SettingBlanc:
         
         # Генерируем раздел уставок (новый метод)
         self._create_section_settings(doc)
-        
+
+        self._create_section_inouts_core4(doc)
         # Остальные разделы пока закомментированы, при необходимости аналогично адаптировать
         # self._create_section_inouts_core4(device.modules, doc)
         # self._create_section_leds_core4(device.modules, device.hmi, doc)
@@ -228,13 +235,173 @@ class SettingBlanc:
         
         return doc
 
-    def get_blanc(self, device):
+    def get_blanc(self):
         """
         Основной метод для генерации бланка уставок Core4
         """
-        self.create_template(device)
+        self.create_template()
 
 
-# Пример использования:
-# blanc = SettingBlanc(code="ПМ-001", versions=[{"edition":"1.0", "data": "01.01.2025"}])
-# blanc.get_blanc_core4(device)
+##################################################################################
+#####################################################################################
+####################################################################################
+
+
+    # РАЗДЕЛ ПАРАМЕТРИРОВАНИЯ ВХОДОВ И ВЫХОДОВ
+    def _create_section_inouts_core4(self, doc):
+        """
+        Генерирует раздел документации "Матрица входов и выходов".
+        """
+        import re
+        
+        # ======================================================================
+        # ЧАСТЬ 0: Подготовка общих списков сигналов для Dropdown
+        # ======================================================================
+        try:
+            raw_sigs, raw_di_sigs = self.order_handler.get_fsu_signals()
+        except Exception:
+            raw_sigs, raw_di_sigs = [], []
+
+        def extract_description(item):
+            if isinstance(item, dict):
+                return (item.get('fullDescription') or 
+                        item.get('appliedDescription') or 
+                        item.get('description') or 
+                        item.get('name', ''))
+            return str(item)
+
+        # Очищенные списки строк для dropdown
+        sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
+        di_sigs_list = [desc for desc in [extract_description(s) for s in raw_di_sigs] if desc]
+
+        # Получаем данные слотов один раз
+        slots_data = self.order_handler.get_slots_data()
+        items_to_process = []
+        if isinstance(slots_data, list):
+            for slot_dict in slots_data:
+                items_to_process.extend(slot_dict.items())
+        elif isinstance(slots_data, dict):
+            items_to_process.extend(slots_data.items())
+
+        # ======================================================================
+        # ЧАСТЬ 1: ОБРАБОТКА ВХОДОВ (M*_B*_B*_Status)
+        # ======================================================================
+        pattern_inputs = re.compile(r'^M\d+_B\d{3}_B\d+_Status$')
+        final_dict_inputs = {}
+        
+        for slot_name, params_list in items_to_process:
+            status_signals = [p for p in params_list if pattern_inputs.match(p)]
+            if not status_signals: continue
+            
+            clean_sig_list = []
+            for sig in status_signals:
+                try:
+                    d = self.config_handler.get_param_info(sig)
+                    desc = d.get("appliedDescription", sig)
+                    clean_sig_list.append(desc.replace(". Статус", "").strip())
+                except:
+                    clean_sig_list.append(sig)
+            if clean_sig_list:
+                final_dict_inputs[slot_name] = clean_sig_list
+
+        # ======================================================================
+        # ЧАСТЬ 2: ОБРАБОТКА ВЫХОДОВ (M*_K*_K*_Status)
+        # ======================================================================
+        pattern_outputs = re.compile(r'^M\d+_K\d{3}_K\d+_Status$')
+        final_dict_outputs = {}
+        
+        sigs_list_outputs = self.order_handler.get_fsu_out_signals()
+        
+        outs_list = self.extract_all_signals_from_structure(sigs_list_outputs)
+
+        for slot_name, params_list in items_to_process:
+            status_signals = [p for p in params_list if pattern_outputs.match(p)]
+            if not status_signals: continue
+            
+            clean_sig_list = []
+            for sig in status_signals:
+                try:
+                    d = self.config_handler.get_param_info(sig)
+                    desc = d.get("appliedDescription", sig)
+                    clean_sig_list.append(desc.replace(". Статус", "").strip())
+                except:
+                    clean_sig_list.append(sig)
+            if clean_sig_list:
+                final_dict_outputs[slot_name] = clean_sig_list
+
+        # ======================================================================
+        # ЧАСТЬ 3: ГЕНЕРАЦИЯ ДОКУМЕНТА
+        # ======================================================================
+        if not final_dict_inputs and not final_dict_outputs:
+            return
+
+        add_new_section_landscape(doc) 
+        
+        p = doc.add_paragraph('МАТРИЦА ВХОДОВ И ВЫХОДНЫХ РЕЛЕ')
+        p.style = 'ДОК Заголовок 1'
+
+        # --- ГЕНЕРАЦИЯ ВХОДОВ ---
+        if final_dict_inputs:
+            doc.add_paragraph('Дискретные входы').style = 'ДОК Заголовок 2'
+            
+            sorted_inputs = sorted(final_dict_inputs.keys(), key=lambda x: int(re.search(r'M(\d+)', x).group(1)) if re.search(r'M(\d+)', x) else 0)
+            
+            for slot_name in sorted_inputs:
+                doc.add_paragraph(f"{slot_name}").style = 'ДОК Таблица Название'
+                add_table_mtrx_ins_core4(
+                    doc=doc,
+                    slot_name=slot_name,
+                    inputs_list=final_dict_inputs[slot_name],
+                    sigs=sigs_list,
+                    di_sigs=di_sigs_list
+                )
+                doc.add_paragraph()
+
+        # --- ГЕНЕРАЦИЯ ВЫХОДОВ ---
+        if final_dict_outputs:
+            #print(final_dict_outputs)
+            doc.add_paragraph('Выходные реле').style = 'ДОК Заголовок 2'
+            
+            sorted_outputs = sorted(final_dict_outputs.keys(), key=lambda x: int(re.search(r'M(\d+)', x).group(1)) if re.search(r'M(\d+)', x) else 0)
+            
+            for slot_name in sorted_outputs:
+                doc.add_paragraph(f"{slot_name}").style = 'ДОК Таблица Название'
+                # Вызываем новую функцию для выходов
+
+                #print(sigs_list)
+                add_table_mtrx_outs_core4(
+                    doc=doc,
+                    outputs_list=final_dict_outputs[slot_name],
+                    sigs_list=outs_list
+                )
+                doc.add_paragraph()
+
+        return
+
+
+    def extract_all_signals_from_structure(self, data_structure):
+        """
+        Извлекает все сигналы из структуры данных функций и подфункций.
+        
+        :param data_structure: Список словарей с ключами 'function' и 'subfunctions'
+        :return: Плоский список всех сигналов (desc)
+        """
+        all_signals = []
+        
+        for function_item in data_structure:
+            # Получаем название функции (для контекста, если нужно)
+            function_name = function_item.get('function', '')
+            
+            # Проходим по всем подфункциям
+            subfunctions = function_item.get('subfunctions', [])
+            for subfunc in subfunctions:
+                subfunc_name = subfunc.get('name', '')
+                
+                # Извлекаем данные (сигналы) из подфункции
+                data_list = subfunc.get('data', [])
+                for signal in data_list:
+                    if signal:  # Пропускаем пустые строки
+                        all_signals.append(signal)
+        
+        return all_signals
+

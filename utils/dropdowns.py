@@ -52,19 +52,42 @@ def add_formatted_dropdown(paragraph, choices, default="", alias="",
 
 
 def add_formatted_dropdown2(paragraph, choices, default="Не назначено", alias="", instruction_text=""):
-    sdt = parse_xml(f'''
+    from xml.sax.saxutils import escape
+    
+    # Экранируем все строковые значения
+    safe_alias = escape(str(alias))
+    safe_default = escape(str(default))
+    safe_instruction = escape(str(instruction_text))
+    
+    # Экранируем каждый choice
+    safe_choices = []
+    for choice in choices:
+        if choice:
+            # Экранируем специальные XML символы
+            safe_choice = escape(str(choice))
+            # Также экранируем кавычки для атрибутов
+            safe_choice = safe_choice.replace('"', '&quot;')
+            safe_choices.append(safe_choice)
+    
+    # Создаем XML элементы для выбора
+    choices_xml = []
+    for choice in safe_choices:
+        choices_xml.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
+    
+    # Формируем XML
+    dropdown_xml = f'''
         <w:sdt xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:sdtPr>
-                <w:alias w:val="{alias}"/>
-                <w:tag w:val="{alias}"/>
-                <w:id w:val="{abs(hash(alias))}"/>
+                <w:alias w:val="{safe_alias}"/>
+                <w:tag w:val="{safe_alias}"/>
+                <w:id w:val="{abs(hash(safe_alias)) % 1000000}"/>
                 <w:dropDownList>
-                    <w:listItem w:displayText="{default}" w:value=""/>
-                    {''.join(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>' for choice in choices)}
+                    <w:listItem w:displayText="{safe_default}" w:value=""/>
+                    {''.join(choices_xml)}
                 </w:dropDownList>
                 <w:showingPlcHdr/>
                 <w:placeholder>
-                    <w:docPart w:val="{instruction_text}"/>
+                    <w:docPart w:val="{safe_instruction}"/>
                 </w:placeholder>
             </w:sdtPr>
             <w:sdtContent>
@@ -72,17 +95,23 @@ def add_formatted_dropdown2(paragraph, choices, default="Не назначено
                     <w:rPr>
                         <w:color w:val="808080"/>
                         <w:sz w:val="24"/>
-                        <w:i/> <!-- курсив -->
-                        <!-- <w:b/> полужирный -->
-                        <w:spacing w:val="10"/> <!-- интервал между символами -->
+                        <w:i/>
+                        <w:spacing w:val="10"/>
                     </w:rPr>
-                    <w:t>{default}</w:t>
+                    <w:t>{safe_default}</w:t>
                 </w:r>
             </w:sdtContent>
         </w:sdt>
-    ''')
+    '''
     
-    paragraph._p.append(sdt)
+    try:
+        from docx.oxml import parse_xml
+        sdt = parse_xml(dropdown_xml)
+        paragraph._p.append(sdt)
+    except Exception as e:
+        # В случае ошибки вставляем текст
+        print(f"Ошибка в add_formatted_dropdown2: {e}")
+        paragraph.text = f"[{default}]"
 
 
 
