@@ -139,7 +139,7 @@ class Application:
         else:
             Logger.info('Начинаем создавать бланк уставок...')
             setting_blanc = SettingBlanc(code=self.device_data["setting_blanc_code"], versions=self.device_data["versions"])
-            setting_blanc.get_blanc()
+            setting_blanc.get_blanc(self.device_data)
             #Logger.info('Бланк уставок в docx создан')
 
     def renew_setting_tables_re(self):

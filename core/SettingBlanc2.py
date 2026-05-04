@@ -28,8 +28,9 @@ class SettingBlanc:
         self.order_handler = OrderHandler()
         self.config_handler = MainConfigHandler.from_json_file("meta.json")
 
+
     # НОВАЯ ФУНКЦИЯ ДЛЯ CORE4
-    def _create_section_settings(self, doc):
+    def _create_section_settings_core4(self, doc):
         """Генерирует раздел уставок для Core4 с таблицами как в Core3"""
         if not self.base_structure:
             Logger.warning("Нет данных base_structure для генерации уставок")
@@ -204,22 +205,45 @@ class SettingBlanc:
         Logger.info(f"Загружено {len(base_structure)} блоков уставок")
         return base_structure
 
-    def create_template(self):
+    def create_template(self, device_data):
         """
         Создает шаблон для Core4 (без использования docxtpl)
         """
+       
+        # Создаем документ
+        #doc = Document('origin.docx')
+        doc_tpl = DocxTemplate('origin.docx')
+
+        colontile = ''
+        if device_data['versions']:
+            last_version = device_data['versions'][-1]
+            colontile = f"Редакция {last_version['edition']} от {last_version['data']}"
+
+        context = {
+            "title": device_data['full_description'],
+            "code": device_data['setting_blanc_code'],
+            "device_order_code": device_data['order_code'],
+            "hmi_order_code": device_data['order_code_hmi'],
+            "versions":  device_data['versions'],
+            "device_name":  device_data['name'],
+            "colontile": colontile,
+            "packet": self.config_handler.model_version
+        }
+
+        doc_tpl.render(context)
+        doc_tpl.save('temp.docx')
+        doc = Document('temp.docx')
+
         # Получаем структуру уставок
         self.get_all_settings()
-        
-        # Создаем документ
-        doc = Document('origin.docx')
-        
-        # Генерируем раздел уставок (новый метод)
-        self._create_section_settings(doc)
 
+        # Генерируем раздел уставок (новый метод)
+        self._create_section_settings_core4(doc)
         self._create_section_inouts_core4(doc)
+
+
+        self._create_section_leds_core4(device.modules, device.hmi, doc)
         # Остальные разделы пока закомментированы, при необходимости аналогично адаптировать
-        # self._create_section_inouts_core4(device.modules, doc)
         # self._create_section_leds_core4(device.modules, device.hmi, doc)
         # self._create_section_config_core4(device.aux_funcs, doc)
         # self._create_section_disturb_core4(device.fsu, doc)
@@ -235,11 +259,12 @@ class SettingBlanc:
         
         return doc
 
-    def get_blanc(self):
+    def get_blanc(self, device_data):
         """
         Основной метод для генерации бланка уставок Core4
         """
-        self.create_template()
+        #print(device_data)
+        self.create_template(device_data)
 
 
 ##################################################################################
@@ -315,6 +340,7 @@ class SettingBlanc:
         outs_list = self.extract_all_signals_from_structure(sigs_list_outputs)
 
         for slot_name, params_list in items_to_process:
+            print(slot_name, params_list)
             status_signals = [p for p in params_list if pattern_outputs.match(p)]
             if not status_signals: continue
             
@@ -405,3 +431,60 @@ class SettingBlanc:
         
         return all_signals
 
+
+
+
+    # РАЗДЕЛ СВЕТОДИОДОВ И ФК
+    def _create_section_leds_core4(self, modules, hmi, fsu, doc):
+        #if hmi.order_code=='': # Если ИЧМ не заказан, но раздел не формируем
+            #return
+
+        #############################################################################
+        # СОЗДАЕМ РАЗДЕЛ НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ
+        add_new_section_landscape(doc) # Создаем раздел для матрицы вх/вых
+        # Добавляем заголовок
+        p = doc.add_paragraph('НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ')
+        p.style = 'ДОК Заголовок 1'
+
+        ###############################################################
+        p = doc.add_paragraph('Светодиоды')
+        p.style = 'ДОК Заголовок 2'
+
+        text = doc.add_paragraph('Для светодиода возможно подключение до пяти сигналов.')
+        text.style = 'ДОК Текст'
+
+        p = doc.add_paragraph(r'{% for leds in hmi.get_leds() if hmi.get_leds() %}')
+        p.style = 'ДОК Текст'
+
+        p = doc.add_paragraph(r'{{ leds }}')
+        p.style = 'ДОК Таблица Название'
+
+        statuses = fsu.get_statuses()
+        statuses = sorted([item[0] for item in statuses])
+
+        add_table_leds_new(doc, statuses, plates_data=modules.get_statuses())
+
+        p = doc.add_paragraph(r'{% endfor %}')
+        p.style = 'TAGS'    
+
+        ###############################################################
+        p = doc.add_paragraph('Функциональные клавиши')
+        p.style = 'ДОК Заголовок 2'
+
+        text = doc.add_paragraph('Для функциональной клавиши возможно подключение только одного управляющего сигнала.')
+        text.style = 'ДОК Текст'
+
+        p = doc.add_paragraph(r'{% for fks in hmi.get_fks() if hmi.get_fks() %}')
+        p.style = 'ДОК Текст'
+
+        p = doc.add_paragraph(r'{{ fks }}')
+        p.style = 'ДОК Таблица Название'
+
+        choices = fsu.get_controls()
+        #choices = sorted(list(choices))
+        choices = sorted([item[0] for item in choices])
+
+        add_table_fks(doc, choices)
+
+        p = doc.add_paragraph(r'{% endfor %}')
+        p.style = 'TAGS'
