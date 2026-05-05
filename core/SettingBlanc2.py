@@ -8,7 +8,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from utils.docx_handler import add_new_section, add_new_section_landscape
-from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4
+from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4, add_table_leds_new_core4, add_table_fks_core4
 
 from xml.sax.saxutils import escape # для экранирования в дропдаун списке всяких << >>
 
@@ -19,6 +19,11 @@ from logger.logger import Logger
 from core.OrderHandler import OrderHandler
 from core.MainConfigHandler import MainConfigHandler
 
+
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+
 class SettingBlanc:
     def __init__(self, code='', versions=[{"edition":"X.X", "data": "XX.XX.XXXX"}]):
         self.code = code
@@ -28,6 +33,7 @@ class SettingBlanc:
         self.order_handler = OrderHandler()
         self.config_handler = MainConfigHandler.from_json_file("meta.json")
 
+        self.di_list = []
 
     # НОВАЯ ФУНКЦИЯ ДЛЯ CORE4
     def _create_section_settings_core4(self, doc):
@@ -84,9 +90,7 @@ class SettingBlanc:
         2. Из col1 скобки и их содержимое удаляются.
         3. Старое значение col2 игнорируется/перезаписывается.
         """
-        import re
-        from docx.shared import Pt
-        from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
         
         # Добавляем строки с данными (начиная с row_index=2, т.к. 0 и 1 - заголовки)
         for i, row_data in enumerate(rows_data, start=1):
@@ -207,7 +211,7 @@ class SettingBlanc:
 
     def create_template(self, device_data):
         """
-        Создает шаблон для Core4 (без использования docxtpl)
+        Создает шаблон для Core4
         """
        
         # Создаем документ
@@ -219,11 +223,21 @@ class SettingBlanc:
             last_version = device_data['versions'][-1]
             colontile = f"Редакция {last_version['edition']} от {last_version['data']}"
 
+
+
+        if "-ЮНИТ-" in self.config_handler.config_version:
+            parts = self.config_handler.config_version.split("-ЮНИТ-", 1)  # maxsplit=1
+            first_part = parts[0]
+            second_part = "ЮНИТ-" + parts[1]
+        else:
+            first_part = self.config_handler.config_version
+            second_part = None  # или '' , или raise исключение
+
         context = {
             "title": device_data['full_description'],
             "code": device_data['setting_blanc_code'],
-            "device_order_code": device_data['order_code'],
-            "hmi_order_code": device_data['order_code_hmi'],
+            "device_order_code": first_part,
+            "hmi_order_code": second_part,
             "versions":  device_data['versions'],
             "device_name":  device_data['name'],
             "colontile": colontile,
@@ -241,10 +255,12 @@ class SettingBlanc:
         self._create_section_settings_core4(doc)
         self._create_section_inouts_core4(doc)
 
+        if second_part:
+            self._create_section_leds_core4(second_part, doc)
 
-        self._create_section_leds_core4(device.modules, device.hmi, doc)
+        self._create_section_config_core4(doc)
+
         # Остальные разделы пока закомментированы, при необходимости аналогично адаптировать
-        # self._create_section_leds_core4(device.modules, device.hmi, doc)
         # self._create_section_config_core4(device.aux_funcs, doc)
         # self._create_section_disturb_core4(device.fsu, doc)
         
@@ -277,8 +293,6 @@ class SettingBlanc:
         """
         Генерирует раздел документации "Матрица входов и выходов".
         """
-        import re
-        
         # ======================================================================
         # ЧАСТЬ 0: Подготовка общих списков сигналов для Dropdown
         # ======================================================================
@@ -298,7 +312,7 @@ class SettingBlanc:
         # Очищенные списки строк для dropdown
         sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
         di_sigs_list = [desc for desc in [extract_description(s) for s in raw_di_sigs] if desc]
-
+        self.di_list =  di_sigs_list
         # Получаем данные слотов один раз
         slots_data = self.order_handler.get_slots_data()
         items_to_process = []
@@ -340,7 +354,7 @@ class SettingBlanc:
         outs_list = self.extract_all_signals_from_structure(sigs_list_outputs)
 
         for slot_name, params_list in items_to_process:
-            print(slot_name, params_list)
+            #print(slot_name, params_list)
             status_signals = [p for p in params_list if pattern_outputs.match(p)]
             if not status_signals: continue
             
@@ -432,12 +446,17 @@ class SettingBlanc:
         return all_signals
 
 
-
-
     # РАЗДЕЛ СВЕТОДИОДОВ И ФК
-    def _create_section_leds_core4(self, modules, hmi, fsu, doc):
-        #if hmi.order_code=='': # Если ИЧМ не заказан, но раздел не формируем
-            #return
+    def _create_section_leds_core4(self, order_code, doc):
+
+        # парсим код заказа ИЧМ
+        parts = order_code.split('-')
+        result = [
+            "Модуль расширения 1 на 16 светодиодов" if parts[3]=="С" else "Модуль расширения 1 на 16 функциональных кнопок" if parts[3]=="К" else "Модуль отсутствует",
+            "Модуль расширения 2 на 16 светодиодов" if parts[4]=="С" else "Модуль расширения 2 на 16 функциональных кнопок" if parts[4]=="К" else "Модуль отсутствует",
+            "Модуль расширения 3 на 16 светодиодов" if parts[5]=="С" else "Модуль расширения 3 на 16 функциональных кнопок" if parts[5]=="К" else "Модуль отсутствует",
+            "Модуль расширения 4 на 16 светодиодов" if parts[6]=="С" else "Модуль расширения 4 на 16 функциональных кнопок" if parts[6]=="К" else "Модуль отсутствует"
+        ]
 
         #############################################################################
         # СОЗДАЕМ РАЗДЕЛ НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ
@@ -445,46 +464,64 @@ class SettingBlanc:
         # Добавляем заголовок
         p = doc.add_paragraph('НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ')
         p.style = 'ДОК Заголовок 1'
-
-        ###############################################################
         p = doc.add_paragraph('Светодиоды')
         p.style = 'ДОК Заголовок 2'
 
-        text = doc.add_paragraph('Для светодиода возможно подключение до пяти сигналов.')
-        text.style = 'ДОК Текст'
+        # вытаскиваем выпадающий список сигналов для светодиодов
+        drop_list = self.order_handler.get_digital_signals_for_led()
 
-        p = doc.add_paragraph(r'{% for leds in hmi.get_leds() if hmi.get_leds() %}')
-        p.style = 'ДОК Текст'
+        doc.add_paragraph("ИЧМ").style = 'ДОК Таблица Название'
+        add_table_leds_new_core4(doc, drop_list)
 
-        p = doc.add_paragraph(r'{{ leds }}')
-        p.style = 'ДОК Таблица Название'
-
-        statuses = fsu.get_statuses()
-        statuses = sorted([item[0] for item in statuses])
-
-        add_table_leds_new(doc, statuses, plates_data=modules.get_statuses())
-
-        p = doc.add_paragraph(r'{% endfor %}')
-        p.style = 'TAGS'    
+        for res in result:
+            if "светодиодов" in res:
+                doc.add_paragraph()
+                doc.add_paragraph(res).style = 'ДОК Таблица Название'
+                add_table_leds_new_core4(doc, drop_list)                
 
         ###############################################################
         p = doc.add_paragraph('Функциональные клавиши')
         p.style = 'ДОК Заголовок 2'
 
-        text = doc.add_paragraph('Для функциональной клавиши возможно подключение только одного управляющего сигнала.')
-        text.style = 'ДОК Текст'
+        doc.add_paragraph("ИЧМ").style = 'ДОК Таблица Название'        
+        add_table_fks_core4(doc, self.di_list)
 
-        p = doc.add_paragraph(r'{% for fks in hmi.get_fks() if hmi.get_fks() %}')
-        p.style = 'ДОК Текст'
+        for res in result:
+            if "функциональных кнопок" in res:
+                doc.add_paragraph()
+                doc.add_paragraph(res).style = 'ДОК Таблица Название'
+                add_table_fks_core4(doc, drop_list)  
 
-        p = doc.add_paragraph(r'{{ fks }}')
-        p.style = 'ДОК Таблица Название'
 
-        choices = fsu.get_controls()
-        #choices = sorted(list(choices))
-        choices = sorted([item[0] for item in choices])
+    #########################################
+    #################### РАЗДЕЛ КОНФИГУРАЦИЯ 
+    #########################################
 
-        add_table_fks(doc, choices)
+    def _create_section_config_core4(self, doc):
 
-        p = doc.add_paragraph(r'{% endfor %}')
-        p.style = 'TAGS'
+        add_new_section(doc)
+        p = doc.add_paragraph('КОНФИГУРАЦИЯ')
+        p.style = 'ДОК Заголовок 1'
+
+
+        raw_data = self.order_handler.get_data_for_configuration()
+        #print(raw_data)
+
+        for datum in raw_data:
+            p = doc.add_paragraph(datum["main_title"])
+            p.style = 'ДОК Заголовок 2'
+            for table in datum["tables"]:
+                doc.add_paragraph(table["title"]).style = 'ДОК Таблица Название'
+                fixed_rows = []
+                for row in table["rows"]:
+                    row_name = row["name"]
+                    row_data = self.config_handler.get_param_info(row_name)
+                    col1 = row_data["fullDescription"]
+                    col2 = row_data["appliedDescription"]
+                    col3 = row_data["note"]
+                    col4 = row_data["units"]
+                    col5 = row_data["step"]
+                    col6 = row_data["defaultValue"]
+                    fixed_rows.append((col1, col2, col3, col4, col5, col6))
+                    print(col1, col2, col3, col4, col5, col6)
+

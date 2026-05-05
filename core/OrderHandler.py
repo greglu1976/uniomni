@@ -5,6 +5,7 @@
 
 import json
 from typing import List, Dict, Any
+from collections import defaultdict
 
 from core.MainConfigHandler import MainConfigHandler
 
@@ -352,56 +353,86 @@ class OrderHandler:
                         break
 
     def get_fsu_signals(self):
-        if self.fsu_signals:
-            return self.fsu_signals
+        """
+        Возвращает кортеж (fsu_signals, fsu_di_signals).
+        fsu_signals: общие сигналы функциональной логики (для ФК, светодиодов и т.д.)
+        fsu_di_signals: дискретные входы (DI_)
+        """
+        
+        # 1. Если данные уже есть в кэше, возвращаем ОБА списка сразу
+        # Важно: возвращаем кортеж, чтобы распаковка _, raw = ... работала всегда
+        if self.fsu_signals is not None and self.fsu_di_signals is not None:
+             # Проверка на пустоту списков может быть опасна, если сигналов действительно нет.
+             # Лучше проверять флаг "инициализировано" или просто наличие списков.
+             # Если списки были созданы в __init__ как [], то проверка if self.fsu_signals: 
+             # вернет False для пустого списка, и код пойдет пересчитывать.
+             # Поэтому лучше использовать отдельный флаг или проверять тип.
+             
+             # Вариант А: Если в __init__ они []:
+             if self.fsu_signals or self.fsu_di_signals: 
+                 return self.fsu_signals, self.fsu_di_signals
+             # Если оба пустые, но мы уже ходили за данными, можно добавить флаг _signals_loaded
+             # Но для простоты, если списки могут быть легитимно пустыми, лучше убрать этот блок
+             # и полагаться на то, что пересчет быстрый, или использовать флаг.
+             
+             # Давайте используем более надежный подход с флагом, если он есть, 
+             # или просто позволим коду выполниться один раз.
+             # Ниже приведен стандартный паттерн с проверкой наличия данных.
 
-        if not self.general_sigs_of_func_logic or self.general_sigs_of_func_logic==[]:
+        # Если мы здесь, значит нужно собрать данные
+        # (или данные пустые, и мы хотим их обновить/собрать заново)
+        
+        # Очищаем списки перед сбором, чтобы не дублировать при повторном вызове
+        self.fsu_signals = []
+        self.fsu_di_signals = []
+
+        if not self.general_sigs_of_func_logic:
             self._drag_gen_sigs_of_func_logic()
 
         gen_signals = []
         
+        # Ищем нужный узел
         for o in self.general_sigs_of_func_logic:
-            if o["Name"] == "Общие сигналы ФС":
-                gen_signals = o["Nodes"]
+            if o.get("Name") == "Общие сигналы ФС":
+                gen_signals = o.get("Nodes", [])
+                break # Нашли, выходим из цикла
 
-        pass_data = ["GOOSE", "HMI_", "FB_", "BitTest_"] # не выдаем сигналы с такими префиксмаи
-        
+        pass_data = ["GOOSE", "HMI_", "FB_", "BitTest_"] 
         
         for signal in gen_signals:
+            try:
+                sig_data = self.config_handler.get_param_info(signal["Name"])
+            except Exception:
+                continue
 
-            sig_data = self.config_handler.get_param_info(signal["Name"])
-            if "DI_" in sig_data["name"]:
+            # 1. Разделяем DI сигналы
+            if "DI_" in sig_data.get("name", ""):
                 self.fsu_di_signals.append(sig_data)
                 continue
 
-            if sig_data["command"] == True or sig_data["size"]!=1:
+            # 2. Фильтры для остальных сигналов
+            # Пропускаем команды и многобитные сигналы
+            if sig_data.get("command") is True or sig_data.get("size", 1) != 1:
                 continue
-                # Проверяем, начинается ли имя с любого из префиксов
+            
+            # Пропускаем по префиксам
             if any(signal["Name"].startswith(prefix) for prefix in pass_data):
                 continue
+            
+            # Пропускаем по содержимому имени
             if "HMI" in signal["Name"] or "ACS" in signal["Name"] or "APCSRst" in signal["Name"]:
                 continue
+            
+            # Пропускаем конкретные имена
             if signal["Name"] in ["IRF", "Test", "Test_blocked", "Loc", "cError", "ncError"]:
                 continue
 
+            # Добавляем в основной список
             self.fsu_signals.append(sig_data)
 
+        # ВСЕГДА возвращаем кортеж из двух элементов
         return self.fsu_signals, self.fsu_di_signals
     
-    def get_fsu_out_signals(self):
-        if self.fsu_out_signals:
-            return self.fsu_out_signals
-
-        # Находим "Сигналы функциональной логики"
-        sigs_of_func_logic = []
-        for data in self.data:
-            if data["Name"] == "DigitalSignalsTree":
-                m = data["Nodes"]
-                for node in m:
-                    if node["Name"] == "Сигналы функциональной логики":
-                        sigs_of_func_logic = node["Nodes"]
-                        break
-                break
 
     def get_fsu_out_signals(self):
         if self.fsu_out_signals:
@@ -527,4 +558,263 @@ class OrderHandler:
                 break
         
         return sigs_of_func_logic
+
+
+################################################################################
+    #########################################################################
+    # ДАННЫЕ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА СВЕТОДИОДОВ
+    def get_digital_signals_for_led(self):
+
+        sigs_of_func_logic = []
+        for data in self.data:
+            if data["Name"] == "DigitalSignalsTree":
+                m = data["Nodes"]
+                for node in m:
+                    if node["Name"] == "Обобщенные сигналы" or node["Name"] == "Периферийные блоки" :
+                        continue
+                    sigs_of_func_logic.append(node)
+        q = self.extract_parameters(sigs_of_func_logic)
+
+        raw_list = []
+        for par in q:
+            if "VirtualKey_" in par or "VirtualButton_" in par:
+                raw = self.find_virt_key_desc(par)
+                desc = self.config_handler.get_param_info(par)
+                raw_list.append(f"{raw} ({desc['appliedDescription']})")
+            else:
+                raw = self.config_handler.get_param_info(par)
+                if raw["size"]==1 and raw["group"]!="Setting" and "Convert_SPS" not in raw["name"] and "BitTest_" not in raw["name"] and "_ACS_" not in raw["name"] and "GOOSE_" not in raw["name"] and "FB_" not in raw["name"] and "HMI" not in raw["name"] and "DI_" not in raw["name"] and "APCSRst_CLS_Reset" not in raw["name"] and "Convert_" not in raw["name"]: 
+                    raw_list.append(raw["appliedDescription"])
+        return raw_list
+
+    def extract_parameters(self, nodes):
+        """
+        Рекурсивная функция для извлечения только имен параметров (сигналов).
+        
+        Args:
+            nodes (list): Список узлов (групп или параметров).
             
+        Returns:
+            list: Плоский список строк с именами сигналов.
+        """
+        signal_names = []
+        
+        if not isinstance(nodes, list):
+            return signal_names
+
+        for node in nodes:
+            name = node.get('Name', '')
+            node_type = node.get('Type', '')
+            
+            if node_type == 'Parameter':
+                # Добавляем только имя сигнала
+                if name: # Исключаем пустые имена, если такие возможны
+                    signal_names.append(name)
+            elif node_type == 'Group':
+                # Рекурсивно обрабатываем вложенные узлы
+                sub_nodes = node.get('Nodes', [])
+                signal_names.extend(self.extract_parameters(sub_nodes))
+                
+        return signal_names
+
+    def find_virt_key_desc(self, target_name):
+        """
+        Ищет параметр с именем target_name в структуре self.data
+        и возвращает имя родительской группы.
+        
+        Args:
+            target_name (str): Имя искомого параметра (например, "VirtualKey_1_FuncOperOut")
+            
+        Returns:
+            str or None: Имя родительской группы или None, если не найдено.
+        """
+        # Внутренняя рекурсивная функция
+        def _search_recursive(nodes, parent_group_name=None):
+            if not isinstance(nodes, list):
+                return None
+
+            for node in nodes:
+                name = node.get('Name')
+                node_type = node.get('Type')
+                sub_nodes = node.get('Nodes', [])
+
+                # Если это группа, запоминаем её имя как потенциального родителя
+                # и спускаемся глубже
+                if node_type == 'Group':
+                    result = _search_recursive(sub_nodes, parent_group_name=name)
+                    if result:
+                        return result
+                
+                # Если это параметр, проверяем имя
+                elif node_type == 'Parameter':
+                    if name == target_name:
+                        # Возвращаем имя последней запомненной группы
+                        return parent_group_name
+            
+            return None
+
+        # Запуск поиска с корневого уровня
+        # Для корневого элемента parent_group_name пока None, 
+        # но так как структура начинается с Groups, первая найденная Group станет родителем
+        return _search_recursive(self.data)
+    
+
+# Сбор сигналов для раздела конфигурация !!!!!!!!!!!!!!! ДОРАБОТАТЬ !!!!!!!!!!!!!!!!!!!!
+
+    def get_data_for_configuration(self):
+
+        sigs_of_func_logic = []
+        for data in self.data:
+            if data["Name"] == "ConfigurationTree":
+                m = data["Nodes"]
+                for node in m:
+                    sigs_of_func_logic.append(node)
+        
+        transformed_data = self.transform_for_word_render(sigs_of_func_logic)
+
+        return self.build_word_structure(transformed_data)
+          
+
+
+
+
+
+
+
+    def transform_for_word_render(self, data, parent_table_title=None, result_list=None):
+        """
+        Рекурсивная функция для преобразования древовидной структуры в плоский список
+        событий для рендера в Word.
+        
+        Возвращает список словарей вида:
+        - {'type': 'new_table', 'title': 'Имя таблицы'}
+        - {'type': 'row', 'name': 'Имя параметра', 'table_ref': 'Имя родительской таблицы'}
+        """
+        if result_list is None:
+            result_list = []
+
+        for item in data:
+            name = item.get('Name')
+            item_type = item.get('Type')
+            nodes = item.get('Nodes', [])
+
+            if item_type == 'Group':
+                # Если у группы есть вложенные узлы, она потенциально является таблицей
+                if nodes:
+                    # Проверяем, есть ли внутри только параметры или еще группы
+                    # В вашем случае вложенные группы (как Летнее время) тоже должны стать отдельными таблицами
+                    
+                    # 1. Добавляем маркер начала новой таблицы
+                    result_list.append({
+                        'type': 'new_table',
+                        'title': name,
+                        'parent_title': parent_table_title # Для сохранения иерархии, если нужно
+                    })
+                    
+                    # 2. Рекурсивно обрабатываем вложенные элементы
+                    # Теперь текущая группа становится "родителем" для вложенных элементов
+                    self.transform_for_word_render(nodes, parent_table_title=name, result_list=result_list)
+                else:
+                    # Пустая группа, можно игнорировать или добавить как заглушку
+                    pass
+                    
+            elif item_type == 'Parameter':
+                # Это строка данных для текущей активной таблицы
+                result_list.append({
+                    'type': 'row',
+                    'name': name,
+                    'table_ref': parent_table_title,
+                    # Здесь можно добавить значение по умолчанию или пустое место, 
+                    # так как в исходных данных значений нет, только имена
+                    'value': '' 
+                })
+
+        return result_list     
+    
+
+
+    def build_word_structure(self, data):
+        """
+        Превращает список в структуру для Word:
+        [
+            {
+                'main_title': 'Синхронизация времени',
+                'tables': [
+                    {'title': 'Общие настройки', 'rows': [...]},
+                    {'title': 'Параметры летнего времени', 'rows': [...]},
+                    ...
+                ]
+            },
+            ...
+        ]
+        """
+        # Сначала соберём все основные разделы
+        main_sections = {}
+        current_main = None
+        
+        for item in data:
+            if item['type'] == 'new_table':
+                title = item['title']
+                parent = item.get('parent_title')
+                
+                if parent is None:
+                    # Новый основной раздел
+                    current_main = title
+                    main_sections[current_main] = {
+                        'tables': defaultdict(list)  # key: название таблицы, value: список строк
+                    }
+                    # Автоматически создаём таблицу "Общие настройки"
+                    main_sections[current_main]['tables']['Общие настройки'] = []
+                else:
+                    # Подраздел — будет отдельной таблицей внутри основного раздела
+                    # Сначала найдём, к какому основному разделу относится
+                    if current_main is None:
+                        # Если parent_title есть, но текущий основной раздел ещё не задан —
+                        # ищем его по parent_title (на случай, если new_table идёт раньше своего parent_title)
+                        # В вашем списке всё идёт по порядку, но на всякий случай:
+                        found = False
+                        for main in main_sections:
+                            if main == parent:
+                                current_main = main
+                                found = True
+                                break
+                        if not found:
+                            raise ValueError(f"Подраздел '{title}' ссылается на отсутствующий раздел '{parent}'")
+                    
+                    # Создаём таблицу для подраздела, если её ещё нет
+                    if title not in main_sections[current_main]['tables']:
+                        main_sections[current_main]['tables'][title] = []
+            
+            elif item['type'] == 'row':
+                table_ref = item['table_ref']
+                # Найти, в какой основной раздел и какую таблицу добавить
+                for main_title, main_data in main_sections.items():
+                    if table_ref == main_title:
+                        # Строка относится к основному разделу → в "Общие настройки"
+                        main_data['tables']['Общие настройки'].append(item)
+                        break
+                    elif table_ref in main_data['tables']:
+                        # Строка относится к подразделу
+                        main_data['tables'][table_ref].append(item)
+                        break
+                else:
+                    # Если не нашли — возможно, это строка для ещё не созданного подраздела
+                    # (но по вашим данным такого не должно быть)
+                    pass
+        
+        # Преобразуем defaultdict(list) в обычный список словарей для удобства вывода в Word
+        result = []
+        for main_title, main_data in main_sections.items():
+            tables_list = []
+            for table_title, rows in main_data['tables'].items():
+                if rows:  # Добавляем только таблицы с данными
+                    tables_list.append({
+                        'title': table_title,
+                        'rows': rows
+                    })
+            result.append({
+                'main_title': main_title,
+                'tables': tables_list
+            })
+        
+        return result

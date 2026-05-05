@@ -1214,3 +1214,300 @@ def add_table_mtrx_outs_core4(doc, outputs_list, sigs_list):
                 row.cells[idx].width = width
 
     return table
+
+
+
+
+####################################################################################
+######################## ТАБЛИЦА ДЛЯ СВЕТОДИОДОВ УСОВЕРШЕНСТВОВАННАЯ ###############
+####################################################################################
+
+
+# Define widths for 8 columns: 
+# [LED Name, Mode, Color, Sig1, Sig2, Sig3, Sig4, Sig5]
+TABLE_WIDTHS_LEDS = (
+    Inches(1.2),  # LED Name
+    Inches(1.2),  # Mode
+    Inches(1.0),  # Color
+    Inches(1.5),  # Sig 1
+    Inches(1.5),  # Sig 2
+    Inches(1.5),  # Sig 3
+    Inches(1.5),  # Sig 4
+    Inches(1.5)   # Sig 5
+)
+
+def add_table_leds_new_core4(doc, statuses, led_count=16):
+    """
+    Creates a table for LED configuration with dynamic rows.
+    
+    Args:
+        doc: python-docx Document object.
+        statuses: List of choices for signal dropdowns.
+        plates_data: List of choices for signal dropdowns (controls).
+        led_count: Number of LEDs (rows) to generate (default 16).
+    """
+    
+    # 1. Create Table: Header row + led_count data rows
+    total_rows = 1 + led_count
+    table = doc.add_table(rows=total_rows, cols=8)
+    table.style = 'Стиль6'
+    table.allow_autofit = False
+
+    # 2. Set Fixed Layout
+    tbl_pr = table._tbl.xpath('./w:tblPr')
+    if tbl_pr:
+        tbl_pr[0].append(
+            parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+        )
+
+    # 3. Configure Header Row (Row 0)
+    hdr_cells = table.rows[0].cells
+    headers = [
+        'Светодиод', 
+        'Режим работы', 
+        'Цвет', 
+        'Назначенный сигнал 1',    
+        'Назначенный сигнал 2', 
+        'Назначенный сигнал 3', 
+        'Назначенный сигнал 4', 
+        'Назначенный сигнал 5'
+    ]
+    
+    for i, header_text in enumerate(headers):
+        hdr_cells[i].text = header_text
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        # Assuming set_cell_vertical_alignment is defined in your context
+        try:
+            set_cell_vertical_alignment(hdr_cells[i], align="center")
+        except NameError:
+            pass 
+
+
+    # Set Header Repeat (if table spans multiple pages)
+    set_repeat_table_header(table.rows[0]) 
+
+    # 4. Generate Data Rows (LED 1 to LED 16)
+    for row_idx in range(1, total_rows):
+        row = table.rows[row_idx]
+        cells = row.cells
+        
+        # Column 0: LED Name (e.g., "Светодиод 1")
+        cells[0].text = f'Светодиод {row_idx}'
+        p_name = cells[0].paragraphs[0]
+        p_name.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        # Column 1: Mode Dropdown
+        par_mode_data = cells[1].paragraphs[0]
+        add_formatted_dropdown2(
+            paragraph=par_mode_data,
+            choices=["С фиксацией"],
+            default='Без фиксации'
+        )
+        par_mode_data.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        # Column 2: Color Dropdown
+        par_color_data = cells[2].paragraphs[0]
+        add_formatted_dropdown2(
+            paragraph=par_color_data,
+            choices=['Зеленый'],
+            default='Красный'
+        )
+        par_color_data.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        # Columns 3-7: Signal Dropdowns
+        for col_idx in range(3, 8):
+            par_sig_data = cells[col_idx].paragraphs[0]
+            add_formatted_dropdown2(
+                paragraph=par_sig_data,
+                choices=statuses
+            )
+            par_sig_data.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # 5. Apply Column Widths
+    for row in table.rows:
+        for idx, width in enumerate(TABLE_WIDTHS_LEDS):
+            if idx < len(row.cells):
+                row.cells[idx].width = width
+
+    return table
+
+
+
+####################################################################################
+############################ ТАБЛИЦА ДЛЯ ФУНКЦИОНАЛЬНЫХ КЛАВИШ ###############
+####################################################################################
+
+# Widths for 2 columns: [Key Name, Signal Dropdown]
+TABLE_WIDTHS_KFS = (Inches(2), Inches(4))
+
+def add_table_fks_core4(doc, choices, key_count=16):
+    """
+    Creates a table for Functional Keys (FKs) configuration.
+    
+    Args:
+        doc: python-docx Document object.
+        choices: List of choices for the signal dropdown.
+        key_count: Number of functional keys (rows) to generate (default 16).
+    """
+    
+    # 1. Create Table: 1 Header row + key_count data rows
+    total_rows = 1 + key_count
+    table = doc.add_table(rows=total_rows, cols=2)
+    table.style = 'Стиль6'
+    table.allow_autofit = False
+
+    # 2. Set Fixed Layout
+    tbl_pr = table._tbl.xpath('./w:tblPr')
+    if tbl_pr:
+        tbl_pr[0].append(
+            parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+        )
+
+    # 3. Configure Header Row (Row 0)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Функциональная клавиша'
+    hdr_cells[1].text = 'Назначенный сигнал'
+
+    for i in range(2):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        try:
+            set_cell_vertical_alignment(hdr_cells[i], align="center")
+        except NameError:
+            pass
+
+    # Set Header Repeat (if table spans multiple pages)
+    set_repeat_table_header(table.rows[0])
+
+    # 4. Generate Data Rows (FK 1 to FK 16)
+    for row_idx in range(1, total_rows):
+        row = table.rows[row_idx]
+        cells = row.cells
+        
+        # Column 0: Key Name (e.g., "Функциональная клавиша 1")
+        cells[0].text = f'Функциональная клавиша {row_idx}'
+        p_name = cells[0].paragraphs[0]
+        p_name.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        # Column 1: Signal Dropdown
+        par_sig = cells[1].paragraphs[0]
+        add_formatted_dropdown2(
+            paragraph=par_sig,
+            choices=choices
+        )
+        par_sig.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # 5. Apply Column Widths
+    for row in table.rows:
+        for idx, width in enumerate(TABLE_WIDTHS_KFS):
+            if idx < len(row.cells):
+                row.cells[idx].width = width
+
+    return table
+
+
+
+
+#########################################  НОВАЯ  ###################################
+################################ ТАБЛИЦА ДЛЯ ДИСКРЕТНЫХ ВХОДОВ ВЫХОДОВ  #############
+#####################################################################################
+
+table_binaries4 = (Inches(0.28), Inches(1.23), Inches(1.4), Inches(1.5), Inches(0.55), Inches(0.45), Inches(0.9), Inches(1.05))  #задаем ширину столбцов таблицы вывода репортов
+
+def add_table_binaries_core4(doc, tag = 'for row in items'):
+    table = doc.add_table(rows=4, cols=8)
+    table.style = 'Сетка таблицы51'
+    table.allow_autofit = False
+    set_table_borders(table)
+
+    # Устанавливаем фиксированный макет таблицы с правильным пространством имен
+    table._tbl.xpath('./w:tblPr')[0].append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = '№'
+    hdr_cells[1].text = 'Описание'
+    hdr_cells[2].text = 'Наименование'
+    hdr_cells[3].text = 'Значение / Диапазон'
+    hdr_cells[4].text = 'Ед. изм.'
+    hdr_cells[5].text = 'Шаг'
+    hdr_cells[6].text = 'Значение по умолчанию'
+    hdr_cells[7].text = 'Уставка'
+    for i in range(0,8):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    set_repeat_table_header(table.rows[0]) # повторение заголовка на след странице
+
+    # p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # p.runs[0].font.size = Pt(10)
+
+    #hdr_cells = table.rows[1].cells # вторая строка заголовка таблицы
+    #hdr_cells[2].text = 'ПО'
+    #hdr_cells[3].text = 'ФСУ'
+    #hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # третья строка со служебными тегами
+    hdr_cells = table.rows[1].cells
+    #hdr_cells[2].text = '{%tr for param_name, param_data in input_value.properties.items() %}'
+    #tag = f'for row in items'
+    hdr_cells[2].text = '{%tr '+ tag + ' %}'
+    # четвертая строка со служебными тегами
+    hdr_cells = table.rows[2].cells
+    hdr_cells[0].text = '{{ loop.index }}'
+    hdr_cells[1].text = '{{ row[0] }}'
+    hdr_cells[2].text = '{{ row[1] }}'
+    #hdr_cells[3].text = '{{ row["Наименование ФСУ"] }}'    
+    hdr_cells[3].text = '{{ row[2]  }}'
+    hdr_cells[4].text = '{{ row[3] }}'
+    hdr_cells[5].text = '{{ row[4] }}'
+    hdr_cells[6].text = '{{ row[5] }}'
+    hdr_cells[7].text = '' #'{{ param_data.setpoint }}'
+
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # пятая строка со служебными тегами
+    hdr_cells = table.rows[3].cells
+    hdr_cells[0].text = '{%tr endfor %}'
+
+    set_repeat_table_header(table.rows[1])  # повторение заголовка на след странице
+    for i in range(0,8):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        #set_cell_border(hdr_cells[i], bottom={"val": "double"}) # подчеркиваем заголовок двойной чертой
+
+    # формируем финальный заголок слияниями ячеек
+    #table.cell(0, 2).merge(table.cell(0, 3))
+    #table.cell(0, 0).merge(table.cell(1, 0))
+    #table.cell(0, 1).merge(table.cell(1, 1))
+    #table.cell(0, 4).merge(table.cell(1, 4))
+    #table.cell(0, 5).merge(table.cell(1, 5))
+    #table.cell(0, 6).merge(table.cell(1, 6))
+    #table.cell(0, 7).merge(table.cell(1, 7))
+    #table.cell(0, 8).merge(table.cell(1, 8))
+
+    table.cell(1, 0).merge(table.cell(1, 7))
+    table.cell(3, 0).merge(table.cell(3, 7))
+
+    for row in table.rows:
+        for idx, width in enumerate(table_binaries4):
+            row.cells[idx].width = width
+    #add_row_table_reports(table, ('','','','','','')) # добавляем пустую строчку, чтобы двойное подчеркивание сохранить
+
+        # Устанавливаем высоту шрифта (11 пунктов) для всех ячеек таблицы
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(11)  # Устанавливаем размер шрифта 12 пунктов
+
+    return table

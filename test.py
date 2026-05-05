@@ -19,4 +19,6 @@ for sig in di_sigs:
 #sigs = order_data.get_fsu_out_signals()
 #print(sigs)
 
-sigs = order_data.get_slots_data()
+sigs = order_data.get_data_for_configuration()
+
+

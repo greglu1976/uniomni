@@ -1,0 +1,4578 @@
+{
+	  "Transformations":[
+    {
+      "Transformation":"MeasPhI3phs_1_Current_Transformation",
+      "InitialDeclarationUnits":"о.е.",
+      "AvailableUnits":[
+        {
+          "Units":"kA (первич.)",
+          "Type":"Primary",
+          "Coefficient":1,
+          "CoefficientParameter":"MeasPhI3phs_1_Current_TransCoeff"
+        },
+        {
+          "Units":"A (вторич.)",
+          "Type":"Secondary",
+          "Coefficient":1
+        },
+        {
+          "Units":"о.е.",
+          "Type":"Relative",
+          "Coefficient":1,
+          "BasisParameter":"MeasPhI3phs_1_Current_Basis"
+        }
+      ]
+    },
+    {
+      "Transformation":"CalcNSeqI_1_Current_Transformation",
+      "InitialDeclarationUnits":"о.е.",
+      "AvailableUnits":[
+        {
+          "Units":"kA (первич.)",
+          "Type":"Primary",
+          "Coefficient":1,
+          "CoefficientParameter":"CalcNSeqI_1_Current_TransCoeff"
+        },
+        {
+          "Units":"A (вторич.)",
+          "Type":"Secondary",
+          "Coefficient":1
+        },
+        {
+          "Units":"о.е.",
+          "Type":"Relative",
+          "Coefficient":1,
+          "BasisParameter":"CalcNSeqI_1_Current_Basis"
+        }
+      ]
+    },
+    {
+      "Transformation":"Top_Transformation",
+      "InitialDeclarationUnits":"мс",
+      "AvailableUnits":[
+        {
+          "Units":"мс",
+          "Type":"MultiplicationCoefficient",
+          "Coefficient":1
+        },
+        {
+          "Units":"с",
+          "Type":"MultiplicationCoefficient",
+          "Coefficient":0.001
+        },
+        {
+          "Units":"мин",
+          "Type":"MultiplicationCoefficient",
+          "Coefficient":0.00001666665
+        }
+      ]
+    }
+  ],
+    "Parameters": [
+    {
+      "Parameter": "CLS_1_CLS_TmaxCB_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_Tpulse_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LTCBLKTOC_1_PTOC1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_I2op_SG1",
+      "Transformation": "CalcNSeqI_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_1_RVTR1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_2_RVTR1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_Tpulse_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_Tpulse_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PHAR1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_IopCoars_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_IopCoars_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_IopCoars_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TALMGASLGC_1_PTRC1_TopOnBlk_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TLTCGASLGC_1_LLN0_TopOnBlk_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TTRGASLGC_1_LLN0_TopOnBlk_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVARCTOC_1_PTOC1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_ElmgWorking_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_EnBlk_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_FailureCtrlElmg_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_Tblk_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_TchangeCB_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_ClsTPtime_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_OpnTPtime_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TextenCls_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TonFaul_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Iop_SG1",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Top_SG1",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "CLS_1_CLS_TmaxCB_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_Tpulse_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LTCBLKTOC_1_PTOC1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_I2op_SG2",
+      "Transformation": "CalcNSeqI_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_1_RVTR1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_2_RVTR1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_Tpulse_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_Tpulse_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PHAR1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_IopCoars_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_IopCoars_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_IopCoars_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TALMGASLGC_1_PTRC1_TopOnBlk_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TLTCGASLGC_1_LLN0_TopOnBlk_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TTRGASLGC_1_LLN0_TopOnBlk_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVARCTOC_1_PTOC1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_ElmgWorking_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_EnBlk_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_FailureCtrlElmg_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_Tblk_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_TchangeCB_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_ClsTPtime_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_OpnTPtime_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TextenCls_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TonFaul_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Iop_SG2",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Top_SG2",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "CLS_1_CLS_TmaxCB_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_Tpulse_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LTCBLKTOC_1_PTOC1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_I2op_SG3",
+      "Transformation": "CalcNSeqI_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_1_RVTR1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_2_RVTR1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_Tpulse_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_Tpulse_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PHAR1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_IopCoars_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_IopCoars_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_IopCoars_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TALMGASLGC_1_PTRC1_TopOnBlk_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TLTCGASLGC_1_LLN0_TopOnBlk_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TTRGASLGC_1_LLN0_TopOnBlk_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVARCTOC_1_PTOC1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_ElmgWorking_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_EnBlk_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_FailureCtrlElmg_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_Tblk_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_TchangeCB_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_ClsTPtime_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_OpnTPtime_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TextenCls_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TonFaul_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Iop_SG3",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Top_SG3",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "CLS_1_CLS_TmaxCB_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_Tpulse_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LTCBLKTOC_1_PTOC1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_I2op_SG4",
+      "Transformation": "CalcNSeqI_1_Current_Transformation"
+    },
+	{
+      "Parameter": "LVNSTOC_1_NSPTOC1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_1_RVTR1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVRBVTR_2_RVTR1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_Tpulse_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_Tpulse_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PHAR1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_IopCoars_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_IopCoars_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC2_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_IopCoars_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_LVTTOC_1_PTOC3_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TALMGASLGC_1_PTRC1_TopOnBlk_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TLTCGASLGC_1_LLN0_TopOnBlk_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "TTRGASLGC_1_LLN0_TopOnBlk_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVARCTOC_1_PTOC1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_ElmgWorking_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_EnBlk_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVCBSUP_1_RCBF1_T_FailureCtrlElmg_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_LVTOC_1_PTOC1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_Tblk_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SWCTRL_1_CBCSWI1_TchangeCB_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_ClsTPtime_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_OpnTPtime_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TextenCls_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_SwitchDevice_1_CB1_TonFaul_SG4",
+      "Transformation": "Top_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Iop_SG4",
+      "Transformation": "MeasPhI3phs_1_Current_Transformation"
+    },
+	{
+      "Parameter": "T_TPBRF_1_GENRBRF1_Top_SG4",
+      "Transformation": "Top_Transformation"
+    },
+    {
+      "Parameter": "Mod",
+      "Enum": "Mod"
+    },
+    {
+      "Parameter": "Supervision_TimeSource",
+      "Enum": "TimeSources"
+    },
+    {
+      "Parameter": "Supervision_InterfaceRED12",
+      "Enum": "No_PRP_HSR_RSTP"
+    },
+    {
+      "Parameter": "Supervision_InterfaceRED34",
+      "Enum": "No_PRP_HSR_RSTP"
+    },
+    {
+      "Parameter": "DisturbanceRecorder_TrgMod",
+      "Enum": "TrgMod"
+    },
+    {
+      "Parameter": "DisturbanceRecorder_RcdMod",
+      "Enum": "RcdMod"
+    },
+    {
+      "Parameter": "DisturbanceRecorder_LevMod",
+      "Enum": "LevMod"
+    },
+    {
+      "Parameter": "ValueUpdateMode",
+      "Enum": "Cyclic_Sporadic_Combined"
+    },
+    {
+      "Parameter": "UnitMeas",
+      "Enum": "SIUnitKind"
+    },
+    {
+      "Parameter": "Multiplier",
+      "Enum": "MultiplierKind"
+    },
+    {
+      "Parameter": "TypeValueCalculated",
+      "Enum": "TypeValue_Calculated"
+    },
+    {
+      "Parameter": "Diagnostics_CurrentTimeSource",
+      "Enum": "CurrentTimeSource"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_ExtVFlMod",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_SBMod",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVBTSRBLC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBRECRBRE1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_ExtVFlMod",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_KschemeCT",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn2_OCControl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_LowIsolSignCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_BlkToClsFrmFailureTrip",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn1_OCControl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_SBMod",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_StrMod",
+      "Enum": "Internal_PTOC123"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_ExtSignGen_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_KnobCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVBTSRBLC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_PTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn2_OCControl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA6",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkCtrlFrmInsAlm",
+      "Enum": "NotProvided_InsAlm_InsAlmLow"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_LowIsolGAS_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_SD_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_TypeOfCtrlCurrent",
+      "Enum": "TypeOfCtrlCurrent"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASBlock_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_MICMod",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CurrentPickUp",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkFrmCBPosFault",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC3_Ctrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPOpnResetCtrl",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_MICMod",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASSign_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBCSoperationCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_TestBlock_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_ActUpSwitch",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV2_VoltStrCond",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_GAS_OCControl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCSign_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VolMod",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn1_OCControl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VolMod",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV1_VoltStrCond",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC3_Ctrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PHAR1_RegBlock",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "VirtualKey_28_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_21_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_31_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_30_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_20_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_11_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_38_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_39_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_17_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_42_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_16_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_10_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_22_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_18_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_41_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_7_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_23_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_35_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_9_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_26_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_33_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_14_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_44_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_34_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_24_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_29_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_12_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_43_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_37_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_15_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_3_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_25_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_13_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_6_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_1_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_45_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_19_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_36_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_32_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_8_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_40_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_27_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_4_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_5_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_2_Condition",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC2_Ctrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_BlkToOpnSpeedUp",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPClsResetCtrl",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC3_Ctrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBOSoperationCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_OCcircuitFailureCtrl",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_ExtVFlMod",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_MICMod",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OpExt_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_KschemeCT",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_AssymCtrlMod",
+      "Enum": "AsymmetryControlCurrentMode"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBRECRBRE1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_PNL_1_PNL_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CBOSTypeCtrl",
+      "Enum": "CBOSTypeCtrl"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC2_Ctrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA5",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_CtlCir_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_RBLC1_StepSel",
+      "Enum": "StepSelection1"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC2_Ctrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_MDCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_LowIsolTripCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_SBMod",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_RstFrmCLS",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_ConditionForElmgLaunchFault",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_SwOperExcTim_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VolMod",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_LowIsolTripCtrl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_IO_1_IO_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkToClsFrmLowIsol",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_HVBCTRL_1_CBCSWI1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_SWCTRL_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCnnSign_Ctl",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_OCcir_CB",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_StrMod",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_StrMod",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LTCBLKTOC_1_PTOC1_EnaDis",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl1_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl1_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl1_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl1_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_ExtVFlMod_SG3",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_ExtVFlMod_SG1",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_ExtVFlMod_SG2",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_ExtVFlMod_SG4",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_SBMod_SG4",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_SBMod_SG1",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_SBMod_SG3",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_SBMod_SG2",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVBTSRBLC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVBTSRBLC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVBTSRBLC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVBTSRBLC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBRECRBRE1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBRECRBRE1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBRECRBRE1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBRECRBRE1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_ExtVFlMod_SG1",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_ExtVFlMod_SG3",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_ExtVFlMod_SG2",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_ExtVFlMod_SG4",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_KschemeCT_SG1",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_KschemeCT_SG4",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_KschemeCT_SG2",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_KschemeCT_SG3",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn2_OCControl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn2_OCControl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn2_OCControl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn2_OCControl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_LowIsolSignCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_LowIsolSignCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_LowIsolSignCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_LowIsolSignCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_BlkToClsFrmFailureTrip_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_BlkToClsFrmFailureTrip_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_BlkToClsFrmFailureTrip_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_BlkToClsFrmFailureTrip_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG1_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG1_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG1_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG1_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "HVTCBOFF_1_HVCBPTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod1_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod1_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod1_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod1_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn1_OCControl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn1_OCControl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn1_OCControl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_ARCnn1_OCControl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_SBMod_SG2",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_SBMod_SG4",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_SBMod_SG1",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_SBMod_SG3",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_StrMod_SG4",
+      "Enum": "Internal_PTOC123"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_StrMod_SG2",
+      "Enum": "Internal_PTOC123"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_StrMod_SG3",
+      "Enum": "Internal_PTOC123"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_StrMod_SG1",
+      "Enum": "Internal_PTOC123"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod2_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod2_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod2_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod2_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod2_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod2_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod2_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VCMod2_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_ExtSignGen_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_ExtSignGen_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_ExtSignGen_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_ExtSignGen_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_KnobCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_KnobCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_KnobCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_KnobCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF2_1_LVCBPTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl2_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl2_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl2_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_IEDvt_OCControl2_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVBTSRBLC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVBTSRBLC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVBTSRBLC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVBTSRBLC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_PTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_PTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_PTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_PTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA3_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA3_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA3_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA3_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn2_OCControl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn2_OCControl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn2_OCControl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn2_OCControl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA6_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA6_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA6_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA6_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkCtrlFrmInsAlm_SG2",
+      "Enum": "NotProvided_InsAlm_InsAlmLow"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkCtrlFrmInsAlm_SG3",
+      "Enum": "NotProvided_InsAlm_InsAlmLow"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkCtrlFrmInsAlm_SG4",
+      "Enum": "NotProvided_InsAlm_InsAlmLow"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkCtrlFrmInsAlm_SG1",
+      "Enum": "NotProvided_InsAlm_InsAlmLow"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_LowIsolGAS_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_LowIsolGAS_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_LowIsolGAS_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_LowIsolGAS_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_SD_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_SD_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_SD_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_SD_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVARCTOC_1_PTOC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_TypeOfCtrlCurrent_SG1",
+      "Enum": "TypeOfCtrlCurrent"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_TypeOfCtrlCurrent_SG4",
+      "Enum": "TypeOfCtrlCurrent"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_TypeOfCtrlCurrent_SG2",
+      "Enum": "TypeOfCtrlCurrent"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_TypeOfCtrlCurrent_SG3",
+      "Enum": "TypeOfCtrlCurrent"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASBlock_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASBlock_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASBlock_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASBlock_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA4_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA4_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA4_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA4_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_MICMod_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_MICMod_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_MICMod_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_MICMod_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CurrentPickUp_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CurrentPickUp_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CurrentPickUp_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CurrentPickUp_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkFrmCBPosFault_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkFrmCBPosFault_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkFrmCBPosFault_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkFrmCBPosFault_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC3_Ctrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC3_Ctrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC3_Ctrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC3_Ctrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPOpnResetCtrl_SG2",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPOpnResetCtrl_SG1",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPOpnResetCtrl_SG4",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPOpnResetCtrl_SG3",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_MICMod_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_MICMod_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_MICMod_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_MICMod_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASSign_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASSign_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASSign_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_GASSign_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA1_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA1_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA1_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA1_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBCSoperationCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBCSoperationCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBCSoperationCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBCSoperationCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG2_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG2_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG2_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG2_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_TestBlock_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_TestBlock_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_TestBlock_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_TestBlock_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_ActUpSwitch_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_ActUpSwitch_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_ActUpSwitch_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_ActUpSwitch_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod2_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod2_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod2_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod2_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA2_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA2_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA2_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA2_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV2_VoltStrCond_SG4",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV2_VoltStrCond_SG1",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV2_VoltStrCond_SG2",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV2_VoltStrCond_SG3",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_GAS_OCControl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_GAS_OCControl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_GAS_OCControl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_GAS_OCControl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBPTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCSign_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCSign_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCSign_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCSign_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_CBCSWI1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VolMod_SG2",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VolMod_SG4",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VolMod_SG3",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VolMod_SG1",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn1_OCControl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn1_OCControl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn1_OCControl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_CBFPnn1_OCControl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod1_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod1_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod1_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VCMod1_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VolMod_SG3",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VolMod_SG4",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VolMod_SG1",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_VolMod_SG2",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV1_VoltStrCond_SG4",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV1_VoltStrCond_SG1",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV1_VoltStrCond_SG2",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTUV1_VoltStrCond_SG3",
+      "Enum": "OnVoltage_Combined"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC3_Ctrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC3_Ctrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC3_Ctrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC3_Ctrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PHAR1_RegBlock_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PHAR1_RegBlock_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PHAR1_RegBlock_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PHAR1_RegBlock_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "VirtualKey_28_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_28_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_28_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_28_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_21_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_21_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_21_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_21_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_31_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_31_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_31_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_31_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_30_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_30_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_30_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_30_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_20_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_20_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_20_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_20_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_11_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_11_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_11_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_11_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_38_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_38_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_38_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_38_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_39_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_39_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_39_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_39_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_17_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_17_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_17_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_17_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_42_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_42_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_42_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_42_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_16_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_16_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_16_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_16_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_10_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_10_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_10_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_10_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_22_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_22_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_22_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_22_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_18_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_18_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_18_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_18_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_41_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_41_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_41_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_41_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_7_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_7_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_7_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_7_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_23_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_23_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_23_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_23_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_35_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_35_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_35_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_35_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_9_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_9_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_9_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_9_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_26_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_26_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_26_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_26_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_33_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_33_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_33_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_33_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_14_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_14_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_14_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_14_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_44_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_44_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_44_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_44_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_34_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_34_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_34_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_34_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_24_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_24_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_24_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_24_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_29_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_29_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_29_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_29_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_12_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_12_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_12_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_12_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_43_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_43_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_43_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_43_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_37_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_37_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_37_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_37_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_15_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_15_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_15_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_15_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_3_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_3_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_3_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_3_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_25_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_25_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_25_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_25_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_13_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_13_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_13_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_13_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_6_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_6_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_6_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_6_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_1_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_1_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_1_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_1_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_45_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_45_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_45_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_45_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_19_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_19_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_19_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_19_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_36_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_36_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_36_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_36_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_32_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_32_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_32_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_32_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_8_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_8_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_8_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_8_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_40_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_40_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_40_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_40_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_27_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_27_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_27_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_27_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_4_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_4_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_4_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_4_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_5_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_5_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_5_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_5_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_2_Condition_SG1",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_2_Condition_SG2",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_2_Condition_SG4",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "VirtualKey_2_Condition_SG3",
+      "Enum": "VirtualKey"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC2_Ctrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC2_Ctrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC2_Ctrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_RBRE1_PVOC2_Ctrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_BlkToOpnSpeedUp_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_BlkToOpnSpeedUp_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_BlkToOpnSpeedUp_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_BlkToOpnSpeedUp_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPClsResetCtrl_SG1",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPClsResetCtrl_SG4",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPClsResetCtrl_SG2",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_TPClsResetCtrl_SG3",
+      "Enum": "Long-lasting_Pulse"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC3_Ctrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC3_Ctrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC3_Ctrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC3_Ctrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBOSoperationCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBOSoperationCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBOSoperationCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_CBOSoperationCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_OCcircuitFailureCtrl_SG3",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_OCcircuitFailureCtrl_SG2",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_OCcircuitFailureCtrl_SG4",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_OCcircuitFailureCtrl_SG1",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_ExtVFlMod_SG3",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_ExtVFlMod_SG4",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_ExtVFlMod_SG2",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_ExtVFlMod_SG1",
+      "Enum": "UnblockBlock"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_MICMod_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_MICMod_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_MICMod_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC1_MICMod_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod1_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod1_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod1_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_VCMod1_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OpExt_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OpExt_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OpExt_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OpExt_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG3_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG3_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG3_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SG3_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_KschemeCT_SG2",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_KschemeCT_SG1",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_KschemeCT_SG3",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_KschemeCT_SG4",
+      "Enum": "Star_Triangle"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_AssymCtrlMod_SG4",
+      "Enum": "AsymmetryControlCurrentMode"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_AssymCtrlMod_SG1",
+      "Enum": "AsymmetryControlCurrentMode"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_AssymCtrlMod_SG3",
+      "Enum": "AsymmetryControlCurrentMode"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_AssymCtrlMod_SG2",
+      "Enum": "AsymmetryControlCurrentMode"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBRECRBRE1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBRECRBRE1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBRECRBRE1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVTRESCBOFF1_1_LVCBRECRBRE1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVTOC_1_PTOC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_PNL_1_PNL_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_PNL_1_PNL_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_PNL_1_PNL_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_PNL_1_PNL_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CBOSTypeCtrl_SG1",
+      "Enum": "CBOSTypeCtrl"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CBOSTypeCtrl_SG4",
+      "Enum": "CBOSTypeCtrl"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CBOSTypeCtrl_SG3",
+      "Enum": "CBOSTypeCtrl"
+    },
+    {
+      "Parameter": "T_TPBRF_1_GENRBRF1_CBOSTypeCtrl_SG2",
+      "Enum": "CBOSTypeCtrl"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SwitchDevice_1_CB1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC2_Ctrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC2_Ctrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC2_Ctrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_LVTPTOC2_Ctrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA5_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA5_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA5_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_SA5_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_CtlCir_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_CtlCir_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_CtlCir_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_CtlCir_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_RBLC1_StepSel_SG1",
+      "Enum": "StepSelection1"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_RBLC1_StepSel_SG2",
+      "Enum": "StepSelection1"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_RBLC1_StepSel_SG4",
+      "Enum": "StepSelection1"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_RBLC1_StepSel_SG3",
+      "Enum": "StepSelection1"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC2_Ctrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC2_Ctrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC2_Ctrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_PVOC2_Ctrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_MDCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_MDCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_MDCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "CLS_1_CLS_MDCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC2_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_LowIsolTripCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_LowIsolTripCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_LowIsolTripCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_LowIsolTripCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TALMGASLGC_1_PTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_SBMod_SG2",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_SBMod_SG1",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_SBMod_SG4",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_SBMod_SG3",
+      "Enum": "Blocklevel_NotProvided_EnaDisSV"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_RstFrmCLS_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_RstFrmCLS_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_RstFrmCLS_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_RstFrmCLS_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_ConditionForElmgLaunchFault_SG1",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_ConditionForElmgLaunchFault_SG4",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_ConditionForElmgLaunchFault_SG3",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_ConditionForElmgLaunchFault_SG2",
+      "Enum": "CtrlElectromagnetOnOff"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_SwOperExcTim_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_SwOperExcTim_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_SwOperExcTim_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_SwOperExcTim_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VolMod_SG1",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VolMod_SG4",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VolMod_SG2",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "T2_LVTTOC_1_PTOC3_VolMod_SG3",
+      "Enum": "VoltageMode"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TRESOFFLVLGC_1_LVCBRBLC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TOVCTOC_1_HVPTOC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_LowIsolTripCtrl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_LowIsolTripCtrl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_LowIsolTripCtrl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_LowIsolTripCtrl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_TTOCLGC_UIRZ_1_PTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_IO_1_IO_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_IO_1_IO_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_IO_1_IO_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_IO_1_IO_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkToClsFrmLowIsol_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkToClsFrmLowIsol_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkToClsFrmLowIsol_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_LVCBSUP_1_RCBF1_BlkToClsFrmLowIsol_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_HVBCTRL_1_CBCSWI1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_HVBCTRL_1_CBCSWI1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_HVBCTRL_1_CBCSWI1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_HVBCTRL_1_CBCSWI1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TTRGASLGC_1_PTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_SWCTRL_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_SWCTRL_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_SWCTRL_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T_SWCTRL_1_SWCTRL_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCnnSign_Ctl_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCnnSign_Ctl_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCnnSign_Ctl_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_LVALH_1_CALH1_OCnnSign_Ctl_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "TLTCGASLGC_1_PTRC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVNSTOC_1_NSPTOC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_OCcir_CB_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_OCcir_CB_SG4",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_OCcir_CB_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "T2_SignAssembly_1_Ctl_OCcir_CB_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_StrMod_SG2",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_StrMod_SG4",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_StrMod_SG1",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_2_RVTR1_StrMod_SG3",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_StrMod_SG3",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_StrMod_SG2",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_StrMod_SG4",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LVRBVTR_1_RVTR1_StrMod_SG1",
+      "Enum": "Internal_External"
+    },
+    {
+      "Parameter": "LTCBLKTOC_1_PTOC1_EnaDis_SG2",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LTCBLKTOC_1_PTOC1_EnaDis_SG3",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LTCBLKTOC_1_PTOC1_EnaDis_SG1",
+      "Enum": "NotProvided_Provided"
+    },
+    {
+      "Parameter": "LTCBLKTOC_1_PTOC1_EnaDis_SG4",
+      "Enum": "NotProvided_Provided"
+    }
+  ],
+  "Enums": [
+    {
+      "Enum": "No_PRP_HSR_RSTP",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Отключен"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "PRP (IEC 62439-3)"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "HSR (IEC 62439-3)"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "RSTP (IEEE 802.1w)"
+        }
+      ]
+    },
+    {
+      "Enum": "TrgMod",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Автоматический пуск по заданным условиям"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Внешний пуск"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "Оба критерия"
+        }
+      ]
+    },
+    {
+      "Enum": "RcdMod",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Перезапись по кольцу"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Остановка по заполнению памяти"
+        }
+      ]
+    },
+    {
+      "Enum": "LevMod",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "По переднему фронту"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "По заднему фронту"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "По переднему и заднему фронту"
+        },
+        {
+          "ParameterValue": 4,
+          "VisibleValue": "Другое"
+        }
+      ]
+    },
+    {
+      "Enum": "TimeSources",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Отсутствует"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "SNTP"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "PTP"
+        },
+        {
+          "ParameterValue": 4,
+          "VisibleValue": "SNTP+1PPS"
+        },
+        {
+          "ParameterValue": 5,
+          "VisibleValue": "Протокол"
+        },
+        {
+          "ParameterValue": 6,
+          "VisibleValue": "Протокол+1PPS"
+        }
+      ]
+    },
+    {
+      "Enum": "Mod",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Введено"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Блокировано"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "Тест"
+        },
+        {
+          "ParameterValue": 4,
+          "VisibleValue": "Тест+блокировано"
+        },
+        {
+          "ParameterValue": 5,
+          "VisibleValue": " Выведено"
+        }
+      ]
+    },
+    {
+      "Enum": "NotProvided_Provided",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Предусмотрено"
+        }
+      ]
+    },
+    {
+      "Enum": "Internal_External",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Внутренний"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Внешний"
+        }
+      ]
+    },
+    {
+      "Enum": "AsymmetryControlCurrentMode",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "по I2"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "по I2/I1"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "по I2 или по I2/I1"
+        }
+      ]
+    },
+    {
+      "Enum": "Long-lasting_Pulse",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Длительный"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Импульсный"
+        }
+      ]
+    },
+    {
+      "Enum": "UnblockBlock",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Деблокировка"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Блокировка"
+        }
+      ]
+    },
+    {
+      "Enum": "VoltageMode",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Управляющее напряжение"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Вольтметровая блокировка"
+        }
+      ]
+    },
+    {
+      "Enum": "StepSelection1",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "1 ступень"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "2 ступень"
+        },
+        {
+          "ParameterValue": 4,
+          "VisibleValue": "3 ступень"
+        }
+      ]
+    },
+    {
+      "Enum": "OnVoltage_Combined",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "По Uмин"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Комбинированный"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Внешний"
+        }
+      ]
+    },
+    {
+      "Enum": "TypeOfCtrlCurrent",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Предусмотрено по внутр. ПО"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Предусмотрено по внеш. ПО"
+        }
+      ]
+    },
+    {
+      "Enum": "CBOSTypeCtrl",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Предусмотрено по ЭМО1"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Предусмотрено по ЭМО1 и ЭМО2"
+        }
+      ]
+    },
+    {
+      "Enum": "VirtualKey",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "От ИЧМ"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "От ДВ"
+        }
+      ]
+    },
+    {
+      "Enum": "Cyclic_Sporadic_Combined",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Циклически"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Спорадически"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Комбинировано"
+        }
+      ]
+    },
+    {
+      "Enum": "SIUnitKind",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Безразмерная величина"
+        },
+        {
+          "ParameterValue": 4,
+          "VisibleValue": "с"
+        },
+        {
+          "ParameterValue": 5,
+          "VisibleValue": "А"
+        },
+        {
+          "ParameterValue": 9,
+          "VisibleValue": "град."
+        },
+        {
+          "ParameterValue": 10,
+          "VisibleValue": "рад"
+        },
+        {
+          "ParameterValue": 23,
+          "VisibleValue": "°С"
+        },
+        {
+          "ParameterValue": 27,
+          "VisibleValue": "См"
+        },
+        {
+          "ParameterValue": 29,
+          "VisibleValue": "В"
+        },
+        {
+          "ParameterValue": 30,
+          "VisibleValue": "Ом"
+        },
+        {
+          "ParameterValue": 33,
+          "VisibleValue": "Гц"
+        },
+        {
+          "ParameterValue": 38,
+          "VisibleValue": "Вт"
+        },
+        {
+          "ParameterValue": 53,
+          "VisibleValue": "1/с"
+        },
+        {
+          "ParameterValue": 54,
+          "VisibleValue": "рад/с"
+        },
+        {
+          "ParameterValue": 61,
+          "VisibleValue": "ВА"
+        },
+        {
+          "ParameterValue": 62,
+          "VisibleValue": "Вт"
+        },
+        {
+          "ParameterValue": 63,
+          "VisibleValue": "ВАр"
+        },
+        {
+          "ParameterValue": 64,
+          "VisibleValue": "φ"
+        },
+        {
+          "ParameterValue": 65,
+          "VisibleValue": "Cosφ"
+        },
+        {
+          "ParameterValue": 71,
+          "VisibleValue": "ВАч"
+        },
+        {
+          "ParameterValue": 72,
+          "VisibleValue": "Втч"
+        },
+        {
+          "ParameterValue": 73,
+          "VisibleValue": "ВАрч"
+        },
+        {
+          "ParameterValue": 75,
+          "VisibleValue": "Гц/с"
+        },
+        {
+          "ParameterValue": 81,
+          "VisibleValue": "Вт/с"
+        }
+      ]
+    },
+    {
+      "Enum": "MultiplierKind",
+      "Value": [
+        {
+          "ParameterValue": -24,
+          "VisibleValue": "и (10e-24)"
+        },
+        {
+          "ParameterValue": -21,
+          "VisibleValue": "з (10e-21)"
+        },
+        {
+          "ParameterValue": -18,
+          "VisibleValue": "а (10e-18)"
+        },
+        {
+          "ParameterValue": -15,
+          "VisibleValue": "ф (10e-15)"
+        },
+        {
+          "ParameterValue": -12,
+          "VisibleValue": "п (10e-12)"
+        },
+        {
+          "ParameterValue": -9,
+          "VisibleValue": "н (10e-9)"
+        },
+        {
+          "ParameterValue": -6,
+          "VisibleValue": "мк (10e-6)"
+        },
+        {
+          "ParameterValue": -3,
+          "VisibleValue": "м (10e-3)"
+        },
+        {
+          "ParameterValue": -2,
+          "VisibleValue": "с (10e-2)"
+        },
+        {
+          "ParameterValue": -1,
+          "VisibleValue": "д (10e-1)"
+        },
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "1 (10e0)"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "да (10e+1)"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "г (10e+2)"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "к (10e+3)"
+        },
+        {
+          "ParameterValue": 6,
+          "VisibleValue": "М (10e+6)"
+        },
+        {
+          "ParameterValue": 9,
+          "VisibleValue": "Г (10e+9)"
+        },
+        {
+          "ParameterValue": 12,
+          "VisibleValue": "Т (10e+12)"
+        },
+        {
+          "ParameterValue": 15,
+          "VisibleValue": "П (10e+15)"
+        },
+        {
+          "ParameterValue": 18,
+          "VisibleValue": "Э (10e+18)"
+        },
+        {
+          "ParameterValue": 21,
+          "VisibleValue": "З (10e+21)"
+        },
+        {
+          "ParameterValue": 24,
+          "VisibleValue": "И (10e+24)"
+        }
+      ]
+    },
+    {
+      "Enum": "CtrlElectromagnetOnOff",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "ЭМВ и ЭМО1"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "ЭМВ, ЭМО1 и ЭМО2"
+        }
+      ]
+    },
+    {
+      "Enum": "Star_Triangle",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Звезда"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Треугольник"
+        }
+      ]
+    },
+    {
+      "Enum": "CurrentTimeSource",
+      "Value": [
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "SNTP1"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "SNTP2"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "Протокол МЭК 60870-5-104"
+        },
+        {
+          "ParameterValue": 4,
+          "VisibleValue": "Протокол МЭК 60870-5-101"
+        },
+        {
+          "ParameterValue": 5,
+          "VisibleValue": "Протокол МЭК 60870-5-103"
+        },
+        {
+          "ParameterValue": 6,
+          "VisibleValue": "PTP"
+        }
+      ]
+    },
+    {
+      "Enum": "Blocklevel_NotProvided_EnaDisSV",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "Блокировка ступени при включенном СВ"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "Блокировка ступени при отключенном СВ"
+        }
+      ]
+    },
+    {
+      "Enum": "Internal_PTOC123",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Внутренний"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "МТЗ 1 ст"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "МТЗ 2 ст"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "МТЗ 3 ст"
+        }
+      ]
+    },
+    {
+      "Enum": "NotProvided_InsAlm_InsAlmLow",
+      "Value": [
+        {
+          "ParameterValue": 0,
+          "VisibleValue": "Не предусмотрено"
+        },
+        {
+          "ParameterValue": 1,
+          "VisibleValue": "От аварийного"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "От аварийного и низкого"
+        }
+      ]
+    }
+  ],
+  "Vectors": []
+}
