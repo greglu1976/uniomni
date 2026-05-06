@@ -20,7 +20,7 @@ import json
 
 from pathlib import Path
 
-from .dropdowns import add_formatted_dropdown2, add_formatted_dropdown3
+from .dropdowns import add_formatted_dropdown2, add_formatted_dropdown3, add_formatted_dropdown2_10pt
 
 
 def set_table_borders(table):
@@ -1415,99 +1415,202 @@ def add_table_fks_core4(doc, choices, key_count=16):
 ################################ ТАБЛИЦА ДЛЯ ДИСКРЕТНЫХ ВХОДОВ ВЫХОДОВ  #############
 #####################################################################################
 
-table_binaries4 = (Inches(0.28), Inches(1.23), Inches(1.4), Inches(1.5), Inches(0.55), Inches(0.45), Inches(0.9), Inches(1.05))  #задаем ширину столбцов таблицы вывода репортов
+table_binaries4 = (Inches(0.28), Inches(1.23), Inches(1.4), Inches(1.5), Inches(0.55), Inches(0.45), Inches(0.9), Inches(1.05))  # задаем ширину столбцов таблицы вывода репортов
 
-def add_table_binaries_core4(doc, tag = 'for row in items'):
-    table = doc.add_table(rows=4, cols=8)
+def add_table_binaries_core4(doc, data_rows):
+    """
+    Создает таблицу с данными параметров
+    
+    Args:
+        doc: документ python-docx
+        data_rows: список кортежей с данными строк (col1, col2, col3, col4, col5, col6)
+    """
+    if not data_rows:
+        return None
+    
+    # Создаем таблицу: заголовок + тело (на 1 строку больше, чем данных)
+    table = doc.add_table(rows=1 + len(data_rows), cols=8)
     table.style = 'Сетка таблицы51'
     table.allow_autofit = False
     set_table_borders(table)
 
-    # Устанавливаем фиксированный макет таблицы с правильным пространством имен
+    # Устанавливаем фиксированный макет таблицы
     table._tbl.xpath('./w:tblPr')[0].append(
         parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
     )
+    
+    # Заполняем заголовок таблицы (первая строка)
     hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = '№'
-    hdr_cells[1].text = 'Описание'
-    hdr_cells[2].text = 'Наименование'
-    hdr_cells[3].text = 'Значение / Диапазон'
-    hdr_cells[4].text = 'Ед. изм.'
-    hdr_cells[5].text = 'Шаг'
-    hdr_cells[6].text = 'Значение по умолчанию'
-    hdr_cells[7].text = 'Уставка'
-    for i in range(0,8):
+    headers = ['№', 'Описание', 'Обозначение ФСУ', 'Значение / Диапазон', 
+               'Ед. изм.', 'Шаг', 'Значение по умолчанию', 'Уставка']
+    
+    for i, header in enumerate(headers):
+        hdr_cells[i].text = header
         p = hdr_cells[i].paragraphs[0]
         p.style = 'ДОК Таблица Заголовок'
         set_cell_vertical_alignment(hdr_cells[i], align="center")
         p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
-    set_repeat_table_header(table.rows[0]) # повторение заголовка на след странице
+    # Повторяем заголовок на следующей странице
+    set_repeat_table_header(table.rows[0])
 
-    # p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    # p.runs[0].font.size = Pt(10)
+    # Заполняем строки данных
+    for row_idx, row_data in enumerate(data_rows):
+        row_cells = table.rows[row_idx + 1].cells
+        
+        # Номер строки (начиная с 1)
+        row_cells[0].text = str(row_idx + 1)
+        row_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        # Данные строки
+        row_cells[1].text = str(row_data[0]) if row_data[0] else ''  # Описание
+        row_cells[2].text = str(row_data[1]) if row_data[1] else ''  # Обозначение ФСУ
+        row_cells[3].text = str(row_data[2]) if row_data[2] else ''  # Значение / Диапазон
+        row_cells[4].text = str(row_data[3]) if row_data[3] else ''  # Ед. изм.
+        row_cells[5].text = str(row_data[4]) if row_data[4] else ''  # Шаг
+        row_cells[6].text = str(row_data[5]) if row_data[5] else ''  # Значение по умолчанию
+        row_cells[7].text = ''  # Уставка (пустое поле для заполнения)
+        
+        # Выравнивание для числовых полей
+        row_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        row_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        row_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        row_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        row_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
-    #hdr_cells = table.rows[1].cells # вторая строка заголовка таблицы
-    #hdr_cells[2].text = 'ПО'
-    #hdr_cells[3].text = 'ФСУ'
-    #hdr_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    # третья строка со служебными тегами
-    hdr_cells = table.rows[1].cells
-    #hdr_cells[2].text = '{%tr for param_name, param_data in input_value.properties.items() %}'
-    #tag = f'for row in items'
-    hdr_cells[2].text = '{%tr '+ tag + ' %}'
-    # четвертая строка со служебными тегами
-    hdr_cells = table.rows[2].cells
-    hdr_cells[0].text = '{{ loop.index }}'
-    hdr_cells[1].text = '{{ row[0] }}'
-    hdr_cells[2].text = '{{ row[1] }}'
-    #hdr_cells[3].text = '{{ row["Наименование ФСУ"] }}'    
-    hdr_cells[3].text = '{{ row[2]  }}'
-    hdr_cells[4].text = '{{ row[3] }}'
-    hdr_cells[5].text = '{{ row[4] }}'
-    hdr_cells[6].text = '{{ row[5] }}'
-    hdr_cells[7].text = '' #'{{ param_data.setpoint }}'
-
-    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    hdr_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    hdr_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    hdr_cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    hdr_cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    hdr_cells[7].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    # пятая строка со служебными тегами
-    hdr_cells = table.rows[3].cells
-    hdr_cells[0].text = '{%tr endfor %}'
-
-    set_repeat_table_header(table.rows[1])  # повторение заголовка на след странице
-    for i in range(0,8):
-        p = hdr_cells[i].paragraphs[0]
-        p.style = 'ДОК Таблица Заголовок'
-        #set_cell_border(hdr_cells[i], bottom={"val": "double"}) # подчеркиваем заголовок двойной чертой
-
-    # формируем финальный заголок слияниями ячеек
-    #table.cell(0, 2).merge(table.cell(0, 3))
-    #table.cell(0, 0).merge(table.cell(1, 0))
-    #table.cell(0, 1).merge(table.cell(1, 1))
-    #table.cell(0, 4).merge(table.cell(1, 4))
-    #table.cell(0, 5).merge(table.cell(1, 5))
-    #table.cell(0, 6).merge(table.cell(1, 6))
-    #table.cell(0, 7).merge(table.cell(1, 7))
-    #table.cell(0, 8).merge(table.cell(1, 8))
-
-    table.cell(1, 0).merge(table.cell(1, 7))
-    table.cell(3, 0).merge(table.cell(3, 7))
-
+    # Устанавливаем ширину столбцов
     for row in table.rows:
         for idx, width in enumerate(table_binaries4):
-            row.cells[idx].width = width
-    #add_row_table_reports(table, ('','','','','','')) # добавляем пустую строчку, чтобы двойное подчеркивание сохранить
+            if idx < len(row.cells):
+                row.cells[idx].width = width
 
-        # Устанавливаем высоту шрифта (11 пунктов) для всех ячеек таблицы
+    # Устанавливаем высоту шрифта (11 пунктов) для всех ячеек таблицы
     for row in table.rows:
         for cell in row.cells:
             for paragraph in cell.paragraphs:
                 for run in paragraph.runs:
-                    run.font.size = Pt(11)  # Устанавливаем размер шрифта 12 пунктов
+                    run.font.size = Pt(11)
+
+    return table
+
+
+
+####################################################################################
+################################ ТАБЛИЦА ДЛЯ РЕГИСТРАЦИИ ###########################
+####################################################################################
+
+
+table_reg4 = (Inches(4.0), Inches(2.0), Inches(1.6), Inches(1.6), Inches(1.6))
+
+def add_table_reg_core4(doc, data_rows):
+    """
+    Создает таблицу для настройки параметров регистрации с выпадающими списками
+    
+    Args:
+        doc: документ python-docx
+        data_rows: список кортежей (наименование, обозначение ФСУ, restrain)
+    """
+    if not data_rows:
+        return None
+    
+    # Создаем таблицу: 2 строки заголовка + строки данных
+    table = doc.add_table(rows=2 + len(data_rows), cols=5)
+    table.style = 'Стиль7'
+    table.allow_autofit = False
+    
+    # Устанавливаем фиксированный макет таблицы
+    table._tbl.xpath('./w:tblPr')[0].append(
+        parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+    )
+    
+    # ====== ПЕРВАЯ СТРОКА ЗАГОЛОВКА ======
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Параметр'
+    hdr_cells[2].text = 'Журнал событий регистрация'
+    hdr_cells[3].text = 'Осциллограф пуск'
+    hdr_cells[4].text = 'Осциллограф регистрация'
+    for i in range(5):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    set_repeat_table_header(table.rows[0])
+    
+    # ====== ВТОРАЯ СТРОКА ЗАГОЛОВКА ======
+    hdr_cells = table.rows[1].cells
+    hdr_cells[0].text = 'Наименование'
+    hdr_cells[1].text = 'Обозначение ФСУ'
+    hdr_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    hdr_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # ====== ОБЪЕДИНЕНИЕ ЯЧЕЕК ======
+    table.cell(0, 0).merge(table.cell(0, 1))
+    table.cell(0, 2).merge(table.cell(1, 2))
+    table.cell(0, 3).merge(table.cell(1, 3))
+    table.cell(0, 4).merge(table.cell(1, 4))
+    
+    # ====== ВАРИАНТЫ ДЛЯ ВЫПАДАЮЩИХ СПИСКОВ ======
+    choices_reg = ["Введено"]
+    choices_osc = ["По переднему фронту", "По заднему фронту", "По любому изменению"]
+    
+    # ====== ЗАПОЛНЕНИЕ ДАННЫХ С ВЫПАДАЮЩИМИ СПИСКАМИ ======
+    for row_idx, row_data in enumerate(data_rows):
+        row_cells = table.rows[row_idx + 2].cells
+        
+        col1, col2, type = row_data
+        
+        # Столбец 0: Наименование (обычный текст)
+        row_cells[0].text = str(col1) if col1 else ''
+        row_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        
+        # Столбец 1: Обозначение ФСУ (обычный текст)
+        row_cells[1].text = str(col2) if col2 else ''
+        row_cells[1].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        
+        # Столбец 2: Журнал событий регистрация (выпадающий список)
+        add_formatted_dropdown2_10pt(
+            paragraph=row_cells[2].paragraphs[0],
+            choices=choices_osc,
+            default="Не выполняется"
+        )
+        row_cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        # Столбец 3: Осциллограф пуск (выпадающий список)
+        if type != 3:
+            row_cells[3].text = 'Не выполняется'
+        else:
+            add_formatted_dropdown2_10pt(
+                paragraph=row_cells[3].paragraphs[0],
+                choices=choices_osc,
+                default="Не выполняется"
+            )        
+        row_cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        # Столбец 4: Осциллограф регистрация (выпадающий список)
+        if type != 3:
+            row_cells[4].text = 'Выведено'
+        else:        
+            add_formatted_dropdown2_10pt(
+                paragraph=row_cells[4].paragraphs[0],
+                choices=choices_reg,
+                default="Выведено"
+            )
+        row_cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # ====== НАСТРОЙКА ШИРИНЫ СТОЛБЦОВ ======
+    for row in table.rows:
+        for idx, width in enumerate(table_reg4):
+            if idx < len(row.cells):
+                row.cells[idx].width = width
+    
+    # ====== УСТАНОВКА РАЗМЕРА ШРИФТА ======
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)
+    
+    set_repeat_table_header(table.rows[0])
+    set_repeat_table_header(table.rows[1])
 
     return table

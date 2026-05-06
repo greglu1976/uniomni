@@ -657,164 +657,175 @@ class OrderHandler:
         # Для корневого элемента parent_group_name пока None, 
         # но так как структура начинается с Groups, первая найденная Group станет родителем
         return _search_recursive(self.data)
-    
 
-# Сбор сигналов для раздела конфигурация !!!!!!!!!!!!!!! ДОРАБОТАТЬ !!!!!!!!!!!!!!!!!!!!
 
+        
+
+    # Сбор сигналов для раздела конфигурация !!!!!!!!!!!!!!! ДОРАБОТАТЬ !!!!!!!!!!!!!!!!!!!!
     def get_data_for_configuration(self):
-
-        sigs_of_func_logic = []
-        for data in self.data:
-            if data["Name"] == "ConfigurationTree":
-                m = data["Nodes"]
-                for node in m:
-                    sigs_of_func_logic.append(node)
-        
-        transformed_data = self.transform_for_word_render(sigs_of_func_logic)
-
-        return self.build_word_structure(transformed_data)
-          
-
-
-
-
-
-
-
-    def transform_for_word_render(self, data, parent_table_title=None, result_list=None):
         """
-        Рекурсивная функция для преобразования древовидной структуры в плоский список
-        событий для рендера в Word.
-        
-        Возвращает список словарей вида:
-        - {'type': 'new_table', 'title': 'Имя таблицы'}
-        - {'type': 'row', 'name': 'Имя параметра', 'table_ref': 'Имя родительской таблицы'}
-        """
-        if result_list is None:
-            result_list = []
-
-        for item in data:
-            name = item.get('Name')
-            item_type = item.get('Type')
-            nodes = item.get('Nodes', [])
-
-            if item_type == 'Group':
-                # Если у группы есть вложенные узлы, она потенциально является таблицей
-                if nodes:
-                    # Проверяем, есть ли внутри только параметры или еще группы
-                    # В вашем случае вложенные группы (как Летнее время) тоже должны стать отдельными таблицами
-                    
-                    # 1. Добавляем маркер начала новой таблицы
-                    result_list.append({
-                        'type': 'new_table',
-                        'title': name,
-                        'parent_title': parent_table_title # Для сохранения иерархии, если нужно
-                    })
-                    
-                    # 2. Рекурсивно обрабатываем вложенные элементы
-                    # Теперь текущая группа становится "родителем" для вложенных элементов
-                    self.transform_for_word_render(nodes, parent_table_title=name, result_list=result_list)
-                else:
-                    # Пустая группа, можно игнорировать или добавить как заглушку
-                    pass
-                    
-            elif item_type == 'Parameter':
-                # Это строка данных для текущей активной таблицы
-                result_list.append({
-                    'type': 'row',
-                    'name': name,
-                    'table_ref': parent_table_title,
-                    # Здесь можно добавить значение по умолчанию или пустое место, 
-                    # так как в исходных данных значений нет, только имена
-                    'value': '' 
-                })
-
-        return result_list     
-    
-
-
-    def build_word_structure(self, data):
-        """
-        Превращает список в структуру для Word:
+        Сбор сигналов для раздела конфигурация.
+        Возвращает структуру для Word:
         [
             {
-                'main_title': 'Синхронизация времени',
+                'main_title': 'Название группы',
                 'tables': [
-                    {'title': 'Общие настройки', 'rows': [...]},
-                    {'title': 'Параметры летнего времени', 'rows': [...]},
+                    {'title': 'Название подгруппы', 'rows': [{'name': 'параметр1', 'value': ''}, ...]},
                     ...
                 ]
             },
             ...
         ]
         """
-        # Сначала соберём все основные разделы
-        main_sections = {}
-        current_main = None
+        # 1. Получаем дерево конфигурации
+        config_tree = None
+        for data in self.data:
+            if data["Name"] == "ConfigurationTree":
+                config_tree = data["Nodes"]
+                break
         
-        for item in data:
-            if item['type'] == 'new_table':
-                title = item['title']
-                parent = item.get('parent_title')
-                
-                if parent is None:
-                    # Новый основной раздел
-                    current_main = title
-                    main_sections[current_main] = {
-                        'tables': defaultdict(list)  # key: название таблицы, value: список строк
-                    }
-                    # Автоматически создаём таблицу "Общие настройки"
-                    main_sections[current_main]['tables']['Общие настройки'] = []
-                else:
-                    # Подраздел — будет отдельной таблицей внутри основного раздела
-                    # Сначала найдём, к какому основному разделу относится
-                    if current_main is None:
-                        # Если parent_title есть, но текущий основной раздел ещё не задан —
-                        # ищем его по parent_title (на случай, если new_table идёт раньше своего parent_title)
-                        # В вашем списке всё идёт по порядку, но на всякий случай:
-                        found = False
-                        for main in main_sections:
-                            if main == parent:
-                                current_main = main
-                                found = True
-                                break
-                        if not found:
-                            raise ValueError(f"Подраздел '{title}' ссылается на отсутствующий раздел '{parent}'")
-                    
-                    # Создаём таблицу для подраздела, если её ещё нет
-                    if title not in main_sections[current_main]['tables']:
-                        main_sections[current_main]['tables'][title] = []
-            
-            elif item['type'] == 'row':
-                table_ref = item['table_ref']
-                # Найти, в какой основной раздел и какую таблицу добавить
-                for main_title, main_data in main_sections.items():
-                    if table_ref == main_title:
-                        # Строка относится к основному разделу → в "Общие настройки"
-                        main_data['tables']['Общие настройки'].append(item)
-                        break
-                    elif table_ref in main_data['tables']:
-                        # Строка относится к подразделу
-                        main_data['tables'][table_ref].append(item)
-                        break
-                else:
-                    # Если не нашли — возможно, это строка для ещё не созданного подраздела
-                    # (но по вашим данным такого не должно быть)
-                    pass
+        if not config_tree:
+            return []
         
-        # Преобразуем defaultdict(list) в обычный список словарей для удобства вывода в Word
+        # 2. Рекурсивный обход для построения структуры
         result = []
-        for main_title, main_data in main_sections.items():
-            tables_list = []
-            for table_title, rows in main_data['tables'].items():
-                if rows:  # Добавляем только таблицы с данными
-                    tables_list.append({
-                        'title': table_title,
-                        'rows': rows
+        
+        def process_node(node, parent_group=None):
+            """
+            Рекурсивно обрабатывает узлы дерева.
+            Возвращает список таблиц для текущей группы.
+            """
+            node_name = node.get('Name')
+            node_type = node.get('Type')
+            children = node.get('Nodes', [])
+            
+            if node_type == 'Group':
+                # Группа может быть как контейнером для таблиц, так и самой таблицей
+                
+                # Сначала находим все параметры в этой группе (прямые дети)
+                direct_params = [child for child in children if child.get('Type') == 'Parameter']
+                # И все вложенные группы
+                sub_groups = [child for child in children if child.get('Type') == 'Group']
+                
+                if direct_params:
+                    # Если есть прямые параметры - создаем таблицу для этой группы
+                    current_table = {
+                        'title': node_name,
+                        'rows': [{'name': param.get('Name'), 'value': ''} for param in direct_params]
+                    }
+                    
+                    # Обрабатываем вложенные группы - они станут отдельными таблицами
+                    nested_tables = []
+                    for sub_group in sub_groups:
+                        nested_result = process_node(sub_group, node_name)
+                        if isinstance(nested_result, list):
+                            nested_tables.extend(nested_result)
+                        elif nested_result:
+                            nested_tables.append(nested_result)
+                    
+                    # Возвращаем текущую таблицу + вложенные
+                    return [current_table] + nested_tables if nested_tables else [current_table]
+                
+                elif sub_groups:
+                    # Если параметров нет, но есть вложенные группы - просто обрабатываем их
+                    all_tables = []
+                    for sub_group in sub_groups:
+                        sub_result = process_node(sub_group, node_name)
+                        if isinstance(sub_result, list):
+                            all_tables.extend(sub_result)
+                        elif sub_result:
+                            all_tables.append(sub_result)
+                    return all_tables
+                
+                else:
+                    # Пустая группа - игнорируем
+                    return []
+            
+            return []
+        
+        # 3. Обрабатываем корневые узлы
+        for root_node in config_tree:
+            if root_node.get('Type') == 'Group':
+                tables = process_node(root_node)
+                if tables:
+                    result.append({
+                        'main_title': root_node.get('Name'),
+                        'tables': tables
                     })
-            result.append({
-                'main_title': main_title,
-                'tables': tables_list
-            })
+        
+        return result
+    
+    # Сбор сигналов для раздела Настройка регистрации
+    def get_data_for_registration(self):
+
+        sigs_of_func_logic = []
+        for data in self.data:
+            if data["Name"] == "DigitalSignalsTree":
+                m = data["Nodes"]
+                for node in m:
+                    if node["Name"] == "Периферийные блоки" :
+                        continue
+                    sigs_of_func_logic.append(node)
+        #print(self.build_configuration_structure(sigs_of_func_logic))
+        return self.build_configuration_structure(sigs_of_func_logic)
+        
+    def build_configuration_structure(self, data):
+        """
+        Формирует структуру для вывода конфигурации в Word
+        
+        Returns:
+            [
+                {
+                    'main_title': 'Название раздела',
+                    'tables': [
+                        {
+                            'title': 'Название таблицы',
+                            'parameters': ['параметр1', 'параметр2', ...]
+                        },
+                        ...
+                    ]
+                },
+                ...
+            ]
+        """
+        result = []
+        
+        # Корневые разделы (первые уровни групп)
+        root_groups = []
+        for item in data:
+            if item.get('Type') == 'Group':
+                root_groups.append(item)
+        
+        for root in root_groups:
+            section = {
+                'main_title': root.get('Name'),
+                'tables': []
+            }
+            
+            # Рекурсивный сбор параметров
+            def collect_parameters(node, current_table=None):
+                node_name = node.get('Name')
+                node_type = node.get('Type')
+                children = node.get('Nodes', [])
+                
+                if node_type == 'Group':
+                    # Проверяем, есть ли прямые параметры
+                    direct_params = [child for child in children if child.get('Type') == 'Parameter']
+                    
+                    if direct_params:
+                        # Создаем таблицу для этой группы
+                        table = {
+                            'title': node_name,
+                            'parameters': [param.get('Name') for param in direct_params]
+                        }
+                        section['tables'].append(table)
+                    
+                    # Обрабатываем вложенные группы
+                    for child in children:
+                        if child.get('Type') == 'Group':
+                            collect_parameters(child)
+            
+            collect_parameters(root)
+            result.append(section)
         
         return result

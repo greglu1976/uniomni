@@ -114,6 +114,72 @@ def add_formatted_dropdown2(paragraph, choices, default="Не назначено
         paragraph.text = f"[{default}]"
 
 
+def add_formatted_dropdown2_10pt(paragraph, choices, default="Не назначено", alias="", instruction_text=""):
+    from xml.sax.saxutils import escape
+    from docx.shared import Pt
+    from docx.oxml.ns import qn
+
+    # Экранируем все строковые значения
+    safe_alias = escape(str(alias))
+    safe_default = escape(str(default))
+    safe_instruction = escape(str(instruction_text))
+    
+    # Экранируем каждый choice
+    safe_choices = []
+    for choice in choices:
+        if choice:
+            safe_choice = escape(str(choice))
+            safe_choice = safe_choice.replace('"', '&quot;')
+            safe_choices.append(safe_choice)
+    
+    # Создаем XML элементы для выбора
+    choices_xml = []
+    for choice in safe_choices:
+        choices_xml.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
+    
+    # Формируем XML с размером шрифта 10pt (20 полупунктов)
+    dropdown_xml = f'''
+        <w:sdt xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+            <w:sdtPr>
+                <w:alias w:val="{safe_alias}"/>
+                <w:tag w:val="{safe_alias}"/>
+                <w:id w:val="{abs(hash(safe_alias)) % 1000000}"/>
+                <w:dropDownList>
+                    <w:listItem w:displayText="{safe_default}" w:value=""/>
+                    {''.join(choices_xml)}
+                </w:dropDownList>
+                <w:showingPlcHdr/>
+                <w:placeholder>
+                    <w:docPart w:val="{safe_instruction}"/>
+                </w:placeholder>
+            </w:sdtPr>
+            <w:sdtContent>
+                <w:r>
+                    <w:rPr>
+                        <w:color w:val="808080"/>
+                        <w:sz w:val="20"/>  <!-- 10pt -->
+                        <w:spacing w:val="10"/>
+                    </w:rPr>
+                    <w:t>{safe_default}</w:t>
+                </w:r>
+            </w:sdtContent>
+        </w:sdt>
+    '''
+    
+    try:
+        from docx.oxml import parse_xml
+        sdt = parse_xml(dropdown_xml)
+        paragraph._element.append(sdt)
+        
+        # Дополнительно: устанавливаем размер шрифта для существующих runs
+        for run in paragraph.runs:
+            run.font.size = Pt(10)
+    
+    except Exception as e:
+        print(f"Ошибка в add_formatted_dropdown2_10pt: {e}")
+        run = paragraph.add_run(f"[{default}]")
+        run.font.size = Pt(10)
+
 
 def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], default="Не назначено", alias="", instruction_text="", first_divider = 'Сигналы РЗиА', second_divider='Общие сигналы ФС'):
     # Формируем элементы списка с разделителями

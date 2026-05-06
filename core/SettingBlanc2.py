@@ -8,7 +8,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from utils.docx_handler import add_new_section, add_new_section_landscape
-from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4, add_table_leds_new_core4, add_table_fks_core4
+from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4, add_table_leds_new_core4, add_table_fks_core4, add_table_binaries_core4, add_table_reg_core4
 
 from xml.sax.saxutils import escape # для экранирования в дропдаун списке всяких << >>
 
@@ -18,7 +18,7 @@ from logger.logger import Logger
 
 from core.OrderHandler import OrderHandler
 from core.MainConfigHandler import MainConfigHandler
-
+from core.ExtensionHandler import ExtensionHandler
 
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -32,6 +32,7 @@ class SettingBlanc:
 
         self.order_handler = OrderHandler()
         self.config_handler = MainConfigHandler.from_json_file("meta.json")
+        self.extension_handler = ExtensionHandler() # Для раздела конфигурация оттуда берутся перечисления
 
         self.di_list = []
 
@@ -260,8 +261,8 @@ class SettingBlanc:
 
         self._create_section_config_core4(doc)
 
+        self._create_section_disturb_core4(doc)
         # Остальные разделы пока закомментированы, при необходимости аналогично адаптировать
-        # self._create_section_config_core4(device.aux_funcs, doc)
         # self._create_section_disturb_core4(device.fsu, doc)
         
         # Добавляем финальную таблицу
@@ -497,31 +498,130 @@ class SettingBlanc:
     #################### РАЗДЕЛ КОНФИГУРАЦИЯ 
     #########################################
 
+    def enum_calc(self, enum, default):
+        result_str = " / ".join([item['VisibleValue'] for item in enum])
+        default_visible = None
+        for item in enum:
+            if str(item.get('ParameterValue')) == default:
+                default_visible = item.get('VisibleValue')
+                break
+        return result_str, default_visible
+
+    def parse_note(self, note, default):
+        """
+        Парсит строку вида "1 - Вывод, 2 - Ввод, 3 - Неизвестно"
+        """
+        # Разбиваем строку на части
+        parts = [part.strip() for part in note.split(',')]
+        
+        # Извлекаем значения
+        values = []
+        default_value = None
+        
+        for part in parts:
+            if ' - ' in part:
+                key_str, value = part.split(' - ', 1)
+                key_str = key_str.strip()
+                value = value.strip()
+                values.append(value)
+                
+                # Сравниваем как строки (не преобразуем в int)
+                if key_str == str(default):  # Приводим default к строке
+                    default_value = value
+        
+        # Формируем строку для отображения всех вариантов
+        result_str = " / ".join(values)
+        
+        return result_str, default_value
+
     def _create_section_config_core4(self, doc):
 
         add_new_section(doc)
         p = doc.add_paragraph('КОНФИГУРАЦИЯ')
         p.style = 'ДОК Заголовок 1'
 
-
         raw_data = self.order_handler.get_data_for_configuration()
-        #print(raw_data)
 
         for datum in raw_data:
+            if datum["main_title"] == "ИЧМ":
+                continue
             p = doc.add_paragraph(datum["main_title"])
             p.style = 'ДОК Заголовок 2'
+
             for table in datum["tables"]:
                 doc.add_paragraph(table["title"]).style = 'ДОК Таблица Название'
+
                 fixed_rows = []
                 for row in table["rows"]:
+
                     row_name = row["name"]
                     row_data = self.config_handler.get_param_info(row_name)
+                    enum_data = self.extension_handler.find_enum_by_parameter_name(row_name)
+
                     col1 = row_data["fullDescription"]
                     col2 = row_data["appliedDescription"]
-                    col3 = row_data["note"]
-                    col4 = row_data["units"]
-                    col5 = row_data["step"]
+                    col3 = row_data["note"] if row_data["note"].count('-') >= 2 else ""
+                    col4 = row_data["units"] if row_data["units"] else '-'
+                    col5 = row_data["step"] if row_data["step"] else '-'
                     col6 = row_data["defaultValue"]
-                    fixed_rows.append((col1, col2, col3, col4, col5, col6))
-                    print(col1, col2, col3, col4, col5, col6)
 
+                    if col3:
+                        col3, col6 = self.parse_note(col3, col6)
+
+                    if str(col6)=="false":
+                        col3 = 'Вывод / Ввод'
+                        col6 = "Вывод"
+
+                    if str(col6)=="true":
+                        col3 = 'Вывод / Ввод'
+                        col6 = "Ввод"
+
+                    if enum_data:
+                        col3, col6 =  self.enum_calc(enum_data, col6)
+                        col4 = col5 = '-'
+                    elif col3:
+                        col4 = col5 = '-'                           
+                    elif row_data["minValue"] is None:
+                        col3 = '-'
+                    else:
+                        if row_data["minValue"]=="0" and row_data["maxValue"]=="1":
+                            col3 = 'Вывод / Ввод'
+                            col6 = "Вывод" if row_data["defaultValue"]=="0" else "Ввод"
+                            col5 = '-'
+                        else:    
+                            col3 = row_data["minValue"] + ' ... ' + row_data["maxValue"]
+
+                    fixed_rows.append((col1, col2, col3, col4, col5, col6))
+                add_table_binaries_core4(doc, fixed_rows)
+                p = doc.add_paragraph()
+
+
+    def _create_section_disturb_core4(self, doc):
+        
+        add_new_section_landscape(doc)
+
+        p = doc.add_paragraph('НАСТРОЙКА РЕГИСТРАЦИИ')
+        p.style = 'ДОК Заголовок 1'
+
+        reg_data = self.order_handler.get_data_for_registration()
+
+        for reg in reg_data:
+            p = doc.add_paragraph(reg["main_title"])
+            p.style = 'ДОК Заголовок 2'
+
+            for table in reg["tables"]:
+                doc.add_paragraph(table["title"]).style = 'ДОК Таблица Название'
+
+                data_rows = []
+                for param_name in table["parameters"]:
+                    row_info = self.config_handler.get_param_info(param_name)
+                    
+                    if row_info:
+                        col1 = row_info.get("fullDescription", "")
+                        col2 = row_info.get("appliedDescription", "")
+                        type = row_info.get("type")
+                        
+                        data_rows.append((col1, col2, type))
+                
+                if data_rows:
+                    add_table_reg_core4(doc, data_rows)
