@@ -11,8 +11,8 @@ from core.MainConfigHandler import MainConfigHandler
 
 class OrderHandler:
 
-    def __init__(self, config_handler = None):
-        with open("grouping.json", 'r', encoding='utf-8') as f:
+    def __init__(self, config_handler = None, root_path = ''):
+        with open(root_path+"grouping.json", 'r', encoding='utf-8') as f:
             self.data = json.load(f)
         self.settings_group1 = None
         self._extrude_settings_group1()
@@ -21,7 +21,7 @@ class OrderHandler:
             self.config_handler = config_handler
         else:
             self.config_handler = MainConfigHandler.from_json_file("meta.json")
-            
+
         self.mapping = {}
         self._create_mapping_from_structure()
 

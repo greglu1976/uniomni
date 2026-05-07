@@ -134,12 +134,11 @@ class Application:
             Logger.info('Перечень сокращений в РЭ обновлен')
 
     def generate_setting_blanc_docx(self):
-        if self.device_data is None:
-            self.start_device_task()
-            Logger.info('Начинаем создавать бланк уставок...')
-            setting_blanc = SettingBlanc(code=self.device_data["setting_blanc_code"], versions=self.device_data["versions"])
-            setting_blanc.get_blanc(self.device_data)
-            #Logger.info('Бланк уставок в docx создан')
+        self.start_device_task()
+        Logger.info('Начинаем создавать бланк уставок...')
+        setting_blanc = SettingBlanc(self.device_data)
+        setting_blanc.get_blanc()
+        #Logger.info('Бланк уставок в docx создан')
 
     def renew_setting_tables_re(self):
         if self.device is None:

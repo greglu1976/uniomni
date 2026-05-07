@@ -2,8 +2,8 @@ import json
 
 class ExtensionHandler:
 
-    def __init__(self):
-        with open("EXTENSION.json", 'r', encoding='utf-8') as f:
+    def __init__(self, root_path = ''):
+        with open(root_path+"EXTENSION.json", 'r', encoding='utf-8') as f:
             self.data = json.load(f)
 
     def find_enum_by_parameter_name(self, name):

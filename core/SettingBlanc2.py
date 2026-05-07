@@ -26,15 +26,20 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 
 class SettingBlanc:
-    def __init__(self, code='', versions=[{"edition":"X.X", "data": "XX.XX.XXXX"}]):
-        self.code = code
-        self.versions = versions
+    def __init__(self, device_data):
+        
+
+        Logger.info(f"Путь к пакетам поддержки: {device_data['path_to_support_packets']}")
+        packet_path = device_data['path_to_support_packets']
+        self.device_data = device_data
+        self.code = self.device_data["setting_blanc_code"]
+        self.versions = self.device_data["versions"]
         self.base_structure = None  # Будет хранить структуру из get_all_settings()
 
-        self.config_handler = MainConfigHandler.from_json_file("meta.json")
-        self.order_handler = OrderHandler(self.config_handler)
+        self.config_handler = MainConfigHandler.from_json_file(packet_path + "meta.json")
+        self.order_handler = OrderHandler(self.config_handler, packet_path)
 
-        self.extension_handler = ExtensionHandler() # Для раздела конфигурация оттуда берутся перечисления
+        self.extension_handler = ExtensionHandler(packet_path) # Для раздела конфигурация оттуда берутся перечисления
 
         self.di_list = []
 
@@ -222,7 +227,7 @@ class SettingBlanc:
         Logger.info(f"Загружено {len(base_structure)} блоков уставок")
         return base_structure
 
-    def create_template(self, device_data):
+    def create_template(self):
         """
         Создает шаблон для Core4
         """
@@ -234,8 +239,8 @@ class SettingBlanc:
 
         last_version = ""
         colontile = ''
-        if device_data['versions']:
-            last_version = device_data['versions'][-1]
+        if self.device_data['versions']:
+            last_version = self.device_data['versions'][-1]
             colontile = f"Редакция {last_version['edition']} от {last_version['data']}"
 
 
@@ -249,12 +254,12 @@ class SettingBlanc:
             second_part = None  # или '' , или raise исключение
 
         context = {
-            "title": device_data['full_description'],
-            "code": device_data['setting_blanc_code'],
+            "title": self.device_data['full_description'],
+            "code": self.device_data['setting_blanc_code'],
             "device_order_code": first_part,
             "hmi_order_code": second_part,
-            "versions":  device_data['versions'],
-            "device_name":  device_data['name'],
+            "versions":  self.device_data['versions'],
+            "device_name":  self.device_data['name'],
             "colontile": colontile,
             "packet": self.config_handler.model_version,
             "version": last_version['edition'],
@@ -290,19 +295,19 @@ class SettingBlanc:
         
         # Сохраняем
 
-        name_for_save = f"{self.code} Бланк уставок {device_data['name']} ред.{last_version['edition']}"
+        name_for_save = f"{self.code} Бланк уставок {self.device_data['name']} ред.{last_version['edition']}"
         #name_for_save = f"{self.code} Бланк уставок Core4"
         doc.save(f'{name_for_save}.docx')
         Logger.info(f"Бланк уставок сохранен: '{name_for_save}.docx'")
         
         return doc
 
-    def get_blanc(self, device_data):
+    def get_blanc(self):
         """
         Основной метод для генерации бланка уставок Core4
         """
         #print(device_data)
-        self.create_template(device_data)
+        self.create_template()
 
 
 ##################################################################################
@@ -633,7 +638,8 @@ class SettingBlanc:
             # Обрабатываем подразделы
             for subsection in section.get("subsections", []):
                 # Заголовок подраздела (например, "ТО РПН")
-                p_sub = doc.add_paragraph(subsection["title"])
+                _name = subsection["title"].split("_")[0]
+                p_sub = doc.add_paragraph(self.abbr_dict.get(_name, _name))    #)  subsection["title"])
                 p_sub.style = 'ДОК Заголовок 3'  # или другой стиль для подраздела
                 
                 # Таблицы внутри подраздела
