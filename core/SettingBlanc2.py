@@ -604,6 +604,7 @@ class SettingBlanc:
         p.style = 'ДОК Заголовок 1'
 
         reg_data = self.order_handler.get_data_for_registration()
+        print(reg_data)
 
         for reg in reg_data:
             p = doc.add_paragraph(reg["main_title"])
@@ -625,3 +626,4 @@ class SettingBlanc:
                 
                 if data_rows:
                     add_table_reg_core4(doc, data_rows)
+                    doc.add_paragraph().style = 'TAGS'
