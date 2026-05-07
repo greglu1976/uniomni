@@ -3,6 +3,7 @@
 # для генерации бланка уставок в него нужно передать объект класса Device
 
 import re
+import json
 
 from docxtpl import DocxTemplate
 from docx import Document
@@ -36,6 +37,10 @@ class SettingBlanc:
 
         self.di_list = []
 
+        with open("abbr.json", 'r', encoding='utf-8') as f:
+            self.abbr_dict = json.load(f)
+        
+
     # НОВАЯ ФУНКЦИЯ ДЛЯ CORE4
     def _create_section_settings_core4(self, doc):
         """Генерирует раздел уставок для Core4 с таблицами как в Core3"""
@@ -53,12 +58,17 @@ class SettingBlanc:
         for func_block in self.base_structure:
             func_type = func_block.get('type')
             func_name = func_block.get('func_name', 'Без имени')
-            
+
+            fixed_func_name = func_name.split("_")[0]     
+
             if func_type == 'simple':
+
                 # Заголовок функции
-                p = doc.add_paragraph(func_name)
+                p = doc.add_paragraph(self.abbr_dict.get(fixed_func_name, fixed_func_name))
                 p.style = 'ДОК Заголовок 2'
-                
+
+                p = doc.add_paragraph(fixed_func_name)
+                p.style = 'ДОК Таблица Название'            
                 # Создаем и заполняем таблицу
                 if func_block.get('rows'):
                     table = add_table_settings_core4(doc)
@@ -66,7 +76,7 @@ class SettingBlanc:
             
             elif func_type == 'complex':
                 # Заголовок составной функции
-                p = doc.add_paragraph(func_name)
+                p = doc.add_paragraph(self.abbr_dict.get(fixed_func_name, fixed_func_name))
                 p.style = 'ДОК Заголовок 2'
                 
                 # Проходим по подфункциям
@@ -80,6 +90,7 @@ class SettingBlanc:
                     if sub_func.get('rows'):
                         table = add_table_settings_core4(doc)
                         self._fill_table_settings(table, sub_func['rows'])
+                        p = doc.add_paragraph().style = "TAGS"
 
     def _fill_table_settings(self, table, rows_data):
         """
@@ -219,6 +230,8 @@ class SettingBlanc:
         #doc = Document('origin.docx')
         doc_tpl = DocxTemplate('origin.docx')
 
+
+        last_version = ""
         colontile = ''
         if device_data['versions']:
             last_version = device_data['versions'][-1]
@@ -270,9 +283,11 @@ class SettingBlanc:
         add_table_final(doc)
         
         # Сохраняем
-        name_for_save = f"{self.code} Бланк уставок Core4"
+
+        name_for_save = f"{self.code} Бланк уставок {device_data['name']} ред.{last_version['edition']}"
+        #name_for_save = f"{self.code} Бланк уставок Core4"
         doc.save(f'{name_for_save}.docx')
-        Logger.info(f"Бланк уставок Core4 сохранен: '{name_for_save}.docx'")
+        Logger.info(f"Бланк уставок сохранен: '{name_for_save}.docx'")
         
         return doc
 
@@ -604,7 +619,7 @@ class SettingBlanc:
         p.style = 'ДОК Заголовок 1'
 
         reg_data = self.order_handler.get_data_for_registration()
-        print(reg_data)
+        #print(reg_data)
 
         for reg in reg_data:
             p = doc.add_paragraph(reg["main_title"])

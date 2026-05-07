@@ -82,7 +82,7 @@ def add_formatted_dropdown2(paragraph, choices, default="Не назначено
                 <w:tag w:val="{safe_alias}"/>
                 <w:id w:val="{abs(hash(safe_alias)) % 1000000}"/>
                 <w:dropDownList>
-                    <w:listItem w:displayText="{safe_default}" w:value=""/>
+                    <w:listItem w:displayText="{safe_default}" w:value="{safe_default}"/>
                     {''.join(choices_xml)}
                 </w:dropDownList>
                 <w:showingPlcHdr/>
@@ -93,9 +93,8 @@ def add_formatted_dropdown2(paragraph, choices, default="Не назначено
             <w:sdtContent>
                 <w:r>
                     <w:rPr>
-                        <w:color w:val="808080"/>
+                        <w:color w:val="A0A0A0"/>
                         <w:sz w:val="24"/>
-                        <w:i/>
                         <w:spacing w:val="10"/>
                     </w:rPr>
                     <w:t>{safe_default}</w:t>
@@ -203,7 +202,7 @@ def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], defa
                 <w:tag w:val="{alias}"/>
                 <w:id w:val="{abs(hash(alias))}"/>
                 <w:dropDownList>
-                    <w:listItem w:displayText="{default}" w:value=""/>
+                    <w:listItem w:displayText="{default}" w:value="{default}"/>
                     {''.join(list_items)}
                 </w:dropDownList>
                 <w:showingPlcHdr/>
@@ -214,9 +213,8 @@ def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], defa
             <w:sdtContent>
                 <w:r>
                     <w:rPr>
-                        <w:color w:val="808080"/>
+                        <w:color w:val="A0A0A0"/>
                         <w:sz w:val="24"/>
-                        <w:i/>
                         <w:spacing w:val="10"/>
                     </w:rPr>
                     <w:t>{default}</w:t>

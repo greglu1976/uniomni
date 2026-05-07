@@ -1,7 +1,7 @@
 
 from core.OrderHandler import OrderHandler
 
-
+import json
 
 order_data = OrderHandler()
 
@@ -20,5 +20,11 @@ for sig in di_sigs:
 #print(sigs)
 
 sigs = order_data.get_data_for_registration()
+#print(sigs)
 
+for sig in sigs:
+    if sig["Name"] == "Сигналы функциональной логики":
+        print(sig)
 
+with open('data.json', 'w', encoding='utf-8') as file:
+    json.dump(sigs, file, ensure_ascii=False, indent=4)

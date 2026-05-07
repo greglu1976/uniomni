@@ -766,7 +766,7 @@ class OrderHandler:
                     if node["Name"] == "Периферийные блоки" :
                         continue
                     sigs_of_func_logic.append(node)
-        #print(self.build_configuration_structure(sigs_of_func_logic))
+        #print(sigs_of_func_logic)
         return self.build_configuration_structure(sigs_of_func_logic)
         
     def build_configuration_structure(self, data):
