@@ -11,13 +11,17 @@ from core.MainConfigHandler import MainConfigHandler
 
 class OrderHandler:
 
-    def __init__(self):
+    def __init__(self, config_handler = None):
         with open("grouping.json", 'r', encoding='utf-8') as f:
             self.data = json.load(f)
         self.settings_group1 = None
         self._extrude_settings_group1()
 
-        self.config_handler = MainConfigHandler.from_json_file("meta.json")
+        if config_handler:
+            self.config_handler = config_handler
+        else:
+            self.config_handler = MainConfigHandler.from_json_file("meta.json")
+            
         self.mapping = {}
         self._create_mapping_from_structure()
 
@@ -777,10 +781,16 @@ class OrderHandler:
             [
                 {
                     'main_title': 'Название раздела',
-                    'tables': [
+                    'subsections': [  # <-- изменено: вместо tables теперь subsections
                         {
-                            'title': 'Название таблицы',
-                            'parameters': ['параметр1', 'параметр2', ...]
+                            'title': 'Название подраздела (группы)',
+                            'tables': [
+                                {
+                                    'title': 'Название таблицы',
+                                    'parameters': ['параметр1', ...]
+                                },
+                                ...
+                            ]
                         },
                         ...
                     ]
@@ -790,42 +800,63 @@ class OrderHandler:
         """
         result = []
         
-        # Корневые разделы (первые уровни групп)
-        root_groups = []
-        for item in data:
-            if item.get('Type') == 'Group':
-                root_groups.append(item)
+        root_groups = [item for item in data if item.get('Type') == 'Group']
         
         for root in root_groups:
             section = {
                 'main_title': root.get('Name'),
-                'tables': []
+                'subsections': []
             }
             
-            # Рекурсивный сбор параметров
-            def collect_parameters(node, current_table=None):
-                node_name = node.get('Name')
-                node_type = node.get('Type')
-                children = node.get('Nodes', [])
+            def process_group(group_node, parent_path=""):
+                """Рекурсивная обработка группы, возвращает структуру подразделов"""
+                group_name = group_node.get('Name')
+                children = group_node.get('Nodes', [])
                 
-                if node_type == 'Group':
-                    # Проверяем, есть ли прямые параметры
-                    direct_params = [child for child in children if child.get('Type') == 'Parameter']
-                    
-                    if direct_params:
-                        # Создаем таблицу для этой группы
-                        table = {
-                            'title': node_name,
-                            'parameters': [param.get('Name') for param in direct_params]
-                        }
-                        section['tables'].append(table)
-                    
-                    # Обрабатываем вложенные группы
-                    for child in children:
-                        if child.get('Type') == 'Group':
-                            collect_parameters(child)
+                # Собираем прямые параметры группы
+                direct_params = [child for child in children if child.get('Type') == 'Parameter']
+                
+                # Собираем вложенные группы
+                sub_groups = [child for child in children if child.get('Type') == 'Group']
+                
+                # Текущий подраздел для этой группы
+                subsection = {
+                    'title': group_name,
+                    'tables': []
+                }
+                
+                # Если есть прямые параметры - создаем таблицу для них
+                if direct_params:
+                    subsection['tables'].append({
+                        'title': group_name,  # таблица с тем же именем, что и группа
+                        'parameters': [param.get('Name') for param in direct_params]
+                    })
+                
+                # Рекурсивно обрабатываем вложенные группы
+                for sub_group in sub_groups:
+                    sub_subsection = process_group(sub_group)
+                    # Добавляем таблицы из вложенной группы в текущий подраздел
+                    subsection['tables'].extend(sub_subsection['tables'])
+                
+                return subsection
             
-            collect_parameters(root)
+            # Обрабатываем все вложенные группы корневого раздела
+            for child in root.get('Nodes', []):
+                if child.get('Type') == 'Group':
+                    subsection = process_group(child)
+                    section['subsections'].append(subsection)
+            
+            # Также обрабатываем прямые параметры корневого раздела
+            direct_params = [child for child in root.get('Nodes', []) if child.get('Type') == 'Parameter']
+            if direct_params:
+                section['subsections'].append({
+                    'title': root.get('Name'),
+                    'tables': [{
+                        'title': root.get('Name'),
+                        'parameters': [param.get('Name') for param in direct_params]
+                    }]
+                })
+            
             result.append(section)
         
         return result

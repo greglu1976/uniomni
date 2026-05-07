@@ -31,8 +31,9 @@ class SettingBlanc:
         self.versions = versions
         self.base_structure = None  # Будет хранить структуру из get_all_settings()
 
-        self.order_handler = OrderHandler()
         self.config_handler = MainConfigHandler.from_json_file("meta.json")
+        self.order_handler = OrderHandler(self.config_handler)
+
         self.extension_handler = ExtensionHandler() # Для раздела конфигурация оттуда берутся перечисления
 
         self.di_list = []
@@ -255,7 +256,9 @@ class SettingBlanc:
             "versions":  device_data['versions'],
             "device_name":  device_data['name'],
             "colontile": colontile,
-            "packet": self.config_handler.model_version
+            "packet": self.config_handler.model_version,
+            "version": last_version['edition'],
+            "date": last_version['data']
         }
 
         doc_tpl.render(context)
@@ -266,14 +269,17 @@ class SettingBlanc:
         self.get_all_settings()
 
         # Генерируем раздел уставок (новый метод)
+        Logger.info("Создаем раздел Уставки РЗиА...")
         self._create_section_settings_core4(doc)
+        Logger.info("Создаем раздел Матрица входов и выходных реле...")
         self._create_section_inouts_core4(doc)
 
         if second_part:
+            Logger.info("ИЧМ присутствует. Создаем раздел Настройка светодиодов и ФК...")
             self._create_section_leds_core4(second_part, doc)
-
+        Logger.info("Создаем раздел Конфигурация...")
         self._create_section_config_core4(doc)
-
+        Logger.info("Создаем раздел Натройка регистрации...")
         self._create_section_disturb_core4(doc)
         # Остальные разделы пока закомментированы, при необходимости аналогично адаптировать
         # self._create_section_disturb_core4(device.fsu, doc)
@@ -619,26 +625,32 @@ class SettingBlanc:
         p.style = 'ДОК Заголовок 1'
 
         reg_data = self.order_handler.get_data_for_registration()
-        #print(reg_data)
 
-        for reg in reg_data:
-            p = doc.add_paragraph(reg["main_title"])
+        for section in reg_data:
+            p = doc.add_paragraph(section["main_title"])
             p.style = 'ДОК Заголовок 2'
-
-            for table in reg["tables"]:
-                doc.add_paragraph(table["title"]).style = 'ДОК Таблица Название'
-
-                data_rows = []
-                for param_name in table["parameters"]:
-                    row_info = self.config_handler.get_param_info(param_name)
-                    
-                    if row_info:
-                        col1 = row_info.get("fullDescription", "")
-                        col2 = row_info.get("appliedDescription", "")
-                        type = row_info.get("type")
-                        
-                        data_rows.append((col1, col2, type))
+            
+            # Обрабатываем подразделы
+            for subsection in section.get("subsections", []):
+                # Заголовок подраздела (например, "ТО РПН")
+                p_sub = doc.add_paragraph(subsection["title"])
+                p_sub.style = 'ДОК Заголовок 3'  # или другой стиль для подраздела
                 
-                if data_rows:
-                    add_table_reg_core4(doc, data_rows)
-                    doc.add_paragraph().style = 'TAGS'
+                # Таблицы внутри подраздела
+                for table_data in subsection["tables"]:
+                    doc.add_paragraph(table_data["title"]).style = 'ДОК Таблица Название'
+                    
+                    data_rows = []
+                    for param_name in table_data["parameters"]:
+                        row_info = self.config_handler.get_param_info(param_name)
+                        
+                        if row_info:
+                            col1 = row_info.get("fullDescription", "")
+                            col2 = row_info.get("appliedDescription", "")
+                            param_type = row_info.get("type")
+                            
+                            data_rows.append((col1, col2, param_type))
+                    
+                    if data_rows:
+                        add_table_reg_core4(doc, data_rows)
+                        doc.add_paragraph().style = 'TAGS'

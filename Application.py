@@ -65,7 +65,7 @@ class Application:
             # Сохраняем идентификатор кнопки
             self.init_button = dpg.add_button(
                 label="Инициализировать устройство",
-                callback=self.start_device_task,
+                callback=self.create_device,
                 enabled=False,
                 width=300
             )
@@ -134,9 +134,8 @@ class Application:
             Logger.info('Перечень сокращений в РЭ обновлен')
 
     def generate_setting_blanc_docx(self):
-        if self.device is None:
-            Logger.error('Устройство не инициализировано!')
-        else:
+        if self.device_data is None:
+            self.start_device_task()
             Logger.info('Начинаем создавать бланк уставок...')
             setting_blanc = SettingBlanc(code=self.device_data["setting_blanc_code"], versions=self.device_data["versions"])
             setting_blanc.get_blanc(self.device_data)
@@ -206,48 +205,46 @@ class Application:
 
         Logger.info(f"Выбрано устройство: {device['name']} v{device['version']}")
 
-        try:
-            # Получаем данные устройства
-            self.device_data = self.device_data_manager.get_device_by_name_and_version(
-                name=device['name'], 
-                version=device['version']
-            )
-            
-            if not self.device_data:
-                Logger.error(f"Не удалось получить данные для устройства {device['name']} v{device['version']}")
-                return False
 
-            # Создаем устройство
-            order_code = self.device_data["order_code"]
-            full_description = self.device_data["full_description"]
-            order_code_hmi = self.device_data["order_code_hmi"]
-            
-            self.device = Device(
-                order_code=order_code, 
-                full_description=full_description, 
-                order_code_hmi=order_code_hmi
-            )
-
-            # Проверяем, что устройство успешно инициализировалось
-            if self.device is None:
-                Logger.error("Ошибка: устройство не было создано")
-                return False
-            
-            # Дополнительные проверки (если есть в классе Device)
-            if hasattr(self.device, 'is_initialized'):
-                if not self.device.is_initialized:
-                    Logger.error("Устройство создано, но не инициализировано корректно")
-                    return False
-            
-            Logger.info(f"Устройство: {device['name']} v{device['version']} успешно инициализировано")
-            return True
-
-        except KeyError as e:
-            Logger.error(f"Отсутствует обязательное поле в данных устройства: {e}")
+        # Получаем данные устройства
+        self.device_data = self.device_data_manager.get_device_by_name_and_version(
+            name=device['name'], 
+            version=device['version']
+        )
+        
+        if not self.device_data:
+            Logger.error(f"Не удалось получить данные для устройства {device['name']} v{device['version']}")
             return False
-        except Exception as e:
-            Logger.error(f"Ошибка при создании устройства: {str(e)}")
+
+
+
+    def create_device(self):
+        # Создаем устройство
+        self.start_device_task()
+
+        order_code = self.device_data["order_code"]
+        full_description = self.device_data["full_description"]
+        order_code_hmi = self.device_data["order_code_hmi"]
+        
+        self.device = Device(
+            order_code=order_code, 
+            full_description=full_description, 
+            order_code_hmi=order_code_hmi
+        )
+
+        # Проверяем, что устройство успешно инициализировалось
+        if self.device is None:
+            Logger.error("Ошибка: устройство не было создано")
             return False
+        
+        # Дополнительные проверки (если есть в классе Device)
+        if hasattr(self.device, 'is_initialized'):
+            if not self.device.is_initialized:
+                Logger.error("Устройство создано, но не инициализировано корректно")
+                return False
+        
+        Logger.info(f"Устройство: {self.device_data['name']} v{self.device_data['version']} успешно инициализировано")
+        return True
 
 
     def run(self):
