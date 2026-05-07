@@ -9,7 +9,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 
 from utils.docx_handler import add_new_section, add_new_section_landscape
-from utils.tables import add_table_settings, add_table_mtrx_ins, add_table_mtrx_outs, add_table_leds_new, add_table_fks, add_table_binaries, add_table_reg, add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4, add_table_leds_new_core4, add_table_fks_core4, add_table_binaries_core4, add_table_reg_core4
+from utils.tables import add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4, add_table_leds_new_core4, add_table_fks_core4, add_table_binaries_core4, add_table_reg_core4
 
 from xml.sax.saxutils import escape # для экранирования в дропдаун списке всяких << >>
 

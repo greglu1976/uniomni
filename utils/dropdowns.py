@@ -2,6 +2,9 @@ from docx.oxml import parse_xml
 from docx.oxml.shared import qn
 from docx import Document
 
+import html
+
+
 def add_formatted_dropdown(paragraph, choices, default="", alias="", 
                          label="", style=None, instruction_text="Выберите значение"):
     """
@@ -176,38 +179,46 @@ def add_formatted_dropdown2_10pt(paragraph, choices, default="Не назнач�
         run = paragraph.add_run(f"[{default}]")
         run.font.size = Pt(10)
 
-
-def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], default="Не назначено", alias="", instruction_text="", first_divider = 'Сигналы РЗиА', second_divider='Общие сигналы ФС'):
+def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], default="Не назначено", alias="", instruction_text="", first_divider='Сигналы РЗиА', second_divider='Общие сигналы ФС'):
+    # Экранируем все переменные с помощью html.escape
+    default_esc = html.escape(str(default))
+    alias_esc = html.escape(str(alias))
+    instruction_esc = html.escape(str(instruction_text))
+    first_divider_esc = html.escape(str(first_divider))
+    second_divider_esc = html.escape(str(second_divider))
+    
     # Формируем элементы списка с разделителями
     list_items = []
     
     # Добавляем inputs
     if inputs_choices:
-        list_items.append(f'<w:listItem w:displayText="──────── {first_divider} ────────" w:value="INPUTS_HEADER" w:disabled="true"/>')
+        list_items.append(f'<w:listItem w:displayText="──────── {first_divider_esc} ────────" w:value="INPUTS_HEADER" w:disabled="true"/>')
         for choice in inputs_choices:
-            list_items.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
+            choice_esc = html.escape(str(choice))
+            list_items.append(f'<w:listItem w:displayText="{choice_esc}" w:value="{choice_esc}"/>')
     
     # Добавляем controls
     if controls_choices:
         if inputs_choices:  # Добавляем разделитель только если есть оба списка
             list_items.append('<w:listItem w:displayText=" " w:value="SPACER" w:disabled="true"/>')
-        list_items.append(f'<w:listItem w:displayText="────── {second_divider} ──────" w:value="CONTROLS_HEADER" w:disabled="true"/>')
+        list_items.append(f'<w:listItem w:displayText="────── {second_divider_esc} ──────" w:value="CONTROLS_HEADER" w:disabled="true"/>')
         for choice in controls_choices:
-            list_items.append(f'<w:listItem w:displayText="{choice}" w:value="{choice}"/>')
+            choice_esc = html.escape(str(choice))
+            list_items.append(f'<w:listItem w:displayText="{choice_esc}" w:value="{choice_esc}"/>')
     
     sdt = parse_xml(f'''
         <w:sdt xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:sdtPr>
-                <w:alias w:val="{alias}"/>
-                <w:tag w:val="{alias}"/>
+                <w:alias w:val="{alias_esc}"/>
+                <w:tag w:val="{alias_esc}"/>
                 <w:id w:val="{abs(hash(alias))}"/>
                 <w:dropDownList>
-                    <w:listItem w:displayText="{default}" w:value="{default}"/>
+                    <w:listItem w:displayText="{default_esc}" w:value="{default_esc}"/>
                     {''.join(list_items)}
                 </w:dropDownList>
                 <w:showingPlcHdr/>
                 <w:placeholder>
-                    <w:docPart w:val="{instruction_text}"/>
+                    <w:docPart w:val="{instruction_esc}"/>
                 </w:placeholder>
             </w:sdtPr>
             <w:sdtContent>
@@ -217,14 +228,13 @@ def add_formatted_dropdown3(paragraph, inputs_choices, controls_choices=[], defa
                         <w:sz w:val="24"/>
                         <w:spacing w:val="10"/>
                     </w:rPr>
-                    <w:t>{default}</w:t>
+                    <w:t>{default_esc}</w:t>
                 </w:r>
             </w:sdtContent>
         </w:sdt>
     ''')
     
     paragraph._p.append(sdt)
-
 
 
 

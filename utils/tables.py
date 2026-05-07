@@ -15,6 +15,7 @@ from docx.oxml import parse_xml
 
 from docx.enum.table import WD_ROW_HEIGHT_RULE
 
+
 import os, sys
 import json
 
