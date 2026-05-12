@@ -8,7 +8,7 @@ from core.Device import Device
 from core.DeviceDataManager import DeviceDataManager
 from core.SettingBlanc2 import SettingBlanc
 
-from core.Manual import Manual
+from core.Manual2 import Manual
 
 from utils.xlsx2fbdata import process_all_xlsx_files
 
@@ -31,10 +31,6 @@ class Application:
         self.setup_gui()
 
         self.load_config_callback()
-
-
-        self.re_ = None # УДАЛИТЬ ПОТОМ
-        self.sum_table_type = 2  # По умолчанию выбран тип 2
 
         
     def setup_gui(self):
@@ -149,13 +145,13 @@ class Application:
             Logger.info('Таблицы с уставками в РЭ обновлены')
 
     def renew_sum_table_latex(self):
-        if self.device is None:
-            Logger.error('Устройство не инициализировано!')
-        else:
-            manual = Manual(device_data=self.device_data)
-            manual.renew_sum_table_latex(self.device)
-            #self.re_.renew_sum_table_latex(table_type=self.sum_table_type)
-            #Logger.info('Суммарная таблица сигналов приложения в РЭ обновлена')
+
+        self.start_device_task()
+
+        manual = Manual(device_data=self.device_data)
+        manual.renew_sum_table_latex()
+
+        #Logger.info('Суммарная таблица сигналов приложения в РЭ обновлена')
 
     def add_to_sqlite(self):
         Logger.info('Запуск задачи обновления БД')
