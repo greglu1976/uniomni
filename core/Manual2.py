@@ -3,7 +3,7 @@
 import os
 import re
 from pathlib import Path
-
+import ast
 from utils.abbrs import start_abbr
 from logger.logger import Logger
 
@@ -75,55 +75,112 @@ class Manual:
     #########################################################
 
     def _render_latex_settings_block(self, settings_data, header):
-        table = []
-        if header is not None and header != "":
-            head_latex = '\\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \\hline \n'
-            table.append(head_latex)
-        
-        for i, row in enumerate(settings_data):
-            # Добавляем \hline перед всеми строками, кроме первой
-            if i > 0:
-                table.append('\\hline\n')
-                
-            str_ = '\\centering '
-            str_ += row[0].replace('_', r'\_')
-            str_ += ' & \\centering '
-            str_ += row[1].replace('-', r'--').replace('_', r'\_')
-            str_ += ' & \\centering '
-            str_ += row[2].replace('\n', r'\\')
-            str_ += ' & \\centering '
-            str_ += row[3].replace('-', r'--').replace('%', r'\%')
-            str_ += ' & \\centering \\arraybackslash '
-            str_ += row[4].replace('-', r'--')
-            str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
-            table.append(str_)
-        
-        return table
-    # Старая функция - добавляет hline после последней строки 30.12.25 Вынесена в архив
-    def _render_latex_settings_blockOLD(self, settings_data, header):
-        table = []
-        if header is not None and header != "":
-            head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \hline \n'
-            table.append(head_latex)
-        for row in settings_data:
-            str_ = '\centering '
-            str_ += row[0].replace('_', r'\_')
-            str_ += ' & \centering '
-            str_ += row[1].replace('-', r'--').replace('_', r'\_')
-            str_ += ' & \centering '
-            str_ += row[2].replace('\n', r'\\')
-            str_ += ' & \centering '
-            str_ += row[3].replace('-', r'--').replace('%', r'\%')
-            str_ += ' & \centering \\arraybackslash '
-            str_ += row[4].replace('-', r'--')
-            str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
-            table.append(str_)  # Добавляем строку таблицы
-            #print(str_)
-            table.append('\\hline\n')  # Добавляем \hline отдельным элементом
-        #print(table)
-        return table
-    ########################################################################################
 
+        table = []
+        if settings_data["type"] == "simple":
+        #if header is not None and header != "":
+            #head_latex = '\\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \\hline \n'
+            #table.append(head_latex)
+            for i, row in enumerate(settings_data["rows"]):
+                # Добавляем \hline перед всеми строками, кроме первой
+                if i > 0:
+                    table.append('\\hline\n')
+
+                col3 = self.parse_note_to_latex(row["col3"])
+
+                str_ = '\\centering '
+                str_ += row["col1"].replace('_', r'\_')
+                str_ += ' & \\centering '
+                str_ += row["col2"].replace('-', r'--').replace('_', r'\_') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
+                str_ += ' & \\centering '
+                str_ += col3 #.replace('\n', r'\\')
+                str_ += ' & \\centering '
+                str_ += row["col4"].replace('-', r'--').replace('%', r'\%')
+                str_ += ' & \\centering \\arraybackslash '
+                str_ += row["col5"].replace('-', r'--')
+                str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
+                table.append(str_)
+            
+            return table
+        else:
+            subs = settings_data["sub_functions"]
+            for idx, sub in enumerate(subs):
+                # Добавляем верхнюю линию только перед первым заголовком
+                if idx == 0:
+                    head_latex = '\\multicolumn{5}{|c|}{ ' + sub["subtitle"] + ' } \\\\ \\hline \n'
+                else:
+                    # Между подфункциями тоже нужен разделитель
+                    head_latex = '\\hline\n\\multicolumn{5}{|c|}{ ' + sub["subtitle"] + ' } \\\\ \\hline \n'
+                
+                table.append(head_latex)
+                for i, row in enumerate(sub["rows"]):
+                    # Добавляем \hline перед всеми строками, кроме первой
+                    if i > 0:
+                        table.append('\\hline\n')
+
+                    col3 = self.parse_note_to_latex(row["col3"])
+
+                    str_ = '\\centering '
+                    str_ += row["col1"].replace('_', r'\_')
+                    str_ += ' & \\centering '
+                    str_ += row["col2"].replace('-', r'--').replace('_', r'\_') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
+                    str_ += ' & \\centering '
+                    str_ += col3 #.replace('\n', r'\\')
+                    str_ += ' & \\centering '
+                    str_ += row["col4"].replace('-', r'--').replace('%', r'\%')
+                    str_ += ' & \\centering \\arraybackslash '
+                    str_ += row["col5"].replace('-', r'--')
+                    str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
+                    table.append(str_)
+            
+            return table
+
+
+
+    
+    def parse_note_to_latex(self, note_str):
+        # Если это не строка или не начинается с "note_", возвращаем как есть
+        if not isinstance(note_str, str) or not note_str.startswith("note_{"):
+            return str(note_str) if note_str is not None else ""
+        
+        # Убираем "note_" и преобразуем в словарь
+        dict_str = note_str[5:]  # убираем 'note_' (5 символов)
+        # dict_str теперь: "{'0': 'Не предусмотрено', '1': 'Предусмотрено'}"
+
+        # Парсим строку в словарь
+        note_dict = ast.literal_eval(dict_str)
+        
+        # Получаем значения, сортируя по ключам (как числа)
+        # Ключи могут быть '0', '1', '2' и т.д.
+        sorted_values = [note_dict[key] for key in sorted(note_dict.keys(), key=lambda x: int(x))]
+        
+        # Объединяем через " \\ " (обратите внимание на пробелы)
+        return " \\\\ ".join(sorted_values)
+
+    # Старая функция - добавляет hline после последней строки 30.12.25 Вынесена в архив
+    #def _render_latex_settings_blockOLD(self, settings_data, header):
+        #table = []
+        #if header is not None and header != "":
+            #head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \hline \n'
+            #table.append(head_latex)
+        #for row in settings_data:
+            #str_ = '\centering '
+            #str_ += row[0].replace('_', r'\_')
+            #str_ += ' & \centering '
+            #str_ += row[1].replace('-', r'--').replace('_', r'\_')
+            #str_ += ' & \centering '
+            #str_ += row[2].replace('\n', r'\\')
+            #str_ += ' & \centering '
+            #str_ += row[3].replace('-', r'--').replace('%', r'\%')
+            #str_ += ' & \centering \\arraybackslash '
+            #str_ += row[4].replace('-', r'--')
+            #str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
+            #table.append(str_)  # Добавляем строку таблицы
+            #print(str_)
+            #table.append('\\hline\n')  # Добавляем \hline отдельным элементом
+        #print(table)
+        #return table
+    ########################################################################################
 
     def _parse_start_tag(self, tag_line):
         """
@@ -141,7 +198,11 @@ class Manual:
             return ln, fb, header
         return None, None, None
 
-    def renew_setting_tables_re(self, device):
+    def renew_setting_tables_re(self):
+
+        mapping = self.setting_blanc.maps
+        #print(all_settings)
+
         start_tag_prefix = '%==+t1*'
         end_tag = '%===t1\n'
 
@@ -190,10 +251,23 @@ class Manual:
 
                     # Парсим LN, FB и заголовок
                     ln, fb, header = self._parse_start_tag(start_line)
+                    m = (mapping.get(fb, '-'))
+                    if m=='-':
+                        Logger.warning(f"Функциональный блок {fb} ({ln}) есть в описании latex, но отсутствует в файле поддержки устройства ")
+                        # Оставляем старый блок как есть
+                        new_content.extend(old_block)
+                        new_content.append(end_tag)
+                        i += 1
+                        continue  # Пропускаем генерацию нового содержимого
+
+                    #print(ln, fb, header)
                     # Генерируем новое содержимое
                     latex_new = []
-                    settings_data = device.fsu.get_table_settings_latex(ln, fb)
+                    settings_data = self.setting_blanc.get_table_settings_latex(ln, fb)
+                    #print(settings_data)
+
                     if settings_data:
+                        pass
                         latex_new = self._render_latex_settings_block(settings_data, header)
                         #print(ln, fb)
                     else:
@@ -243,13 +317,8 @@ class Manual:
         return content1 == content2
 
 
-
-
     def renew_sum_table_latex(self):
-        
-
-
-
+   
         path_to_appA_tex = Path(self.device_data["path_to_latex_desc"]) / "Приложение А. Сигналы" / "_latex" / "app1.tex"
         start_tag = '%===t2\n'
 
@@ -340,7 +409,7 @@ class Manual:
 
         def _generate_section(data, title=''):
             section = []
-            print(data)
+            #print(data)
             if data:
                 #section.append(f'\\multicolumn{{9}}{{c|}}{{{title}}} \\\\\n\\hline\n')
                 if title:
@@ -367,14 +436,8 @@ class Manual:
                 header = f'\\multicolumn{{9}}{{c}}{{{self.setting_blanc.abbr_dict.get(_name, _name)}}} \\\\\n\\hline\n'
                 table.append(header)
 
-                Logger.info(f"{_name}")
-                Logger.info(f"Еще 1: {self.setting_blanc.abbr_dict.get(_name, _name)}")
-
                 # Таблицы внутри подраздела
                 for table_data in subsection["tables"]:
-                    Logger.info(f"Еще 2:  {table_data["title"]}")
-                    #doc.add_paragraph(table_data["title"]).style = 'ДОК Таблица Название'
-                    
                     data_rows = []
                     for param_name in table_data["parameters"]:
                         row_info = self.setting_blanc.config_handler.get_param_info(param_name)
@@ -383,63 +446,38 @@ class Manual:
                             col1 = row_info.get("fullDescription", "")
                             col2 = row_info.get("appliedDescription", "")
                             param_type = row_info.get("type")
-                            l = (col1, col2, str(param_type), "", "", "", "", "", "")
-                            Logger.info(l)
+                            if param_type!=3:
+                                continue
+                            if col2.startswith('MMS') or col2.startswith('GOOSE') or col2.startswith('ИЧМ') or col2.startswith('АСУ:'):
+                                continue
+
+                            is_in_outputs = self.setting_blanc.order_handler.is_in_outputs_tree(param_name)
+                            is_in_inputs = self.setting_blanc.order_handler.is_in_inputs_tree(param_name)
+                            is_in_hmi_sign = self.setting_blanc.order_handler.is_in_hmi_sign_tree(param_name)
+                            is_in_digit_sign = self.setting_blanc.order_handler.is_in_digit_sign_tree(param_name)
+
+                            if  col2.startswith('ФК:'):  
+                                l = (col1, col2, "+" if is_in_inputs else "-", "+" if is_in_outputs else "-", "+" if is_in_hmi_sign else "-", "+", "+" if is_in_digit_sign else "-", "+" if is_in_digit_sign else "-", "+" if is_in_digit_sign else "-")
+                            else:
+                                l = (
+                                    col1, 
+                                    col2, 
+                                    "+" if is_in_inputs else "-", 
+                                    "+" if is_in_outputs else "-", 
+                                    "+" if is_in_hmi_sign else "-", 
+                                    "-", 
+                                    "+" if is_in_digit_sign else "-", 
+                                    "+" if is_in_digit_sign else "-", 
+                                    "+" if is_in_digit_sign else "-"
+                                    )
                             data_rows.append(l)
                     
                     if data_rows:
-                        #add_table_reg_core4(doc, data_rows)
-                        #doc.add_paragraph().style = 'TAGS'
                         s = _generate_section(data_rows)
                         table.extend(s)
-                        Logger.info(f"Рисуем таблицу")
 
         return table
 
-
-        # Список сигналов ФСУ
-        temp_common = device.fsu.get_statuses_for_latex()
-        if temp_common:
-            table.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Общие сигналы функциональной логики"}}}}} \\\\\n\\hline\n')
-            for fb_dict in temp_common:
-                funcs_count = fb_dict["funcs_count"]
-                table.append('\\rowcolor{gray!15}\n')
-                header = f'\\multicolumn{{9}}{{c}}{{{fb_dict["description_fb"]} ({fb_dict["russian_name"]})}} \\\\\n\\hline\n'
-                table.append(header)
-                
-                # Проходим по всем функциям с их статусами
-                for func_group in fb_dict["statuses_by_function"]:
-                    func_name = func_group["function_name"]
-                    func_description = func_group["function_description"]
-                    statuses = func_group["statuses"]
-                    
-                    
-                    # Добавляем подзаголовок функции если нужно
-                    if func_name:
-                        # Не выводим заголовок только если: имя совпадает И функций ровно 1
-                        if not (func_name == fb_dict["russian_name"] and funcs_count == 1):
-                            # Определяем текст заголовка
-                            if func_name == fb_dict["russian_name"]:
-                                header_text = f'Общие сигналы ({func_name})'
-                            else:
-                                header_text = f'{func_description} ({func_name})'
-                            
-                            func_header = f'\\multicolumn{{9}}{{c}}{{{header_text}}} \\\\\n\\hline\n'
-                            table.append(func_header)
-
-                    # Генерируем таблицу для статусов этой функции
-                    table.extend(_generate_section(statuses, ""))
-
-        # Список сигналов ЖЕЛЕЗА
-        #statuses_list = device.modules.get_statuses_for_latex_sum_table()
-        #if statuses_list:
-            #table.append(f'\\multicolumn{{9}}{{c}}{{\\textbf{{{"Дискретные сигналы блоков в составе устройства"}}}}} \\\\\n\\hline\n')
-            #for module in device.modules.get_statuses_for_latex_sum_table():
-                #table.append('\\rowcolor{gray!15}\n')
-                #header = f'\\multicolumn{{9}}{{c}}{{{module["module"]}}} \\\\\n\\hline\n'
-                #table.append(header)
-                #table.extend(_generate_section(module["statuses"]))
-        return table
 
     ###################################################
            ### Обновить перечень сокращений  ###

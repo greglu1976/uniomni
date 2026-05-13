@@ -137,20 +137,15 @@ class Application:
         #Logger.info('Бланк уставок в docx создан')
 
     def renew_setting_tables_re(self):
-        if self.device is None:
-            Logger.error('Устройство не инициализировано!')
-        else:
-            manual = Manual(device_data=self.device_data)
-            manual.renew_setting_tables_re(self.device)
-            Logger.info('Таблицы с уставками в РЭ обновлены')
+        self.start_device_task()
+        manual = Manual(device_data=self.device_data)
+        manual.renew_setting_tables_re()
+        Logger.info('Таблицы с уставками в РЭ обновлены')
 
     def renew_sum_table_latex(self):
-
         self.start_device_task()
-
         manual = Manual(device_data=self.device_data)
         manual.renew_sum_table_latex()
-
         #Logger.info('Суммарная таблица сигналов приложения в РЭ обновлена')
 
     def add_to_sqlite(self):

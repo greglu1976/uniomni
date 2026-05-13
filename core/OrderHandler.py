@@ -860,3 +860,108 @@ class OrderHandler:
             result.append(section)
         
         return result
+    
+    def is_in_outputs_tree(self, parameter_name):
+        # Находим корневой узел
+        root_nodes = []
+        for datum in self.data:
+            if datum.get("Name") == "ParametersToHardwareDigitalOutputsTree":
+                root_nodes = datum.get("Nodes", [])
+                break
+        
+        # Рекурсивный поиск
+        def search(nodes):
+            if not nodes:
+                return False
+            
+            for node in nodes:
+                # Если текущий узел — искомый параметр
+                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
+                    return True
+                
+                # Если у узла есть вложенные узлы — идём глубже
+                if "Nodes" in node and node["Nodes"]:
+                    if search(node["Nodes"]):
+                        return True
+            return False
+        
+        return search(root_nodes)
+
+
+    def is_in_inputs_tree(self, parameter_name):
+        # Находим корневой узел
+        root_nodes = []
+        for datum in self.data:
+            if datum.get("Name") == "ParametersToHardwareDigitalInputsTree":
+                root_nodes = datum.get("Nodes", [])
+                break
+        
+        # Рекурсивный поиск
+        def search(nodes):
+            if not nodes:
+                return False
+            
+            for node in nodes:
+                # Если текущий узел — искомый параметр
+                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
+                    return True
+                
+                # Если у узла есть вложенные узлы — идём глубже
+                if "Nodes" in node and node["Nodes"]:
+                    if search(node["Nodes"]):
+                        return True
+            return False
+        
+        return search(root_nodes)
+    
+    def is_in_hmi_sign_tree(self, parameter_name):
+        # Находим корневой узел
+        root_nodes = []
+        for datum in self.data:
+            if datum.get("Name") == "ParametersToHmiSignalizationTree":
+                root_nodes = datum.get("Nodes", [])
+                break
+        
+        # Рекурсивный поиск
+        def search(nodes):
+            if not nodes:
+                return False
+            
+            for node in nodes:
+                # Если текущий узел — искомый параметр
+                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
+                    return True
+                
+                # Если у узла есть вложенные узлы — идём глубже
+                if "Nodes" in node and node["Nodes"]:
+                    if search(node["Nodes"]):
+                        return True
+            return False
+        
+        return search(root_nodes)
+    
+    def is_in_digit_sign_tree(self, parameter_name):
+        # Находим корневой узел
+        root_nodes = []
+        for datum in self.data:
+            if datum.get("Name") == "DigitalSignalsTree":
+                root_nodes = datum.get("Nodes", [])
+                break
+        
+        # Рекурсивный поиск
+        def search(nodes):
+            if not nodes:
+                return False
+            
+            for node in nodes:
+                # Если текущий узел — искомый параметр
+                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
+                    return True
+                
+                # Если у узла есть вложенные узлы — идём глубже
+                if "Nodes" in node and node["Nodes"]:
+                    if search(node["Nodes"]):
+                        return True
+            return False
+        
+        return search(root_nodes)

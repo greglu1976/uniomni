@@ -42,7 +42,7 @@ class SettingBlanc:
         self.extension_handler = ExtensionHandler(packet_path) # Для раздела конфигурация оттуда берутся перечисления
 
         self.di_list = []
-
+        self.maps = self.order_handler.get_mapping()
         with open("abbr.json", 'r', encoding='utf-8') as f:
             self.abbr_dict = json.load(f)
         
@@ -209,7 +209,7 @@ class SettingBlanc:
     def get_all_settings(self):
         """Собирает структуру уставок из заказа"""
 
-        self.maps = self.order_handler.get_mapping()
+        #self.maps = self.order_handler.get_mapping()
         
         ordered_fbs = list(self.maps.keys())
         base_structure = []
@@ -660,3 +660,27 @@ class SettingBlanc:
                     if data_rows:
                         add_table_reg_core4(doc, data_rows)
                         doc.add_paragraph().style = 'TAGS'
+
+
+    def get_table_settings_latex(self, ln, fb):
+
+        #print(ln, fb)
+        if not self.base_structure:
+            self.get_all_settings()
+        #print(self.base_structure)
+
+        for bloc in self.base_structure:
+            if bloc["type"]=="simple":
+                a = bloc["rows"][0]["col0"].split("_1_")
+                if a[0]==fb and a[1].split('_')[0]==ln:
+                    return bloc
+            else:
+                subs = bloc["sub_functions"]
+                for sub in subs:
+                    a = sub["rows"][0]["col0"].split("_1_")
+                    if a[0]==fb and a[1].split('_')[0]==ln:
+                        #return sub
+                        return bloc
+        return None
+
+
