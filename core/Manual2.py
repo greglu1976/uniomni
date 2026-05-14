@@ -267,7 +267,6 @@ class Manual:
                     #print(settings_data)
 
                     if settings_data:
-                        pass
                         latex_new = self._render_latex_settings_block(settings_data, header)
                         #print(ln, fb)
                     else:

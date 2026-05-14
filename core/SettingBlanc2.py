@@ -672,13 +672,13 @@ class SettingBlanc:
         for bloc in self.base_structure:
             if bloc["type"]=="simple":
                 a = bloc["rows"][0]["col0"].split("_1_")
-                if a[0]==fb and a[1].split('_')[0]==ln:
+                if a[0]==fb: #and a[1].split('_')[0]==ln:
                     return bloc
             else:
                 subs = bloc["sub_functions"]
                 for sub in subs:
                     a = sub["rows"][0]["col0"].split("_1_")
-                    if a[0]==fb and a[1].split('_')[0]==ln:
+                    if a[0]==fb: #and a[1].split('_')[0]==ln:
                         #return sub
                         return bloc
         return None

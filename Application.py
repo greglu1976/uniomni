@@ -10,7 +10,7 @@ from core.SettingBlanc2 import SettingBlanc
 
 from core.Manual2 import Manual
 
-from utils.xlsx2fbdata import process_all_xlsx_files
+#from utils.xlsx2fbdata import process_all_xlsx_files
 
 class Application:
     def __init__(self):
@@ -47,7 +47,7 @@ class Application:
         
 
         # Главное окно
-        with dpg.window(label="Главное окно", width=400, height=450):
+        with dpg.window(label="Главное окно", width=400, height=400, pos=[20, 20]):
            
             # Сохраняем идентификатор комбобокса
             self.device_combo = dpg.add_combo(
@@ -59,12 +59,12 @@ class Application:
             dpg.add_spacer(height=5)
 
             # Сохраняем идентификатор кнопки
-            self.init_button = dpg.add_button(
-                label="Инициализировать устройство",
-                callback=self.create_device,
-                enabled=False,
-                width=300
-            )
+            #self.init_button = dpg.add_button(
+                #label="Инициализировать устройство",
+                #callback=self.create_device,
+                #enabled=False,
+                #width=300
+            #)
 
             dpg.add_separator() 
             dpg.add_spacer(height=5)             
@@ -95,39 +95,36 @@ class Application:
             dpg.add_separator() 
             dpg.add_spacer(height=5) 
 
-            dpg.add_button(
-                label="Занести xlsx из папки db в базу SQLite",
-                callback=self.add_to_sqlite,
-                width=300
-            )
+            #dpg.add_button(
+                #label="Занести xlsx из папки db в базу SQLite",
+                #callback=self.add_to_sqlite,
+                #width=300
+            #)
 
         # Окно логов
-        with dpg.window(label="Логи", width=800, height=400, pos=[400, 0], tag="log_window"):
-            with dpg.child_window(tag="log_container", height=325):
+        heigh = 450
+        with dpg.window(label="Логи", width=900, height=heigh, pos=[430, 20], tag="log_window"):
+            with dpg.child_window(tag="log_container", height=heigh-35):
                 dpg.add_group(tag="log_content")  # для добавления строк
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.6.1 07.05.26", width=1215, height=450)
+        dpg.create_viewport(title="Omni v0.6.2 14.05.26", width=1400, height=550)
         dpg.setup_dearpygui()
 
     def renew_abbrs_ru(self):
-        if self.device is None:
-            Logger.error('Устройство не инициализировано!')
+        self.start_device_task()
+        manual = Manual(device_data=self.device_data)
+        if manual.renew_abbrs_ru()==0:
+            Logger.info('Перечень сокращений в РУ обновлен')
         else:
-            manual = Manual(device_data=self.device_data)
-            if manual.renew_abbrs_ru()==0:
-                Logger.info('Перечень сокращений в РУ обновлен')
-            else:
-                Logger.error('При обновлении перечня сокращений РУ возникли ошибки')               
+            Logger.error('При обновлении перечня сокращений РУ возникли ошибки')               
 
     def renew_abbrs(self):
-        if self.device is None:
-            Logger.error('Устройство не инициализировано!')
-        else:
-            manual = Manual(device_data=self.device_data)
-            manual.renew_abbrs()
-            Logger.info('Перечень сокращений в РЭ обновлен')
+        self.start_device_task()
+        manual = Manual(device_data=self.device_data)
+        manual.renew_abbrs()
+        Logger.info('Перечень сокращений в РЭ обновлен')
 
     def generate_setting_blanc_docx(self):
         self.start_device_task()
@@ -148,10 +145,10 @@ class Application:
         manual.renew_sum_table_latex()
         #Logger.info('Суммарная таблица сигналов приложения в РЭ обновлена')
 
-    def add_to_sqlite(self):
-        Logger.info('Запуск задачи обновления БД')
-        process_all_xlsx_files("db")
-        Logger.info('Задача обновления БД завершена')
+    #def add_to_sqlite(self):
+        #Logger.info('Запуск задачи обновления БД')
+        #process_all_xlsx_files("db")
+        #Logger.info('Задача обновления БД завершена')
 
 #######################################################################
 ######################################################################
@@ -165,7 +162,7 @@ class Application:
         if devices:
             # Используем сохраненные идентификаторы
             dpg.configure_item(self.device_combo, items=devices, enabled=True)
-            dpg.configure_item(self.init_button, enabled=True)
+            #dpg.configure_item(self.init_button, enabled=True)
             Logger.info("Конфигурация загружена успешно")
         else:
             Logger.warning("Устройства не найдены в конфигурации")
@@ -208,33 +205,33 @@ class Application:
 
 
 
-    def create_device(self):
+    #def create_device(self):
         # Создаем устройство
-        self.start_device_task()
+        #self.start_device_task()
 
-        order_code = self.device_data["order_code"]
-        full_description = self.device_data["full_description"]
-        order_code_hmi = self.device_data["order_code_hmi"]
+        #order_code = self.device_data["order_code"]
+        #full_description = self.device_data["full_description"]
+        #order_code_hmi = self.device_data["order_code_hmi"]
         
-        self.device = Device(
-            order_code=order_code, 
-            full_description=full_description, 
-            order_code_hmi=order_code_hmi
-        )
+        #self.device = Device(
+            ##order_code=order_code, 
+            #full_description=full_description, 
+            #order_code_hmi=order_code_hmi
+        #)
 
         # Проверяем, что устройство успешно инициализировалось
-        if self.device is None:
-            Logger.error("Ошибка: устройство не было создано")
-            return False
+       #if self.device is None:
+            #Logger.error("Ошибка: устройство не было создано")
+            #return False
         
         # Дополнительные проверки (если есть в классе Device)
-        if hasattr(self.device, 'is_initialized'):
-            if not self.device.is_initialized:
-                Logger.error("Устройство создано, но не инициализировано корректно")
-                return False
+        #if hasattr(self.device, 'is_initialized'):
+            #if not self.device.is_initialized:
+                #Logger.error("Устройство создано, но не инициализировано корректно")
+                #return False
         
-        Logger.info(f"Устройство: {self.device_data['name']} v{self.device_data['version']} успешно инициализировано")
-        return True
+        #Logger.info(f"Устройство: {self.device_data['name']} v{self.device_data['version']} успешно инициализировано")
+        #return True
 
 
     def run(self):
