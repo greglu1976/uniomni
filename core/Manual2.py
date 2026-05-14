@@ -349,6 +349,7 @@ class Manual:
                 # Генерируем новое содержимое
                 latex_new = self._generate_summ_table_latex() # old_block #self._fsu.get_summ_table_latex()
 
+
                 # Проверяем результат
                 if not latex_new:
                     Logger.warning("Сгенерирована пустая таблица суммарных сигналов! Оставляем старую.")
@@ -420,6 +421,7 @@ class Manual:
         table = [] 
 
         reg_data = self.setting_blanc.order_handler.get_data_for_registration()
+        #print(reg_data)
         for section in reg_data:
             if section["main_title"] != "Сигналы функциональной логики":
                 continue
@@ -431,13 +433,18 @@ class Manual:
                 if "GOOSE" in _name:
                     continue
 
-                table.append('\\rowcolor{gray!15}\n')
-                header = f'\\multicolumn{{9}}{{c}}{{{self.setting_blanc.abbr_dict.get(_name, _name)}}} \\\\\n\\hline\n'
-                table.append(header)
+                table.append('\\rowcolor{gray!10}\n')
+                header_needed = self.setting_blanc.abbr_dict.get(_name, _name)
+                table.append(f'\\multicolumn{{9}}{{c}}{{{header_needed}}} \\\\\n\\hline\n')
 
                 # Таблицы внутри подраздела
                 for table_data in subsection["tables"]:
                     data_rows = []
+                    header2 = table_data["title"].replace('_',r'\_')
+                    if table_data["title"]!='БУ' and header_needed!=header2:
+                        table.append('\\rowcolor{gray!5}\n')
+                        table.append(f'\\multicolumn{{9}}{{c}}{{{header2}}} \\\\\n\\hline\n')  
+
                     for param_name in table_data["parameters"]:
                         row_info = self.setting_blanc.config_handler.get_param_info(param_name)
                         
