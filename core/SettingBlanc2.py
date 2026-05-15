@@ -682,5 +682,47 @@ class SettingBlanc:
                         #return sub
                         return bloc
         return None
+    
 
+    def get_table_settings_latexNEW(self, ln, fb):
 
+        #print(ln, fb)
+        if not self.base_structure:
+            self.get_all_settings()
+        #print(self.base_structure)
+
+        for bloc in self.base_structure:
+            if bloc["type"] == "simple":
+                col0_value = bloc["rows"][0]["col0"]
+                
+                # Сначала пробуем _1_
+                if "_1_" in col0_value:
+                    a = col0_value.split("_1_")
+                # Если нет _1_, пробуем _2_
+                elif "_2_" in col0_value:
+                    a = col0_value.split("_2_")
+                    Logger.error(f"Разделитель _2_ !!! {col0_value}")
+                else:
+                    continue
+                    
+                if a[0] == fb:  # and a[1].split('_')[0] == ln:
+                    return bloc
+            else:
+                subs = bloc["sub_functions"]
+                for sub in subs:
+                    col0_value = sub["rows"][0]["col0"]
+                    
+                    # Сначала пробуем _1_
+                    if "_1_" in col0_value:
+                        a = col0_value.split("_1_")
+                    # Если нет _1_, пробуем _2_
+                    elif "_2_" in col0_value:
+                        a = col0_value.split("_2_")
+                        Logger.error(f"Разделитель _2_ !!! {col0_value}")
+                    else:
+                        continue
+                        
+                    if a[0] == fb:  # and a[1].split('_')[0] == ln:
+                        #return sub
+                        return bloc
+        return None

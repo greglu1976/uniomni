@@ -284,6 +284,8 @@ class OrderHandler:
                     
         return final_output
     
+
+    # ВЕРСИЯ С ПРОВЕРКОЙ ТОЛЬКО _1_
     def _create_mapping_from_structure(self) -> Dict[str, str]:
         """Создаёт mapping префикс -> имя верхней группы (рекурсивно)"""
         
@@ -338,6 +340,70 @@ class OrderHandler:
 
         self.mapping = mapping
         return mapping
+
+    # ВЕРСИЯ С ПРОВЕРКОЙ ТОЛЬКО _1_ и _2_
+    def _create_mapping_from_structure12(self) -> Dict[str, str]:
+        """Создаёт mapping префикс -> имя верхней группы (рекурсивно)"""
+        
+        mapping = {}
+        
+        def process_nodes(nodes, root_group_name):
+            """Рекурсивно обходит узлы, сохраняя имя корневой группы"""
+            if not nodes:
+                return
+                
+            for node in nodes:
+                if not isinstance(node, dict):
+                    continue
+                    
+                node_type = node.get('Type')
+                
+                # Если это Группа - спускаемся внутрь неё рекурсивно
+                if node_type == 'Group':
+                    # Важно: мы передаем то же самое root_group_name, 
+                    # чтобы параметры внутри получили имя верхней группы (например, "ЛО Т_1")
+                    process_nodes(node.get('Nodes', []), root_group_name)
+                    
+                # Если это Параметр
+                elif node_type == 'Parameter':
+                    param_name = node.get('Name', '')
+                    
+                    # Определяем разделитель и получаем префикс
+                    prefix = None
+                    if '_1_' in param_name:
+                        prefix = param_name.split('_1_')[0]
+                    elif '_2_' in param_name:
+                        prefix = param_name.split('_2_')[0]
+                        print(param_name)
+                    else:
+                        continue  # Нет ни одного из разделителей - пропускаем
+                    
+                    # Пропускаем служебные
+                    if prefix == "Номинальный ток входа":
+                        continue
+                    
+                    # Добавляем в маппинг, если такого префикса еще нет
+                    if prefix not in mapping:
+                        mapping[prefix] = root_group_name
+
+        # Основной цикл по верхнему уровню
+        for group in self.settings_group1:
+            if not isinstance(group, dict) or group.get('Type') != 'Group':
+                continue
+                
+            group_name = group.get('Name', '')
+            
+            # Пропускаем служебные верхние группы
+            if group_name.startswith("GOOSE") or group_name.startswith("ВКл:"):
+                continue
+            
+            # Запускаем рекурсию для узлов этой группы
+            process_nodes(group.get('Nodes', []), group_name)
+
+        self.mapping = mapping
+        return mapping
+
+
 
 
     def get_setting_group1(self):
