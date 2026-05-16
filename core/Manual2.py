@@ -89,9 +89,9 @@ class Manual:
                 col3 = self.parse_note_to_latex(row["col3"])
 
                 str_ = '\\centering '
-                str_ += row["col1"].replace('_', r'\_')
+                str_ += row["col1"].replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
                 str_ += ' & \\centering '
-                str_ += row["col2"].replace('-', r'--').replace('_', r'\_') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
+                str_ += row["col2"].replace('-', r'--').replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
                 str_ += ' & \\centering '
                 str_ += col3 #.replace('\n', r'\\')
                 str_ += ' & \\centering '
@@ -121,9 +121,9 @@ class Manual:
                     col3 = self.parse_note_to_latex(row["col3"])
 
                     str_ = '\\centering '
-                    str_ += row["col1"].replace('_', r'\_')
+                    str_ += row["col1"].replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
                     str_ += ' & \\centering '
-                    str_ += row["col2"].replace('-', r'--').replace('_', r'\_') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
+                    str_ += row["col2"].replace('-', r'--').replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
                     str_ += ' & \\centering '
                     str_ += col3 #.replace('\n', r'\\')
                     str_ += ' & \\centering '
@@ -273,12 +273,16 @@ class Manual:
                         Logger.error(f"Не найдено уставок для ФБ: {fb}, Функция: {ln}.")
                         latex_new = old_block
 
+                    # Склеиваем списки в одну строку для сравнения реального содержания
+                    old_str = "".join(old_block)
+                    new_str = "".join(latex_new)
+
                     # Проверяем результат get_table_settings_latex
                     if not latex_new:  # None или пустой список
                         Logger.info("Новое содержимое не сгенерировано - оставляем старое.")
                         new_content.extend(old_block)
                         new_content.append(end_tag)
-                    elif old_block != latex_new:
+                    elif old_str != new_str:
                         Logger.info("Контент отличается - будет обновлён.")
                         new_content.extend(latex_new)
                         new_content.append(end_tag)
@@ -387,9 +391,9 @@ class Manual:
     def _generate_summ_table_latex(self):
         def _generate_row(row):
             row_str = '\\raggedright '
-            row_str += row[0].replace('_', r'\_')
+            row_str += row[0].replace('_', r'\_') #.replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
             row_str += ' & \\centering '
-            row_str += row[1].replace('_', r'\_')
+            row_str += row[1].replace('_', r'\_') #.replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
             row_str += ' & \\centering '
             row_str += row[2].replace('-', r'--').replace('*', r'$\ast$')
             row_str += ' & \\centering '
@@ -421,7 +425,6 @@ class Manual:
         table = [] 
 
         reg_data = self.setting_blanc.order_handler.get_data_for_registration()
-        #print(reg_data)
         for section in reg_data:
             if section["main_title"] != "Сигналы функциональной логики":
                 continue
@@ -432,6 +435,9 @@ class Manual:
                 _name = subsection["title"].split("_")[0]
                 if "GOOSE" in _name:
                     continue
+                if "Блок измерений" in _name:
+                    continue
+
 
                 table.append('\\rowcolor{gray!10}\n')
                 header_needed = self.setting_blanc.abbr_dict.get(_name, _name)
@@ -441,7 +447,8 @@ class Manual:
                 for table_data in subsection["tables"]:
                     data_rows = []
                     header2 = table_data["title"].replace('_',r'\_')
-                    if table_data["title"]!='БУ' and header_needed!=header2:
+                    if table_data["title"]!='БУ' and header_needed!=header2 and subsection["title"]!=table_data["title"]: # subsection["title"]!=table_data["title"] появилось в АРНТ где АРНТ_1 и АРНТ_1
+                        #print(table_data["title"])
                         table.append('\\rowcolor{gray!5}\n')
                         table.append(f'\\multicolumn{{9}}{{c}}{{{header2}}} \\\\\n\\hline\n')  
 

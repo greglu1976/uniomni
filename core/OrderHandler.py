@@ -11,7 +11,7 @@ from core.MainConfigHandler import MainConfigHandler
 
 class OrderHandler:
 
-    def __init__(self, config_handler = None, root_path = ''):
+    def __init__(self, config_handler = None, extension_handler = None, root_path = ''):
         with open(root_path+"grouping.json", 'r', encoding='utf-8') as f:
             self.data = json.load(f)
         self.settings_group1 = None
@@ -21,6 +21,8 @@ class OrderHandler:
             self.config_handler = config_handler
         else:
             self.config_handler = MainConfigHandler.from_json_file("meta.json")
+
+        self.extension_handler = extension_handler 
 
         self.mapping = {}
         self._create_mapping_from_structure()
@@ -73,7 +75,7 @@ class OrderHandler:
         # \s*\d+\s*-\s* - цифра, тире с пробелами
         # (.*?) - значение (любые символы) лениво до...
         # (?=\s*\d+\s*-|$) - ...следующей цифры с тире или конца строки
-        pattern = r'(\d+)\s*-\s*(.*?)(?=\s*\d+\s*-|$)'
+        pattern = r'(\d+)\s*[–—-]\s*(.*?)(?=\s*\d+\s*[–—-]|$)'
         
         for match in re.finditer(pattern, options_str):
             key = match.group(1)
@@ -85,7 +87,6 @@ class OrderHandler:
 
     def prepare_data_for_table(self, fb_name):
         raw = self.config_handler.get_param_info(fb_name)
-
         s = raw["description"]
         desc = "_".join(s.split("_", 1)[1:])
         col1 = raw["fullDescription"] + " (" + desc + ") "
@@ -114,7 +115,6 @@ class OrderHandler:
         else:
             col3 = raw["note"]
             op_dict = self.parse_options(col3)
-
             col3 ="note_"+str(op_dict)
             is_sgf = True
 
@@ -286,7 +286,7 @@ class OrderHandler:
     
 
     # ВЕРСИЯ С ПРОВЕРКОЙ ТОЛЬКО _1_
-    def _create_mapping_from_structure(self) -> Dict[str, str]:
+    def _create_mapping_from_structure1(self) -> Dict[str, str]:
         """Создаёт mapping префикс -> имя верхней группы (рекурсивно)"""
         
         mapping = {}
@@ -342,7 +342,7 @@ class OrderHandler:
         return mapping
 
     # ВЕРСИЯ С ПРОВЕРКОЙ ТОЛЬКО _1_ и _2_
-    def _create_mapping_from_structure12(self) -> Dict[str, str]:
+    def _create_mapping_from_structure(self) -> Dict[str, str]:
         """Создаёт mapping префикс -> имя верхней группы (рекурсивно)"""
         
         mapping = {}
@@ -374,7 +374,7 @@ class OrderHandler:
                         prefix = param_name.split('_1_')[0]
                     elif '_2_' in param_name:
                         prefix = param_name.split('_2_')[0]
-                        print(param_name)
+                        #print(param_name)
                     else:
                         continue  # Нет ни одного из разделителей - пропускаем
                     

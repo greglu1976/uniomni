@@ -4,7 +4,7 @@ import gui.themes as themes
 
 from logger.logger import Logger
 
-from core.Device import Device
+
 from core.DeviceDataManager import DeviceDataManager
 from core.SettingBlanc2 import SettingBlanc
 
@@ -15,8 +15,6 @@ from core.Manual2 import Manual
 class Application:
     def __init__(self):
 
-        self.device = None
-        self.device_data = None
 
         self.device_data_manager = DeviceDataManager()
         self.devices_data = self.device_data_manager.get_all_devices()
@@ -109,7 +107,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.6.2hf1 16.05.26", width=1400, height=550)
+        dpg.create_viewport(title="Omni v0.6.3 16.05.26", width=1400, height=550)
         dpg.setup_dearpygui()
 
     def renew_abbrs_ru(self):

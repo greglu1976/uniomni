@@ -36,10 +36,11 @@ class SettingBlanc:
         self.versions = self.device_data["versions"]
         self.base_structure = None  # Будет хранить структуру из get_all_settings()
 
-        self.config_handler = MainConfigHandler.from_json_file(packet_path + "meta.json")
-        self.order_handler = OrderHandler(self.config_handler, packet_path)
-
         self.extension_handler = ExtensionHandler(packet_path) # Для раздела конфигурация оттуда берутся перечисления
+        self.config_handler = MainConfigHandler.from_json_file(packet_path + "meta.json")
+        self.order_handler = OrderHandler(self.config_handler, self.extension_handler, packet_path)
+
+
 
         self.di_list = []
         self.maps = self.order_handler.get_mapping()
@@ -220,6 +221,7 @@ class SettingBlanc:
                 continue
             
             json_data = self.order_handler.get_data_by_fb_name(fb_map)
+            #print(json_data)
             parsed_blocks = self.order_handler.parse_rza_structure(json_data, all_struct=0)
             base_structure.extend(parsed_blocks)
         
@@ -583,6 +585,7 @@ class SettingBlanc:
                     row_name = row["name"]
                     row_data = self.config_handler.get_param_info(row_name)
                     enum_data = self.extension_handler.find_enum_by_parameter_name(row_name)
+                    #print(enum_data, row_name)
 
                     col1 = row_data["fullDescription"]
                     col2 = row_data["appliedDescription"]
@@ -662,7 +665,7 @@ class SettingBlanc:
                         doc.add_paragraph().style = 'TAGS'
 
 
-    def get_table_settings_latex(self, ln, fb):
+    def get_table_settings_latex1(self, ln, fb):
 
         #print(ln, fb)
         if not self.base_structure:
@@ -684,7 +687,7 @@ class SettingBlanc:
         return None
     
 
-    def get_table_settings_latexNEW(self, ln, fb):
+    def get_table_settings_latex(self, ln, fb):
 
         #print(ln, fb)
         if not self.base_structure:
