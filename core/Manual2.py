@@ -100,7 +100,8 @@ class Manual:
                 str_ += row["col5"].replace('-', r'--')
                 str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
                 table.append(str_)
-            
+                
+            table.append('\\hline\n')  # Добавляем \hline отдельным элементом            
             return table
         else:
             subs = settings_data["sub_functions"]
