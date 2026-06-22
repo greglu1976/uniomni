@@ -132,7 +132,7 @@ class Manual:
                     str_ += row["col5"].replace('-', r'--')
                     str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
                     table.append(str_)
-            
+            table.append('\\hline\n')  # Добавляем \hline отдельным элементом
             return table
 
 
@@ -207,6 +207,15 @@ class Manual:
         end_tag = '%===t1\n'
 
         self._get_all_paths_from_general_tex()
+
+        #self.paths.append("\\\\uni-eng.ru\\unit\\Ivanovo\\Документация ЮНИТ М300\\Разработка\\Схемы ФБ ЮНИТ-М300\\Проект\\РЭ500\\30. РЭ ЮНИТ-М500-ЛВ Уст\\Приложение. Уставки\\settings.tex")
+        path_to_desc = self.device_data.get("path_to_latex_desc")
+        if not path_to_desc:
+            Logger.error("Error: path_to_latex_desc is empty or missing")
+            return
+        path_to_desc = path_to_desc.rstrip('/\\')   
+        self.paths = [path_to_desc + "/Приложение. Уставки/settings.tex",] # Перезаписываем self.paths одной строкой пути к файлу settings в приложении Уставки
+
 
         for path in self.paths:
             if not os.path.exists(path):
