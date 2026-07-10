@@ -274,7 +274,6 @@ class Manual:
                     # Генерируем новое содержимое
                     latex_new = []
                     settings_data = self.setting_blanc.get_table_settings_latex(ln, fb)
-                    #print(settings_data)
 
                     if settings_data:
                         latex_new = self._render_latex_settings_block(settings_data, header)
@@ -293,7 +292,7 @@ class Manual:
                         new_content.extend(old_block)
                         new_content.append(end_tag)
                     elif old_str != new_str:
-                        Logger.info("Контент отличается - будет обновлён.")
+                        Logger.info(f"Контент отличается - будет обновлён. {settings_data['func_name'], ln, fb}")
                         new_content.extend(latex_new)
                         new_content.append(end_tag)
                         modified = True  # <-- Теперь корректно
