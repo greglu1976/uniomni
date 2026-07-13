@@ -10,11 +10,13 @@ from core.SettingBlanc2 import SettingBlanc
 
 from core.Manual2 import Manual
 
-#from utils.xlsx2fbdata import process_all_xlsx_files
+from core.LatexDoc import LatexDoc
+from utils.additional import create_directories, save_obj, load_obj
 
 class Application:
     def __init__(self):
 
+        self.device_data = None
 
         self.device_data_manager = DeviceDataManager()
         self.devices_data = self.device_data_manager.get_all_devices()
@@ -93,11 +95,11 @@ class Application:
             dpg.add_separator() 
             dpg.add_spacer(height=5) 
 
-            #dpg.add_button(
-                #label="Занести xlsx из папки db в базу SQLite",
-                #callback=self.add_to_sqlite,
-                #width=300
-            #)
+            dpg.add_button(
+                label="Собрать в один файл latex (raw.tex)",
+                callback=self.gen_raw_latex,
+                width=300
+            )
 
         # Окно логов
         heigh = 450
@@ -107,7 +109,7 @@ class Application:
 
         Logger.set_container("log_content", "log_window")
         
-        dpg.create_viewport(title="Omni v0.6.6 10.07.26", width=1400, height=550)
+        dpg.create_viewport(title="Omni v0.6.7 13.07.26", width=1400, height=550)
         dpg.setup_dearpygui()
 
     def renew_abbrs_ru(self):
@@ -202,6 +204,28 @@ class Application:
             return False
 
 
+    def gen_raw_latex(self):
+
+        Logger.info('Пытаемся создать единый файл latex')
+
+        if not self.is_device_selected():
+            Logger.warning('Устройство не выбрано')
+            return
+        if self.device_data is None:
+            self.start_device_task()
+
+        create_directories()
+        # Сохраняем в файл объект РЭ
+        #save_obj(self.re_)
+
+        path =self.device_data["path_to_latex_desc"] + '/_manual_latex'
+
+        LatexDoc(path)
+        Logger.info('Проект latex для РЭ создан. См. папку latex_build')        
+        #process_all_xlsx_files("db")
+        #Logger.info('Задача обновления БД завершена')
+
+#######################################################################
 
     #def create_device(self):
         # Создаем устройство
@@ -231,7 +255,14 @@ class Application:
         #Logger.info(f"Устройство: {self.device_data['name']} v{self.device_data['version']} успешно инициализировано")
         #return True
 
-
+    def is_device_selected(self):
+        """Проверяет, выбрано ли устройство и инициализированы ли его данные"""
+        # Проверяем, что в комбобоксе что-то выбрано
+        selected_text = dpg.get_value(self.device_combo)
+        if not selected_text:
+            return False
+        return True
+    
     def run(self):
         dpg.show_viewport()
         dpg.start_dearpygui()
