@@ -214,9 +214,10 @@ class SettingBlanc:
         
         ordered_fbs = list(self.maps.keys())
         base_structure = []
-        
+
         for fb in ordered_fbs:
             fb_map = self.maps.get(fb)
+            
             if not fb_map:
                 continue
             

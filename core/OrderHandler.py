@@ -69,14 +69,18 @@ class OrderHandler:
         """Парсит строку вида '0 - Вывод, 1 - По ЭМО1, ЭМО2' в словарь"""
         import re
         result = {}
-        
+
+        if options_str is None:
+            return {}
+
+
         # Ищем все вхождения "цифра - значение" (значение может содержать запятые)
         # ?: - несохраняющая группа
         # \s*\d+\s*-\s* - цифра, тире с пробелами
         # (.*?) - значение (любые символы) лениво до...
         # (?=\s*\d+\s*-|$) - ...следующей цифры с тире или конца строки
         pattern = r'(\d+)\s*[–—-]\s*(.*?)(?=\s*\d+\s*[–—-]|$)'
-        
+        #print(options_str)
         for match in re.finditer(pattern, options_str):
             key = match.group(1)
             value = match.group(2).strip().rstrip(',')
@@ -96,7 +100,7 @@ class OrderHandler:
         op_dict = {}
         is_sgf = False
         # Форматирование col3
-        if raw["note"] == '':
+        if not raw["note"]: #if raw["note"] == '':
             # Форматируем min и max с учётом шага
             if raw["step"] and raw["step"] != '':
                 step = float(raw["step"])
