@@ -130,7 +130,7 @@ class OrderHandler:
 
 
         unit, units = self.extension_handler.find_trans_by_parameter_name(fb_name)
-        print(fb_name)
+        #print(fb_name)
         col4 = "-" #if raw["units"] == '' else raw["units"]
         if unit:
             col4 = unit
@@ -418,7 +418,13 @@ class OrderHandler:
             # Запускаем рекурсию для узлов этой группы
             process_nodes(group.get('Nodes', []), group_name)
 
-        mapping = {'Общая логика': 'Общая логика', 'КСВ СВ': 'КСВ СВ', 'АУ СВ': 'АУ СВ', 'АПВ СВ': 'АПВ СВ', 'БНН 1СШ': 'БНН 1СШ', 'БНН 2СШ': 'БНН 2СШ',  'МТЗ': 'МТЗ', 'ДЗ': 'ДЗ', 'БК': 'БК', 'КСН СВ': 'КСН СВ', 'ТЗНП': 'ТЗНП', 'ФПВ СВ': 'ФПВ СВ'}
+        #print(self.settings_group1)
+        # упрощенный подход к маппингу для М500
+        mapping = {}
+        for bl in self.settings_group1:
+            key = bl["Name"]
+            value = bl["Name"]
+            mapping[key] = value  # теперь bl — это текущий элемент цикла
 
 
         self.mapping = mapping
