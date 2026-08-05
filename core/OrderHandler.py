@@ -34,6 +34,7 @@ class OrderHandler:
 
         self.general_sigs_of_func_logic = [] # Общие сигналы функциональной логики вытащенные из GROUPING
 
+
     def _extrude_settings_group1(self):
         """Извлекает структуру 'Группа уставок 1' из JSON"""
         for root_node in self.data:
@@ -80,7 +81,6 @@ class OrderHandler:
         # (.*?) - значение (любые символы) лениво до...
         # (?=\s*\d+\s*-|$) - ...следующей цифры с тире или конца строки
         pattern = r'(\d+)\s*[–—-]\s*(.*?)(?=\s*\d+\s*[–—-]|$)'
-        #print(options_str)
         for match in re.finditer(pattern, options_str):
             key = match.group(1)
             value = match.group(2).strip().rstrip(',')
@@ -90,13 +90,19 @@ class OrderHandler:
 
 
     def prepare_data_for_table(self, fb_name):
+
+        enum500 = self.extension_handler.find_enum_by_parameter_name(fb_name)
         raw = self.config_handler.get_param_info(fb_name)
         s = raw["description"]
-        desc = "_".join(s.split("_", 1)[1:])
+
+        desc = s # Различие в М500 и М300 , в М300 ФБ имеют обозначение типа ДЗ_1, в М500 такого нет
+        if "_" in s:
+            desc = "_".join(s.split("_", 1)[1:]) 
+
         col1 = raw["fullDescription"] + " (" + desc + ") "
         col2 = raw["appliedDescription"]
         col0 = fb_name
-        
+
         op_dict = {}
         is_sgf = False
         # Форматирование col3
@@ -122,11 +128,18 @@ class OrderHandler:
             col3 ="note_"+str(op_dict)
             is_sgf = True
 
-        
-        col4 = "-" if raw["units"] == '' else raw["units"]
-        
+
+        unit, units = self.extension_handler.find_trans_by_parameter_name(fb_name)
+        print(fb_name)
+        col4 = "-" #if raw["units"] == '' else raw["units"]
+        if unit:
+            col4 = unit
+
+
+
+
         # col5 - сохраняем старую логику: "-" если note не пустой, иначе step
-        if raw["note"] != '':
+        if raw["note"] != '' and raw["note"]:
             col5 = "-"
         else:
             if raw["step"] and raw["step"] != '':
@@ -136,7 +149,8 @@ class OrderHandler:
                 col5 = f"{step:.{decimals}f}".replace('.', ',')
             else:
                 col5 = "-"
-        
+        if enum500:
+            col5 = "-"       
         # col6 - форматируем defaultValue
         col6 = "-"
         if raw["defaultValue"] and raw["defaultValue"] != '':
@@ -404,7 +418,11 @@ class OrderHandler:
             # Запускаем рекурсию для узлов этой группы
             process_nodes(group.get('Nodes', []), group_name)
 
+        mapping = {'Общая логика': 'Общая логика', 'КСВ СВ': 'КСВ СВ', 'АУ СВ': 'АУ СВ', 'АПВ СВ': 'АПВ СВ', 'БНН 1СШ': 'БНН 1СШ', 'БНН 2СШ': 'БНН 2СШ',  'МТЗ': 'МТЗ', 'ДЗ': 'ДЗ', 'БК': 'БК', 'КСН СВ': 'КСН СВ', 'ТЗНП': 'ТЗНП', 'ФПВ СВ': 'ФПВ СВ'}
+
+
         self.mapping = mapping
+
         return mapping
 
 

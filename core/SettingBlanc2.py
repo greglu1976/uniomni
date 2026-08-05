@@ -56,13 +56,12 @@ class SettingBlanc:
             return
         
         add_new_section_landscape(doc)
-        
         # Основной заголовок
         p = doc.add_paragraph('УСТАВКИ РЗиА')
         p.style = 'ДОК Заголовок 1'
-        
         # Проходим по всем блокам
         for func_block in self.base_structure:
+            #print(func_block)
             func_type = func_block.get('type')
             func_name = func_block.get('func_name', 'Без имени')
 
@@ -115,10 +114,13 @@ class SettingBlanc:
         # Добавляем строки с данными (начиная с row_index=2, т.к. 0 и 1 - заголовки)
         for i, row_data in enumerate(rows_data, start=1):
             row = table.add_row()
-            
+            #print(rows_data)
+
             # --- Обработка Ячейки 1 (ПО ЮС) и Ячейки 2 (ИЧМ) ---
             raw_col1 = row_data.get('col1', '')
-            
+
+            enum500 = self.extension_handler.find_enum_by_parameter_name(row_data.get('col0'))
+
             # Находим все вхождения текста в круглых скобках
             matches = list(re.finditer(r'\(([^()]*)\)', raw_col1))
             
@@ -147,11 +149,13 @@ class SettingBlanc:
             # Ячейка 2 (ИЧМ) - значение из последних скобок (или пусто)
             row.cells[2].text = final_col2
             row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            
+
             # Ячейка 3 (Значение / Диапазон) - из col3 с обработкой note_
             col3_value = row_data.get('col3', '')
             if isinstance(col3_value, str) and col3_value.startswith('note_{'):
                 col3_value = self._parse_note_dict(col3_value)
+            if enum500:
+                col3_value = " / ".join(item['VisibleValue'] for item in enum500)                
             row.cells[3].text = col3_value
             row.cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
             
@@ -164,7 +168,12 @@ class SettingBlanc:
             row.cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             
             # Ячейка 6 (Значение по умолчанию) - из col6
-            row.cells[6].text = row_data.get('col6', '')
+            col6_value = row_data.get('col6', '')
+            if enum500:
+                # Создаём словарь для мгновенного поиска вместо цикла
+                lookup = {item['ParameterValue']: item['VisibleValue'] for item in enum500}
+                col6_value = lookup.get(int(col6_value), col6_value)
+            row.cells[6].text = str(col6_value)
             row.cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             
             # Ячейки 7-10 (Группы уставок) - не заполняем
