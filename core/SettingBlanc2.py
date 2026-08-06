@@ -23,6 +23,8 @@ from core.OrderHandler import OrderHandler
 from core.MainConfigHandler import MainConfigHandler
 from core.ExtensionHandler import ExtensionHandler
 
+from core.MibusHandler import MibusHandler
+
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
@@ -42,7 +44,7 @@ class SettingBlanc:
         self.config_handler = MainConfigHandler.from_json_file(packet_path + "meta.json")
         self.order_handler = OrderHandler(self.config_handler, self.extension_handler, packet_path)
 
-
+        self.mibus_handler = MibusHandler(packet_path)
 
         self.di_list = []
         self.maps = self.order_handler.get_mapping()
@@ -341,6 +343,10 @@ class SettingBlanc:
         except Exception:
             raw_sigs, raw_di_sigs = [], []
 
+        
+
+
+
         def extract_description(item):
             if isinstance(item, dict):
                 return (item.get('fullDescription') or 
@@ -348,9 +354,11 @@ class SettingBlanc:
                         item.get('description') or 
                         item.get('name', ''))
             return str(item)
-
+        
+        raw_sigs, _ = self.order_handler.get_fsu_signals() 
         # Очищенные списки строк для dropdown
         sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
+        #print(sigs_list)
         di_sigs_list = [desc for desc in [extract_description(s) for s in raw_di_sigs] if desc]
         self.di_list =  di_sigs_list
         # Получаем данные слотов один раз

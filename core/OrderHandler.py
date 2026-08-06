@@ -11,6 +11,73 @@ from collections import defaultdict
 
 from core.MainConfigHandler import MainConfigHandler
 
+class NodeResolver:
+    def __init__(self, hard_nodes_structure, config_handler):
+        """
+        :param hard_nodes_structure: Список словарей с узлами (inputs_hard_nodes)
+        :param config_handler: Объект с методом get_param_info(name)
+        """
+        self.config_handler = config_handler
+        # Словарь для быстрого поиска: { "ParamName": ["Parent1", "Parent2"] }
+        self._path_index = {}
+        
+        # Предварительная индексация структуры при инициализации
+        self._build_index(hard_nodes_structure)
+
+    def _build_index(self, nodes, current_path=None):
+        """Рекурсивно обходит структуру и сохраняет путь до каждого Parameter"""
+        if current_path is None:
+            current_path = []
+            
+        for node in nodes:
+            name = node.get('Name')
+            n_type = node.get('Type')
+            
+            if n_type == 'Parameter':
+                # Сохраняем копию текущего пути для этого параметра
+                self._path_index[name] = list(current_path)
+            elif n_type == 'Group' and 'Nodes' in node:
+                # Если это группа, добавляем её имя в путь и идем глубже
+                new_path = current_path + [name]
+                self._build_index(node['Nodes'], new_path)
+
+    def get_formatted_info(self, param_name: str) -> str:
+        """
+        Возвращает строку вида 'Группа / Подгруппа: Описание' или 'Параметр: Описание'
+        """
+        # 1. Получаем описание из конфигуратора
+        try:
+            info = self.config_handler.get_param_info(param_name)
+            description = info.get("description", "Описание не найдено")
+        except Exception as e:
+            return f"{param_name}: Ошибка получения описания ({e})"
+
+        # 2. Формируем префикс пути
+        path_parts = self._path_index.get(param_name)
+        
+        if path_parts is None:
+            # Параметр не найден в структуре hard_nodes
+            prefix = param_name
+        elif len(path_parts) == 0:
+            # Параметр лежит в корне (редкий случай)
+            prefix = param_name
+        else:
+            # Объединяем группы через " / "
+            prefix = " / ".join(path_parts)
+            
+        return f"{prefix}: {description}"
+
+
+
+
+
+
+
+
+
+
+
+
 class OrderHandler:
 
     def __init__(self, config_handler = None, extension_handler = None, root_path = ''):
@@ -32,6 +99,8 @@ class OrderHandler:
         self.fsu_signals = []
         self.fsu_di_signals = []
         self.fsu_out_signals = []
+
+        self.all_nodes_sigs = None
 
 
         self.general_sigs_of_func_logic = [] # Общие сигналы функциональной логики вытащенные из GROUPING
@@ -448,6 +517,15 @@ class OrderHandler:
 
 
     # возвращает список дискретных сигналов 
+    def _drag_all_sigs_of_func_logic(self, tree_name = "FunctionalBlockLogicInputsTree"):
+        for data in self.data:
+            if data["Name"] == tree_name:
+                self.all_nodes_sigs = data["Nodes"]
+                break
+
+
+
+    # возвращает список дискретных сигналов 
     def _drag_gen_sigs_of_func_logic(self, tree_name = "MeasurementsTree"):
         for data in self.data:
             if data["Name"] == tree_name:
@@ -457,7 +535,81 @@ class OrderHandler:
                         self.general_sigs_of_func_logic = node["Nodes"]
                         break
 
+
+
+
+    def get_fsu_signals_test(self):
+
+        # Инициализация / очистка списков перед сбором
+        self.fsu_signals = []
+        self.fsu_di_signals = []
+
+
+        if not self.all_nodes_sigs:
+            self._drag_all_sigs_of_func_logic()
+
+        for node in self.all_nodes_sigs:
+            func_name = node["Name"]
+            func_nodes = node.get("Nodes")
+            if not func_nodes:
+                continue
+            for func_node in func_nodes:
+                info = self.config_handler.get_param_info(func_node["Name"])
+                self.fsu_signals.append(f'{func_name}: {info["description"]}')
+        print(self.fsu_signals)
+        return self.fsu_signals, self.fsu_di_signals
+
+
+
+
+
+
+
+
     def get_fsu_signals(self):
+
+        for data in self.data:
+            if data["Name"] == "ParametersToHardwareDigitalInputsTree":
+                inputs_hard_nodes = data["Nodes"]
+
+
+        for data in self.data:
+            if data["Name"] == "FunctionalBlockLogicInputsTree":
+                inputs_nodes = data["Nodes"]
+
+        resolver = NodeResolver(inputs_hard_nodes, self.config_handler)
+
+        print(resolver.get_formatted_info("I3_29_x3"))
+
+
+
+
+                #info = self.config_handler.get_param_info(func_node["Name"])
+                #self.fsu_signals.append(f'{func_name}: {info["description"]}')
+
+        return [], []
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def get_fsu_signalsOLD(self):
         """
         Возвращает кортеж (fsu_signals, fsu_di_signals).
         fsu_signals: общие сигналы функциональной логики (для ФК, светодиодов и т.д.)
@@ -474,8 +626,8 @@ class OrderHandler:
              # Поэтому лучше использовать отдельный флаг или проверять тип.
              
              # Вариант А: Если в __init__ они []:
-             if self.fsu_signals or self.fsu_di_signals: 
-                 return self.fsu_signals, self.fsu_di_signals
+            if self.fsu_signals or self.fsu_di_signals: 
+                return self.fsu_signals, self.fsu_di_signals
              # Если оба пустые, но мы уже ходили за данными, можно добавить флаг _signals_loaded
              # Но для простоты, если списки могут быть легитимно пустыми, лучше убрать этот блок
              # и полагаться на то, что пересчет быстрый, или использовать флаг.
@@ -495,12 +647,18 @@ class OrderHandler:
             self._drag_gen_sigs_of_func_logic()
 
         gen_signals = []
-        
+
         # Ищем нужный узел
         for o in self.general_sigs_of_func_logic:
             if o.get("Name") == "Общие сигналы ФС":
                 gen_signals = o.get("Nodes", [])
                 break # Нашли, выходим из цикла
+
+
+        #for o in self.general_sigs_of_func_logic:
+            #nodes = o.get("Nodes", [])
+            #gen_signals.extend(nodes)
+        #print(gen_signals)
 
         pass_data = ["GOOSE", "HMI_", "FB_", "BitTest_"] 
         
@@ -509,7 +667,7 @@ class OrderHandler:
                 sig_data = self.config_handler.get_param_info(signal["Name"])
             except Exception:
                 continue
-
+            #print(sig_data.get("name", ""))
             # 1. Разделяем DI сигналы
             if "DI_" in sig_data.get("name", ""):
                 self.fsu_di_signals.append(sig_data)
