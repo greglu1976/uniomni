@@ -133,11 +133,16 @@ class OrderHandler:
 
         unit, units = self.extension_handler.find_trans_by_parameter_name(fb_name)
         #print(fb_name)
-        col4 = "-" #if raw["units"] == '' else raw["units"]
-        if unit:
+        #col4 = "-" #if raw["units"] == '' else raw["units"]
+        #if unit:
+            #col4 = unit
+
+        if raw["units"] == '' and unit:
             col4 = unit
-
-
+        elif raw["units"] != '':
+            col4 = raw["units"]
+        else:
+            col4 = "-"
 
 
         # col5 - сохраняем старую логику: "-" если note не пустой, иначе step

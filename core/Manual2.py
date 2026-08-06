@@ -75,8 +75,9 @@ class Manual:
     ###### Метод для обновления таблиц уставок в РЭ #########
     #########################################################
 
-    def _render_latex_settings_block(self, settings_data, header):
-
+    def _render_latex_settings_block(self, settings_data):
+        #print(settings_data)
+        #print("==================")
         table = []
         if settings_data["type"] == "simple":
         #if header is not None and header != "":
@@ -90,15 +91,17 @@ class Manual:
                 col3 = self.parse_note_to_latex(row["col3"])
 
                 str_ = '\\centering '
-                str_ += row["col1"].replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
+                str_ += row["col2"].replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
                 str_ += ' & \\centering '
-                str_ += row["col2"].replace('-', r'--').replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
-                str_ += ' & \\centering '
+                #str_ += row["col2"].replace('-', r'--').replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
+                #str_ += ' & \\centering '
                 str_ += col3 #.replace('\n', r'\\')
                 str_ += ' & \\centering '
                 str_ += row["col4"].replace('-', r'--').replace('%', r'\%')
-                str_ += ' & \\centering \\arraybackslash '
+                str_ += ' & \\centering '
                 str_ += row["col5"].replace('-', r'--')
+                str_ += ' & \\centering \\arraybackslash '
+                str_ += row["col6"]               
                 str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
                 table.append(str_)
                 
@@ -123,23 +126,22 @@ class Manual:
                     col3 = self.parse_note_to_latex(row["col3"])
 
                     str_ = '\\centering '
-                    str_ += row["col1"].replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
+                    str_ += row["col2"].replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
                     str_ += ' & \\centering '
-                    str_ += row["col2"].replace('-', r'--').replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
-                    str_ += ' & \\centering '
+                    #str_ += row["col2"].replace('-', r'--').replace('_', r'\_').replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|') if row["col2"] else "--" #.replace('-', r'--').replace('_', r'\_')
+                    #str_ += ' & \\centering '
                     str_ += col3 #.replace('\n', r'\\')
                     str_ += ' & \\centering '
                     str_ += row["col4"].replace('-', r'--').replace('%', r'\%')
-                    str_ += ' & \\centering \\arraybackslash '
+                    str_ += ' & \\centering '
                     str_ += row["col5"].replace('-', r'--')
+                    str_ += ' & \\centering \\arraybackslash '
+                    str_ += row["col6"]               
                     str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
                     table.append(str_)
             table.append('\\hline\n')  # Добавляем \hline отдельным элементом
             return table
 
-
-
-    
     def parse_note_to_latex(self, note_str):
         # Если это не строка или не начинается с "note_", возвращаем как есть
         if not isinstance(note_str, str) or not note_str.startswith("note_{"):
@@ -159,58 +161,41 @@ class Manual:
         # Объединяем через " \\ " (обратите внимание на пробелы)
         return " \\\\ ".join(sorted_values)
 
-    # Старая функция - добавляет hline после последней строки 30.12.25 Вынесена в архив
-    #def _render_latex_settings_blockOLD(self, settings_data, header):
-        #table = []
-        #if header is not None and header != "":
-            #head_latex = '\multicolumn{5}{|c|}{ ' + header + ' } \\\\ \hline \n'
-            #table.append(head_latex)
-        #for row in settings_data:
-            #str_ = '\centering '
-            #str_ += row[0].replace('_', r'\_')
-            #str_ += ' & \centering '
-            #str_ += row[1].replace('-', r'--').replace('_', r'\_')
-            #str_ += ' & \centering '
-            #str_ += row[2].replace('\n', r'\\')
-            #str_ += ' & \centering '
-            #str_ += row[3].replace('-', r'--').replace('%', r'\%')
-            #str_ += ' & \centering \\arraybackslash '
-            #str_ += row[4].replace('-', r'--')
-            #str_ += ' \\\\\n'  # Закрываем строку таблицы и переносим строку
-            #table.append(str_)  # Добавляем строку таблицы
-            #print(str_)
-            #table.append('\\hline\n')  # Добавляем \hline отдельным элементом
-        #print(table)
-        #return table
-    ########################################################################################
 
-    def _parse_start_tag(self, tag_line):
+
+    def _parse_start_tag(self, raw_tag):
         """
-        Парсит строку вида:
-            %==+t1*PDIF1|TDIF> Дифференциальная защита
-        или
-            %==+t1*PDIF1|TDIF
-        Возвращает кортеж: (ln, fb, header)
+        Полный парсинг тега
         """
-        match = re.search(r'\*(.*?)\|(.*?)(?:>(.*))?$', tag_line)
-        if match:
-            ln = match.group(1).strip()
-            fb = match.group(2).strip()
-            header = match.group(3).strip() if match.group(3) else ""
-            return ln, fb, header
-        return None, None, None
+    
+        parts = raw_tag[6:].split('|')
+        
+        if len(parts) not in (1, 2):
+            raise ValueError(f"Неверный формат: {raw_tag}")
+        
+        # Если есть разделитель и после него что-то есть
+        if len(parts) == 2:
+            path_part = parts[0].strip()
+            function_name = parts[1].strip() if parts[1].strip() else "-"
+        else:
+            # Если разделителя нет
+            path_part = parts[0].strip()
+            function_name = "-"
+
+        return path_part, function_name
+
+
 
     def renew_setting_tables_re(self):
 
         mapping = self.setting_blanc.maps
         #print(all_settings)
 
-        start_tag_prefix = '%==+t1*'
-        end_tag = '%===t1\n'
+        start_tag_prefix = '%===m>'
+        end_tag = '%===m\n'
 
         self._get_all_paths_from_general_tex()
 
-        #self.paths.append("\\\\uni-eng.ru\\unit\\Ivanovo\\Документация ЮНИТ М300\\Разработка\\Схемы ФБ ЮНИТ-М300\\Проект\\РЭ500\\30. РЭ ЮНИТ-М500-ЛВ Уст\\Приложение. Уставки\\settings.tex")
         path_to_desc = self.device_data.get("path_to_latex_desc")
         if not path_to_desc:
             Logger.error("Error: path_to_latex_desc is empty or missing")
@@ -243,14 +228,14 @@ class Manual:
                     old_block = []
                     i += 1
                     line = content[i]
-                    if line.startswith('%===t1*'):
+                    if line.startswith('%===m>'):
                         # Сохраняем старый тег, если есть
                         new_content.append(line)
                         i += 1
 
                     while i < len(content):
                         current_line = content[i]
-                        if current_line.startswith('%===t1*'):
+                        if current_line.startswith('%===m>'):
                             # Сохраняем старый тег %===t1*...
                             old_block.append(current_line)
                             i += 1                        
@@ -261,7 +246,7 @@ class Manual:
                             i += 1
 
                     # Парсим LN, FB и заголовок
-                    ln, fb, header = self._parse_start_tag(start_line)
+                    fb, ln = self._parse_start_tag(start_line)
                     m = (mapping.get(fb, '-'))
                     if m=='-':
                         Logger.warning(f"Функциональный блок {fb} ({ln}) есть в описании latex, но отсутствует в файле поддержки устройства ")
@@ -274,10 +259,10 @@ class Manual:
                     #print(ln, fb, header)
                     # Генерируем новое содержимое
                     latex_new = []
-                    settings_data = self.setting_blanc.get_table_settings_latex(ln, fb)
+                    settings_data = self.setting_blanc.get_table_settings_latex(fb)
 
                     if settings_data:
-                        latex_new = self._render_latex_settings_block(settings_data, header)
+                        latex_new = self._render_latex_settings_block(settings_data)
                         #print(ln, fb)
                     else:
                         Logger.error(f"Не найдено уставок для ФБ: {fb}, Функция: {ln}.")

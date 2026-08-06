@@ -675,68 +675,106 @@ class SettingBlanc:
                         add_table_reg_core4(doc, data_rows)
                         doc.add_paragraph().style = 'TAGS'
 
-
-    def get_table_settings_latex1(self, ln, fb):
-
-        #print(ln, fb)
-        if not self.base_structure:
-            self.get_all_settings()
-        #print(self.base_structure)
-
-        for bloc in self.base_structure:
-            if bloc["type"]=="simple":
-                a = bloc["rows"][0]["col0"].split("_1_")
-                if a[0]==fb: #and a[1].split('_')[0]==ln:
-                    return bloc
-            else:
-                subs = bloc["sub_functions"]
-                for sub in subs:
-                    a = sub["rows"][0]["col0"].split("_1_")
-                    if a[0]==fb: #and a[1].split('_')[0]==ln:
-                        #return sub
-                        return bloc
-        return None
     
 
-    def get_table_settings_latex(self, ln, fb):
-
-        #print(ln, fb)
+    def get_table_settings_latex(self, fb_key):
+        """
+        Собирает данные для LaTeX-таблицы уставок.
+        Возвращает словарь формата, ожидаемого _render_latex_settings_block.
+        """
         if not self.base_structure:
             self.get_all_settings()
-        #print(self.base_structure)
 
-        for bloc in self.base_structure:
-            if bloc["type"] == "simple":
-                col0_value = bloc["rows"][0]["col0"]
-                
-                # Сначала пробуем _1_
-                if "_1_" in col0_value:
-                    a = col0_value.split("_1_")
-                # Если нет _1_, пробуем _2_
-                elif "_2_" in col0_value:
-                    a = col0_value.split("_2_")
-                    Logger.error(f"Разделитель _2_ !!! {col0_value}")
-                else:
-                    continue
+        # Поиск блока
+        block = None
+        for func_block in self.base_structure:
+            if fb_key == func_block.get('func_name'):
+                block = func_block
+                break
+
+        if not block:
+            Logger.warning(f"Блок {fb_key} не найден")
+            return None
+
+        func_type = block.get('type', 'simple')
+        
+        def prepare_rows(rows_data):
+
+            """Подготавливает строки: применяет логику скобок и enum500"""
+            result_rows = []
+            for row_data in rows_data:
+                raw_col1 = row_data.get('col1', '')
+                param_name = row_data.get('col0')
+                enum500 = self.extension_handler.find_enum_by_parameter_name(param_name)
+
+                # Логика переноса последних скобок из col1 в col2
+                matches = list(re.finditer(r'\(([^()]*)\)', raw_col1))
+                final_col1 = raw_col1.strip()
+                final_col2 = ""
+
+                if matches:
+                    last_match = matches[-1]
+                    final_col2 = last_match.group(1)
+                    final_col1 = (raw_col1[:last_match.start()] + raw_col1[last_match.end():]).strip()
+
+                # Обработка col3 (Значение / Диапазон)
+                col3_value = row_data.get('col3', '')
+                # ✅ СНАЧАЛА проверяем enum — он имеет приоритет
+                if enum500:
+                    col3_value = " / ".join(item['VisibleValue'] for item in enum500)
+                elif isinstance(col3_value, str) and col3_value.startswith('note_{'):
+                    # Если нет enum, но есть note_ — оставляем как есть,
+                    # рендерер (parse_note_to_latex) обработает
+                    pass
                     
-                if a[0] == fb:  # and a[1].split('_')[0] == ln:
-                    return bloc
+                # --- Обработка col6 (Значение по умолчанию) через enum ---
+                # Аналогично Word-версии: заменяем числовой индекс на VisibleValue
+                col6_value = row_data.get('col6', '')
+                if enum500:
+                    lookup = {item['ParameterValue']: item['VisibleValue'] for item in enum500}
+                    try:
+                        col6_value = lookup.get(int(col6_value), col6_value)
+                    except (ValueError, TypeError):
+                        pass  # Оставляем как есть, если не удалось преобразовать в int
+
+                result_rows.append({
+                    "col1": final_col1,
+                    "col2": final_col2,
+                    "col3": str(col3_value),
+                    "col4": row_data.get('col4', ''),
+                    "col5": row_data.get('col5', ''),
+                    "col6": col6_value,
+                    "col7": row_data.get('col7', ''),
+                })
+            return result_rows
+
+        # ✅ ЕДИНСТВЕННОЕ определение output с func_name
+        output = {
+            "type": func_type,
+            "func_name": block.get('func_name', fb_key)
+        }
+
+        if func_type == 'simple':
+            if block.get('rows'):
+                output["rows"] = prepare_rows(block['rows'])
             else:
-                subs = bloc["sub_functions"]
-                for sub in subs:
-                    col0_value = sub["rows"][0]["col0"]
-                    
-                    # Сначала пробуем _1_
-                    if "_1_" in col0_value:
-                        a = col0_value.split("_1_")
-                    # Если нет _1_, пробуем _2_
-                    elif "_2_" in col0_value:
-                        a = col0_value.split("_2_")
-                        Logger.error(f"Разделитель _2_ !!! {col0_value}")
-                    else:
-                        continue
-                        
-                    if a[0] == fb:  # and a[1].split('_')[0] == ln:
-                        #return sub
-                        return bloc
-        return None
+                return None
+
+        elif func_type == 'complex':
+            subs = []
+            for sub_func in block.get('sub_functions', []):
+                if sub_func.get('rows'):
+                    subs.append({
+                        "subtitle": sub_func.get('subtitle', ''),
+                        "rows": prepare_rows(sub_func['rows'])
+                    })
+            
+            if subs:
+                output["sub_functions"] = subs
+            else:
+                return None
+        else:
+            Logger.warning(f"Неизвестный тип блока {func_type} для {fb_key}")
+            return None
+
+        return output
