@@ -524,26 +524,23 @@ class OrderHandler:
                         break
 
 
-    def get_fsu_signals_test(self):
 
-        # Инициализация / очистка списков перед сбором
-        self.fsu_signals = []
-        self.fsu_di_signals = []
+    def get_general_inputs(self, rza_nodes_names):
 
+        # Очищаем списки перед сбором, чтобы не дублировать при повторном вызове
+        result = []
+        for data in self.data:
+            if data["Name"] == "ParametersToHardwareDigitalInputsTree":
+                inputs_nodes = data["Nodes"]
 
-        if not self.all_nodes_sigs:
-            self._drag_all_sigs_of_func_logic()
-
-        for node in self.all_nodes_sigs:
-            func_name = node["Name"]
-            func_nodes = node.get("Nodes")
-            if not func_nodes:
-                continue
-            for func_node in func_nodes:
-                info = self.config_handler.get_param_info(func_node["Name"])
-                self.fsu_signals.append(f'{func_name}: {info["description"]}')
-        #print(self.fsu_signals)
-        return self.fsu_signals, self.fsu_di_signals
+                for inputs_node in inputs_nodes:
+                    if inputs_node["Name"] in rza_nodes_names:
+                        continue
+                    for param_node in inputs_node.get("Nodes", []):
+                        o = self.resolver.get_formatted_info(param_node['Name'])
+                        result.append(o)
+             
+        return result
 
 
     def get_fsu_signals(self):
@@ -552,20 +549,22 @@ class OrderHandler:
             if data["Name"] == "ParametersToHardwareDigitalInputsTree":
                 inputs_hard_nodes = data["Nodes"]
 
-        resolver = NodeResolver(inputs_hard_nodes, self.config_handler) # Объект класса поиска в структуре
-
+        self.resolver = NodeResolver(inputs_hard_nodes, self.config_handler) # Объект класса поиска в структуре
+        rza_nodes_names = []
         result = []
         for data in self.data:
             if data["Name"] == "FunctionalBlockLogicInputsTree":
                 inputs_nodes = data["Nodes"]
 
                 for inputs_node in inputs_nodes:
+                    rza_nodes_names.append(inputs_node["Name"])                   
                     for param_node in inputs_node.get("Nodes", []):
-                        o = resolver.get_formatted_info(param_node['Name'])
+                        o = self.resolver.get_formatted_info(param_node['Name'])
                         result.append(o)
 
-        return result
+        gen_signs = self.get_general_inputs(rza_nodes_names)
 
+        return result, gen_signs
 
 
     def get_fsu_out_signals(self):

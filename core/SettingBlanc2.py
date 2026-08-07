@@ -349,11 +349,10 @@ class SettingBlanc:
                         item.get('name', ''))
             return str(item)
         
-        raw_sigs = self.order_handler.get_fsu_signals() 
+        raw_sigs, raw_gen_sigs = self.order_handler.get_fsu_signals() 
         # Очищенные списки строк для dropdown
         sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
-        #print(sigs_list)
-        #di_sigs_list = [desc for desc in [extract_description(s) for s in raw_di_sigs] if desc]
+        gen_signs = [desc for desc in [extract_description(s) for s in raw_gen_sigs] if desc]
         #self.di_list =  di_sigs_list
         # Получаем данные слотов один раз
         slots_data = self.order_handler.get_slots_data()
@@ -434,8 +433,8 @@ class SettingBlanc:
                     doc=doc,
                     slot_name=slot_name,
                     inputs_list=final_dict_inputs[slot_name],
-                    sigs=sigs_list,
-                    di_sigs=[]
+                    sigs=sigs_list, 
+                    di_sigs=gen_signs
                 )
                 doc.add_paragraph()
 
