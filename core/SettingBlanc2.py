@@ -524,8 +524,9 @@ class SettingBlanc:
         p = doc.add_paragraph('Функциональные клавиши')
         p.style = 'ДОК Заголовок 2'
 
+        buttons_list = self.order_handler.get_fsu_hmi_buttons()
         doc.add_paragraph("ИЧМ").style = 'ДОК Таблица Название'        
-        add_table_fks_core4(doc, self.di_list)
+        add_table_fks_core4(doc, buttons_list) #self.di_list
 
         for res in result:
             if "функциональных кнопок" in res:

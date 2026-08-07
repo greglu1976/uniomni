@@ -42,32 +42,54 @@ class NodeResolver:
                 self._build_index(node['Nodes'], new_path)
 
     def get_formatted_info(self, param_name: str) -> str:
-        """
-        Возвращает строку вида 'Группа / Подгруппа: Описание' или 'Параметр: Описание'
-        """
-        # 1. Получаем описание из конфигуратора
         try:
             info = self.config_handler.get_param_info(param_name)
-            description = info.get("description", "Описание не найдено")
-        except Exception as e:
-            return f"{param_name}: Ошибка получения описания ({e})"
+            description = info.get("description", "").strip()
+        except Exception:
+            path_parts = self._path_index.get(param_name)
+            return " / ".join(path_parts) if path_parts else param_name
 
-        # 2. Формируем префикс пути
         path_parts = self._path_index.get(param_name)
-        
-        if path_parts is None:
-            # Параметр не найден в структуре hard_nodes
-            prefix = param_name
-        elif len(path_parts) == 0:
-            # Параметр лежит в корне (редкий случай)
-            prefix = param_name
-        else:
-            # Объединяем группы через " / "
-            prefix = " / ".join(path_parts)
+        prefix = " / ".join(path_parts) if path_parts else param_name
+
+        if not description:
+            return prefix
+
+        # Агрессивная очистка: убираем из описания все сегменты пути
+        clean_desc = description
+        if path_parts:
+            # Сортируем сегменты по длине (убираем самые длинные сначала)
+            # чтобы "ОУ1 ТЗНП" убралось раньше чем "ТЗНП"
+            sorted_parts = sorted(path_parts, key=len, reverse=True)
             
-        return f"{prefix}: {description}"
+            for part in sorted_parts:
+                # Убираем часть с возможными разделителями после неё
+                for sep in [": ", "/", " / ", ":"]:
+                    pattern = part + sep
+                    while clean_desc.startswith(pattern):
+                        clean_desc = clean_desc[len(pattern):].strip()
+                    # Также убираем если часть стоит в начале без разделителя
+                    # но только если дальше идёт пробел или конец строки
+                    if clean_desc.startswith(part) and (len(clean_desc) == len(part) or clean_desc[len(part)] in (' ', ':', '/')):
+                        clean_desc = clean_desc[len(part):].strip().lstrip(':').lstrip('/').strip()
 
+        # Финальная зачистка ведущих разделителей
+        clean_desc = clean_desc.lstrip(':').lstrip('/').strip()
 
+        if clean_desc:
+            return f"{prefix}: {clean_desc}"
+        return prefix
+
+    def get_all_formatted_info(self) -> List[str]:
+        """
+        Возвращает список строк для всех параметров в структуре
+        Формат: 'Группа / Подгруппа: Описание'
+        """
+        result = []
+        for param_name in self._path_index.keys():
+            formatted = self.get_formatted_info(param_name)
+            result.append(formatted)
+        return result
 
 class OrderHandler:
 
@@ -567,6 +589,19 @@ class OrderHandler:
         return result, gen_signs
 
 
+
+    def get_fsu_hmi_buttons(self):
+
+        for data in self.data:
+            if data["Name"] == "ParametersToHmiButtonsTree":
+                inputs_hard_nodes = data["Nodes"]
+
+        resolver = NodeResolver(inputs_hard_nodes, self.config_handler) # Объект класса поиска в структуре
+
+        return resolver.get_all_formatted_info()
+
+
+
     def get_fsu_out_signals(self):
         if self.fsu_out_signals:
             return self.fsu_out_signals
@@ -795,7 +830,7 @@ class OrderHandler:
         
 
     # Сбор сигналов для раздела конфигурация !!!!!!!!!!!!!!! ДОРАБОТАТЬ !!!!!!!!!!!!!!!!!!!!
-    def get_data_for_configuration(self):
+    def get_data_for_configuration1(self):
         """
         Сбор сигналов для раздела конфигурация.
         Возвращает структуру для Word:
@@ -887,7 +922,106 @@ class OrderHandler:
                     })
         
         return result
-    
+
+
+    def get_data_for_configuration(self):
+        """
+        Сбор сигналов для раздела конфигурация.
+        Возвращает структуру для Word.
+        """
+        exclude_nodes = {
+            "Установка полномочий переключения на станционном уровне (LocSta)",
+            "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
+            "Синхронизация времени",
+            "Модуль ЦП"
+        }
+
+        def is_excluded_by_pattern(name: str) -> bool:
+            """Исключает узлы по паттернам"""
+            if "Слот" in name and "Измерительный модуль" in name:
+                return True
+            if "Слот" in name and "Модуль питания" in name:
+                return True
+            if "Слот" in name and "Центральный процессор" in name:
+                return True            
+            return False
+
+        # 1. Получаем дерево конфигурации
+        config_tree = None
+        for data in self.data:
+            if data["Name"] == "ConfigurationTree":
+                config_tree = data["Nodes"]
+                break
+
+        if not config_tree:
+            return []
+
+        result = []
+
+        def process_node(node, parent_group=None):
+            node_name = node.get('Name')
+
+            if node_name in exclude_nodes or is_excluded_by_pattern(node_name):
+                return []
+
+            node_type = node.get('Type')
+            children = node.get('Nodes', [])
+
+            if node_type == 'Group':
+                direct_params = [child for child in children if child.get('Type') == 'Parameter']
+                sub_groups = [child for child in children if child.get('Type') == 'Group']
+
+                if direct_params:
+                    current_table = {
+                        'title': node_name,
+                        'rows': [{'name': param.get('Name'), 'value': ''} for param in direct_params]
+                    }
+                    nested_tables = []
+                    for sub_group in sub_groups:
+                        nested_result = process_node(sub_group, node_name)
+                        if isinstance(nested_result, list):
+                            nested_tables.extend(nested_result)
+                        elif nested_result:
+                            nested_tables.append(nested_result)
+                    return [current_table] + nested_tables if nested_tables else [current_table]
+
+                elif sub_groups:
+                    all_tables = []
+                    for sub_group in sub_groups:
+                        sub_result = process_node(sub_group, node_name)
+                        if isinstance(sub_result, list):
+                            all_tables.extend(sub_result)
+                        elif sub_result:
+                            all_tables.append(sub_result)
+                    return all_tables
+
+                return []
+
+            return []
+
+        for root_node in config_tree:
+            root_name = root_node.get('Name')
+            if (root_node.get('Type') == 'Group'
+                    and root_name not in exclude_nodes
+                    and not is_excluded_by_pattern(root_name)):
+                tables = process_node(root_node)
+                if tables:
+                    result.append({
+                        'main_title': root_name,
+                        'tables': tables
+                    })
+
+        return result
+
+
+
+
+
+
+
+
+
+
     # Сбор сигналов для раздела Настройка регистрации
     def get_data_for_registration(self):
 
