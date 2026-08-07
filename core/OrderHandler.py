@@ -69,15 +69,6 @@ class NodeResolver:
 
 
 
-
-
-
-
-
-
-
-
-
 class OrderHandler:
 
     def __init__(self, config_handler = None, extension_handler = None, root_path = ''):
@@ -508,8 +499,6 @@ class OrderHandler:
         return mapping
 
 
-
-
     def get_setting_group1(self):
         return self.settings_group1
     def get_mapping(self):
@@ -524,7 +513,6 @@ class OrderHandler:
                 break
 
 
-
     # возвращает список дискретных сигналов 
     def _drag_gen_sigs_of_func_logic(self, tree_name = "MeasurementsTree"):
         for data in self.data:
@@ -534,8 +522,6 @@ class OrderHandler:
                     if node["Name"] == "Сигналы функциональной логики":
                         self.general_sigs_of_func_logic = node["Nodes"]
                         break
-
-
 
 
     def get_fsu_signals_test(self):
@@ -556,14 +542,8 @@ class OrderHandler:
             for func_node in func_nodes:
                 info = self.config_handler.get_param_info(func_node["Name"])
                 self.fsu_signals.append(f'{func_name}: {info["description"]}')
-        print(self.fsu_signals)
+        #print(self.fsu_signals)
         return self.fsu_signals, self.fsu_di_signals
-
-
-
-
-
-
 
 
     def get_fsu_signals(self):
@@ -572,130 +552,21 @@ class OrderHandler:
             if data["Name"] == "ParametersToHardwareDigitalInputsTree":
                 inputs_hard_nodes = data["Nodes"]
 
+        resolver = NodeResolver(inputs_hard_nodes, self.config_handler) # Объект класса поиска в структуре
 
+        result = []
         for data in self.data:
             if data["Name"] == "FunctionalBlockLogicInputsTree":
                 inputs_nodes = data["Nodes"]
 
-        resolver = NodeResolver(inputs_hard_nodes, self.config_handler)
+                for inputs_node in inputs_nodes:
+                    for param_node in inputs_node.get("Nodes", []):
+                        o = resolver.get_formatted_info(param_node['Name'])
+                        result.append(o)
 
-        print(resolver.get_formatted_info("I3_29_x3"))
-
-
-
-
-                #info = self.config_handler.get_param_info(func_node["Name"])
-                #self.fsu_signals.append(f'{func_name}: {info["description"]}')
-
-        return [], []
+        return result
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def get_fsu_signalsOLD(self):
-        """
-        Возвращает кортеж (fsu_signals, fsu_di_signals).
-        fsu_signals: общие сигналы функциональной логики (для ФК, светодиодов и т.д.)
-        fsu_di_signals: дискретные входы (DI_)
-        """
-        
-        # 1. Если данные уже есть в кэше, возвращаем ОБА списка сразу
-        # Важно: возвращаем кортеж, чтобы распаковка _, raw = ... работала всегда
-        if self.fsu_signals is not None and self.fsu_di_signals is not None:
-             # Проверка на пустоту списков может быть опасна, если сигналов действительно нет.
-             # Лучше проверять флаг "инициализировано" или просто наличие списков.
-             # Если списки были созданы в __init__ как [], то проверка if self.fsu_signals: 
-             # вернет False для пустого списка, и код пойдет пересчитывать.
-             # Поэтому лучше использовать отдельный флаг или проверять тип.
-             
-             # Вариант А: Если в __init__ они []:
-            if self.fsu_signals or self.fsu_di_signals: 
-                return self.fsu_signals, self.fsu_di_signals
-             # Если оба пустые, но мы уже ходили за данными, можно добавить флаг _signals_loaded
-             # Но для простоты, если списки могут быть легитимно пустыми, лучше убрать этот блок
-             # и полагаться на то, что пересчет быстрый, или использовать флаг.
-             
-             # Давайте используем более надежный подход с флагом, если он есть, 
-             # или просто позволим коду выполниться один раз.
-             # Ниже приведен стандартный паттерн с проверкой наличия данных.
-
-        # Если мы здесь, значит нужно собрать данные
-        # (или данные пустые, и мы хотим их обновить/собрать заново)
-        
-        # Очищаем списки перед сбором, чтобы не дублировать при повторном вызове
-        self.fsu_signals = []
-        self.fsu_di_signals = []
-
-        if not self.general_sigs_of_func_logic:
-            self._drag_gen_sigs_of_func_logic()
-
-        gen_signals = []
-
-        # Ищем нужный узел
-        for o in self.general_sigs_of_func_logic:
-            if o.get("Name") == "Общие сигналы ФС":
-                gen_signals = o.get("Nodes", [])
-                break # Нашли, выходим из цикла
-
-
-        #for o in self.general_sigs_of_func_logic:
-            #nodes = o.get("Nodes", [])
-            #gen_signals.extend(nodes)
-        #print(gen_signals)
-
-        pass_data = ["GOOSE", "HMI_", "FB_", "BitTest_"] 
-        
-        for signal in gen_signals:
-            try:
-                sig_data = self.config_handler.get_param_info(signal["Name"])
-            except Exception:
-                continue
-            #print(sig_data.get("name", ""))
-            # 1. Разделяем DI сигналы
-            if "DI_" in sig_data.get("name", ""):
-                self.fsu_di_signals.append(sig_data)
-                continue
-
-            # 2. Фильтры для остальных сигналов
-            # Пропускаем команды и многобитные сигналы
-            if sig_data.get("command") is True or sig_data.get("size", 1) != 1:
-                continue
-            
-            # Пропускаем по префиксам
-            if any(signal["Name"].startswith(prefix) for prefix in pass_data):
-                continue
-            
-            # Пропускаем по содержимому имени
-            if "HMI" in signal["Name"] or "ACS" in signal["Name"] or "APCSRst" in signal["Name"]:
-                continue
-            
-            # Пропускаем конкретные имена
-            if signal["Name"] in ["IRF", "Test", "Test_blocked", "Loc", "cError", "ncError"]:
-                continue
-
-            # Добавляем в основной список
-            self.fsu_signals.append(sig_data)
-
-        # ВСЕГДА возвращаем кортеж из двух элементов
-        return self.fsu_signals, self.fsu_di_signals
-    
 
     def get_fsu_out_signals(self):
         if self.fsu_out_signals:
