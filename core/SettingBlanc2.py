@@ -267,13 +267,26 @@ class SettingBlanc:
             first_part = self.config_handler.config_version
             second_part = None  # или '' , или raise исключение
 
+        # Формируем корректный title с переносом после второго слова
+        full_desc = self.device_data['full_description']  # исходный капс
+        words = full_desc.split()  # разбиваем по пробелам
+        if len(words) >= 3:  # если есть хотя бы 3 слова (чтобы было что переносить)
+            # Склеиваем: первые два слова + \n + остальные
+            title_with_newline = ' '.join(words[:2]) + '\n' + ' '.join(words[2:])
+            # Применяем capitalize: первая буква заглавная, все остальные строчные
+            title = title_with_newline.capitalize()
+        else:
+            # Если слов меньше 3 – оставляем как есть, но тоже капитализируем
+            title = full_desc.capitalize()
+
+        # Теперь создаём context, подставляя готовый title
         context = {
-            "title": self.device_data['full_description'],
+            "title": title,   # теперь здесь строка с \n
             "code": self.device_data['setting_blanc_code'],
             "device_order_code": first_part,
             "hmi_order_code": second_part,
-            "versions":  self.device_data['versions'],
-            "device_name":  self.device_data['name'],
+            "versions": self.device_data['versions'],
+            "device_name": self.device_data['name'],
             "colontile": colontile,
             "packet": self.config_handler.model_version,
             "version": last_version['edition'],
@@ -584,7 +597,9 @@ class SettingBlanc:
         raw_data = self.order_handler.get_data_for_configuration()
 
         for datum in raw_data:
-            if datum["main_title"] == "ИЧМ":
+            excluded_titles = {"ИЧМ", "Установка полномочий переключения на станционном уровне (LocSta)", "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
+                                "Синхронизация времени", "Модуль ЦП", "Параметры отладки", "Слот M1. Модуль питания (P02c)", "Слот M12. Измерительный модуль (M090)","Слот M14. Центральный процессор (C01)"}
+            if datum["main_title"] in excluded_titles:
                 continue
             p = doc.add_paragraph(datum["main_title"])
             p.style = 'ДОК Заголовок 2'
