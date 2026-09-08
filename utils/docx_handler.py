@@ -28,13 +28,13 @@ def add_new_section(doc):
     #new_section.bottom_margin = current_section.bottom_margin
 
     # Задаем поля в миллиметрах
-    new_section.left_margin = Mm(20)    # 2.0 см
+    new_section.left_margin = Mm(25)    # 2.0 см
     new_section.right_margin = Mm(10)   # 2.0 см
-    new_section.top_margin = Mm(14)     # 2.5 см
+    new_section.top_margin = Mm(10)     # 2.5 см
     new_section.bottom_margin = Mm(10)  # 2.5 см
     new_section.gutter = Mm(0) # ПЕРЕПЛЕТ
     #new_section.gutter_position = -1 #(left = 0, top = 1, right = 2)
-    new_section.header_distance = Mm(0)
+    new_section.header_distance = Mm(4)
 
 
     return doc
@@ -60,9 +60,9 @@ def add_new_section_landscape(doc):
     # Задаем поля в миллиметрах
     new_section.left_margin = Mm(10)    # 2.0 см
     new_section.right_margin = Mm(10)   # 2.0 см
-    new_section.top_margin = Mm(20)     # 2.5 см
+    new_section.top_margin = Mm(25)     # 2.5 см
     new_section.bottom_margin = Mm(10)  # 2.5 см
-    new_section.header_distance = Mm(10)
+    new_section.header_distance = Mm(15)
 
     return doc
 
