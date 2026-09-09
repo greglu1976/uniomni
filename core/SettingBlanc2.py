@@ -1,21 +1,14 @@
-# SettingBlanc2
-
-# Класс, представляющий бланк уставок
-# Требует инициализации
-# для генерации бланка уставок в него нужно передать объект device_data
+# SettingBlanc2.py
 
 import re
 import json
 
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate, RichText
 from docx import Document
+from docx.enum.text import WD_BREAK
 
 from utils.docx_handler import add_new_section, add_new_section_landscape
 from utils.tables import add_table_final, add_table_settings_core4, add_table_mtrx_ins_core4, add_table_mtrx_outs_core4, add_table_leds_new_core4, add_table_fks_core4, add_table_binaries_core4, add_table_reg_core4
-
-from xml.sax.saxutils import escape # для экранирования в дропдаун списке всяких << >>
-
-from docxtpl import DocxTemplate
 
 from logger.logger import Logger
 
@@ -23,265 +16,199 @@ from core.OrderHandler import OrderHandler
 from core.MainConfigHandler import MainConfigHandler
 from core.ExtensionHandler import ExtensionHandler
 
-
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 
 class SettingBlanc:
     def __init__(self, device_data):
-        
-
         Logger.info(f"Путь к пакетам поддержки: {device_data['path_to_support_packets']}")
         packet_path = device_data['path_to_support_packets']
         self.device_data = device_data
         self.code = self.device_data["setting_blanc_code"]
         self.versions = self.device_data["versions"]
-        self.base_structure = None  # Будет хранить структуру из get_all_settings()
+        self.base_structure = None
 
-        self.extension_handler = ExtensionHandler(packet_path) # Для раздела конфигурация оттуда берутся перечисления
+        self.extension_handler = ExtensionHandler(packet_path)
         self.config_handler = MainConfigHandler.from_json_file(packet_path + "meta.json")
         self.order_handler = OrderHandler(self.config_handler, self.extension_handler, packet_path)
-
 
         self.di_list = []
         self.maps = self.order_handler.get_mapping()
         with open("abbr.json", 'r', encoding='utf-8') as f:
             self.abbr_dict = json.load(f)
-        
 
-    # НОВАЯ ФУНКЦИЯ ДЛЯ CORE4
+    def _make_richtext(self, text):
+        if not text:
+            return RichText()
+        text = text.replace('\\n', '\n')
+        rt = RichText()
+        parts = text.split('\n')
+        for i, part in enumerate(parts):
+            if i > 0:
+                rt.add('\n')          # <-- замена здесь
+            rt.add(part)
+        return rt
+
+    def _add_multiline_text_to_cell(self, cell, text):
+        if not text:
+            text = ""
+        text = text.replace('\\n', '\n')
+        paragraph = cell.paragraphs[0]
+        paragraph.clear()
+        parts = text.split('\n')
+        for i, part in enumerate(parts):
+            if i > 0:
+                paragraph.add_run().add_break()
+            paragraph.add_run(part)
+
     def _create_section_settings_core4(self, doc):
-        """Генерирует раздел уставок для Core4 с таблицами как в Core3"""
         if not self.base_structure:
             Logger.warning("Нет данных base_structure для генерации уставок")
             return
-        
+
         add_new_section_landscape(doc)
-        # Основной заголовок
         p = doc.add_paragraph('УСТАВКИ РЗиА')
         p.style = 'ДОК Заголовок 1'
-        # Проходим по всем блокам
+
         for func_block in self.base_structure:
-            #print(func_block)
             func_type = func_block.get('type')
             func_name = func_block.get('func_name', 'Без имени')
 
-            fixed_func_name = func_name.split("_")[0]     
+            fixed_func_name = func_name.split("_")[0]
+
+            if "fsu-information" in fixed_func_name:
+                fixed_func_name = "Общие уставки"
 
             if func_type == 'simple':
-
-                # Заголовок функции
                 p = doc.add_paragraph(self.abbr_dict.get(fixed_func_name, fixed_func_name))
                 p.style = 'ДОК Заголовок 2'
 
                 p = doc.add_paragraph(fixed_func_name)
-                p.style = 'ДОК Таблица Название'            
-                # Создаем и заполняем таблицу
+                p.style = 'ДОК Таблица Название'
+
                 if func_block.get('rows'):
                     table = add_table_settings_core4(doc)
                     self._fill_table_settings(table, func_block['rows'])
-            
+
             elif func_type == 'complex':
-                # Заголовок составной функции
                 p = doc.add_paragraph(self.abbr_dict.get(fixed_func_name, fixed_func_name))
                 p.style = 'ДОК Заголовок 2'
-                
-                # Проходим по подфункциям
+
                 for sub_func in func_block.get('sub_functions', []):
                     subtitle = sub_func.get('subtitle', '')
-                    
+
                     if subtitle:
                         p = doc.add_paragraph(subtitle)
                         p.style = 'ДОК Таблица Название'
-                    
+
                     if sub_func.get('rows'):
                         table = add_table_settings_core4(doc)
                         self._fill_table_settings(table, sub_func['rows'])
                         p = doc.add_paragraph().style = "TAGS"
 
     def _fill_table_settings(self, table, rows_data):
-        """
-        Заполняет таблицу уставок данными для Core4
-        
-        Логика обработки col1 (ПО ЮС):
-        1. Если есть текст в круглых скобках, например "Ввод функции в работу (Ввод_функции)",
-        то последние скобки "(Ввод_функции)" переносятся в col2 (ИЧМ).
-        2. Из col1 последние скобки и их содержимое удаляются.
-        3. Если в строке несколько скобок, например "текст (первое) (второе)",
-        то берется последнее вхождение: col1 = "текст (первое)", col2 = "второе"
-        4. Старое значение col2 игнорируется/перезаписывается.
-        """
-        
-        # Добавляем строки с данными (начиная с row_index=2, т.к. 0 и 1 - заголовки)
         for i, row_data in enumerate(rows_data, start=1):
             row = table.add_row()
-            #print(rows_data)
 
-            # --- Обработка Ячейки 1 (ПО ЮС) и Ячейки 2 (ИЧМ) ---
             raw_col1 = row_data.get('col1', '')
-
             enum500 = self.extension_handler.find_enum_by_parameter_name(row_data.get('col0'))
 
-            # Находим все вхождения текста в круглых скобках
             matches = list(re.finditer(r'\(([^()]*)\)', raw_col1))
-            
             final_col1 = raw_col1
-            final_col2 = ""  # По умолчанию ИЧМ пуст
-            
+            final_col2 = ""
+
             if matches:
-                # Берем последнее найденное совпадение
                 last_match = matches[-1]
                 extracted_text = last_match.group(1)
-                
-                # Удаляем последние скобки с их содержимым
                 final_col1 = raw_col1[:last_match.start()] + raw_col1[last_match.end():]
                 final_col1 = final_col1.strip()
                 final_col2 = extracted_text
-            
-            # --- Заполнение таблицы ---
-            
-            # Ячейка 0 (№) - номер по порядку
+
             row.cells[0].text = str(i)
             row.cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            
-            # Ячейка 1 (ПО ЮС) - очищенное значение
-            row.cells[1].text = final_col1
-            
-            # Ячейка 2 (ИЧМ) - значение из последних скобок (или пусто)
-            #row.cells[2].text = final_col2
-            #row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
-            # Ячейка 3 (Значение / Диапазон) - из col3 с обработкой note_
+            self._add_multiline_text_to_cell(row.cells[1], final_col1)
+
             col3_value = row_data.get('col3', '')
             if isinstance(col3_value, str) and col3_value.startswith('note_{'):
                 col3_value = self._parse_note_dict(col3_value)
             if enum500:
-                col3_value = " / ".join(item['VisibleValue'] for item in enum500)                
+                col3_value = " / ".join(item['VisibleValue'] for item in enum500)
             row.cells[2].text = col3_value
-            row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
-            
-            # Ячейка 4 (Ед. изм.) - из col4
+            row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
             row.cells[3].text = row_data.get('col4', '')
             row.cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            
-            # Ячейка 5 (Шаг) - из col5
+
             row.cells[4].text = row_data.get('col5', '')
             row.cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            
-            # Ячейка 6 (Значение по умолчанию) - из col6
+
             col6_value = row_data.get('col6', '')
             if enum500:
-                # Создаём словарь для мгновенного поиска вместо цикла
                 lookup = {item['ParameterValue']: item['VisibleValue'] for item in enum500}
-                col6_value = lookup.get(int(col6_value), col6_value)
+                try:
+                    col6_value = lookup.get(int(col6_value), col6_value)
+                except (ValueError, TypeError):
+                    pass
             row.cells[5].text = str(col6_value)
             row.cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            
-            # Ячейки 7-10 (Группы уставок) - не заполняем
-            row.cells[6].text = ''
-            row.cells[7].text = ''
-            row.cells[8].text = ''
-            row.cells[9].text = ''
-            
-            # Устанавливаем размер шрифта
+
+            for j in range(6, 10):
+                row.cells[j].text = ''
+
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
                         run.font.size = Pt(10)
-        
+
         return table
-        
-    
+
     def _parse_note_dict(self, note_str):
-        """
-        Парсит строку вида "note_{'0': 'Не предусмотрено', '1': 'Предусмотрено'}"
-        в формат "Не предусмотрено / Предусмотрено"
-        """
         try:
             import ast
-            # Убираем "note_" в начале
             if note_str.startswith('note_{'):
-                dict_str = note_str[5:]  # оставляем "{'0': '...', '1': '...'}"
+                dict_str = note_str[5:]
                 note_dict = ast.literal_eval(dict_str)
-                
-                # Извлекаем только значения и сортируем их по ключам, 
-                # чтобы порядок был предсказуемым (0, 1, 2...), так как словари в старых Python не упорядочены,
-                # а в новых хотя и сохраняют порядок вставки, но явная сортировка надежнее для конфигов.
-                # Если ключи всегда строковые цифры, можно отсортировать как числа или как строки.
                 sorted_items = sorted(note_dict.items(), key=lambda item: int(item[0]) if item[0].isdigit() else item[0])
                 values = [str(v) for k, v in sorted_items]
-                
                 return ' /\n'.join(values)
         except Exception as e:
             Logger.warning(f"Ошибка парсинга note_dict: {e}")
-        
         return note_str
 
     def get_all_settings(self):
-        """Собирает структуру уставок из заказа"""
-
-        #self.maps = self.order_handler.get_mapping()
-        
         ordered_fbs = list(self.maps.keys())
         base_structure = []
-
         for fb in ordered_fbs:
             fb_map = self.maps.get(fb)
-            
             if not fb_map:
                 continue
-            
             json_data = self.order_handler.get_data_by_fb_name(fb_map)
-            #print(json_data)
             parsed_blocks = self.order_handler.parse_rza_structure(json_data, all_struct=0)
             base_structure.extend(parsed_blocks)
-        
         self.base_structure = base_structure
         Logger.info(f"Загружено {len(base_structure)} блоков уставок")
         return base_structure
 
     def create_template(self):
-        """
-        Создает шаблон для Core4
-        """
-       
-        # Создаем документ
-        #doc = Document('origin.docx')
         doc_tpl = DocxTemplate('origin.docx')
-
-
         last_version = ""
         colontile = ''
         if self.device_data['versions']:
             last_version = self.device_data['versions'][-1]
             colontile = f"Редакция {last_version['edition']} от {last_version['data']}"
 
-
-
         if "-ЮНИТ-" in self.config_handler.config_version:
-            parts = self.config_handler.config_version.split("-ЮНИТ-", 1)  # maxsplit=1
+            parts = self.config_handler.config_version.split("-ЮНИТ-", 1)
             first_part = parts[0]
             second_part = "ЮНИТ-" + parts[1]
         else:
             first_part = self.config_handler.config_version
-            second_part = None  # или '' , или raise исключение
+            second_part = None
 
-        # Формируем корректный title с переносом после второго слова
-        full_desc = self.device_data['full_description']  # исходный капс
-        words = full_desc.split()  # разбиваем по пробелам
-        if len(words) >= 3:  # если есть хотя бы 3 слова (чтобы было что переносить)
-            # Склеиваем: первые два слова + \n + остальные
-            title_with_newline = ' '.join(words[:2]) + '\n' + ' '.join(words[2:])
-            # Применяем capitalize: первая буква заглавная, все остальные строчные
-            title = title_with_newline.capitalize()
-        else:
-            # Если слов меньше 3 – оставляем как есть, но тоже капитализируем
-            title = full_desc.capitalize()
-
-        # Теперь создаём context, подставляя готовый title
         context = {
-            "title": title,   # теперь здесь строка с \n
+            "title": self._make_richtext(self.device_data['full_description']),
             "code": self.device_data['setting_blanc_code'],
             "device_order_code": first_part,
             "hmi_order_code": second_part,
@@ -297,9 +224,7 @@ class SettingBlanc:
         doc_tpl.save('temp.docx')
         doc = Document('temp.docx')
 
-        # Получаем структуру уставок
         self.get_all_settings()
-        # Генерируем раздел уставок (новый метод)
         Logger.info("Создаем раздел Уставки РЗиА...")
         self._create_section_settings_core4(doc)
         Logger.info("Создаем раздел Матрица входов и выходных реле...")
@@ -310,50 +235,21 @@ class SettingBlanc:
             self._create_section_leds_core4(second_part, doc)
         Logger.info("Создаем раздел Конфигурация...")
         self._create_section_config_core4(doc)
-        Logger.info("Создаем раздел Натройка регистрации...")
+        Logger.info("Создаем раздел Настройка регистрации...")
         self._create_section_disturb_core4(doc)
-        # Остальные разделы пока закомментированы, при необходимости аналогично адаптировать
-        # self._create_section_disturb_core4(device.fsu, doc)
-        
-        # Добавляем финальную таблицу
+
         add_new_section(doc)
         add_table_final(doc)
-        
-        # Сохраняем
 
         name_for_save = f"{self.code} Бланк уставок {self.device_data['name']} ред.{last_version['edition']}"
-        #name_for_save = f"{self.code} Бланк уставок Core4"
         doc.save(f'{name_for_save}.docx')
         Logger.info(f"Бланк уставок сохранен: '{name_for_save}.docx'")
-        
         return doc
 
     def get_blanc(self):
-        """
-        Основной метод для генерации бланка уставок Core4
-        """
-        #print(device_data)
         self.create_template()
 
-
-##################################################################################
-#####################################################################################
-####################################################################################
-
-
-    # РАЗДЕЛ ПАРАМЕТРИРОВАНИЯ ВХОДОВ И ВЫХОДОВ
     def _create_section_inouts_core4(self, doc):
-        """
-        Генерирует раздел документации "Матрица входов и выходов".
-        """
-        # ======================================================================
-        # ЧАСТЬ 0: Подготовка общих списков сигналов для Dropdown
-        # ======================================================================
-        #try:
-            #raw_sigs, raw_di_sigs = self.order_handler.get_fsu_signals()
-        #except Exception:
-        #raw_sigs, raw_di_sigs = [], []
-
         def extract_description(item):
             if isinstance(item, dict):
                 return (item.get('fullDescription') or 
@@ -363,11 +259,9 @@ class SettingBlanc:
             return str(item)
         
         raw_sigs, raw_gen_sigs = self.order_handler.get_fsu_signals() 
-        # Очищенные списки строк для dropdown
         sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
         gen_signs = [desc for desc in [extract_description(s) for s in raw_gen_sigs] if desc]
-        #self.di_list =  di_sigs_list
-        # Получаем данные слотов один раз
+
         slots_data = self.order_handler.get_slots_data()
         items_to_process = []
         if isinstance(slots_data, list):
@@ -376,16 +270,11 @@ class SettingBlanc:
         elif isinstance(slots_data, dict):
             items_to_process.extend(slots_data.items())
 
-        # ======================================================================
-        # ЧАСТЬ 1: ОБРАБОТКА ВХОДОВ (M*_B*_B*_Status)
-        # ======================================================================
         pattern_inputs = re.compile(r'^M\d+_B\d{3}_B\d+_Status$')
         final_dict_inputs = {}
-        
         for slot_name, params_list in items_to_process:
             status_signals = [p for p in params_list if pattern_inputs.match(p)]
             if not status_signals: continue
-            
             clean_sig_list = []
             for sig in status_signals:
                 try:
@@ -397,21 +286,14 @@ class SettingBlanc:
             if clean_sig_list:
                 final_dict_inputs[slot_name] = clean_sig_list
 
-        # ======================================================================
-        # ЧАСТЬ 2: ОБРАБОТКА ВЫХОДОВ (M*_K*_K*_Status)
-        # ======================================================================
         pattern_outputs = re.compile(r'^M\d+_K\d{3}_K\d+_Status$')
         final_dict_outputs = {}
-        
         sigs_list_outputs = self.order_handler.get_fsu_out_signals()
-        
         outs_list = self.extract_all_signals_from_structure(sigs_list_outputs)
 
         for slot_name, params_list in items_to_process:
-            #print(slot_name, params_list)
             status_signals = [p for p in params_list if pattern_outputs.match(p)]
             if not status_signals: continue
-            
             clean_sig_list = []
             for sig in status_signals:
                 try:
@@ -423,23 +305,16 @@ class SettingBlanc:
             if clean_sig_list:
                 final_dict_outputs[slot_name] = clean_sig_list
 
-        # ======================================================================
-        # ЧАСТЬ 3: ГЕНЕРАЦИЯ ДОКУМЕНТА
-        # ======================================================================
         if not final_dict_inputs and not final_dict_outputs:
             return
 
         add_new_section_landscape(doc) 
-        
         p = doc.add_paragraph('МАТРИЦА ВХОДОВ И ВЫХОДНЫХ РЕЛЕ')
         p.style = 'ДОК Заголовок 1'
 
-        # --- ГЕНЕРАЦИЯ ВХОДОВ ---
         if final_dict_inputs:
             doc.add_paragraph('Дискретные входы').style = 'ДОК Заголовок 2'
-            
             sorted_inputs = sorted(final_dict_inputs.keys(), key=lambda x: int(re.search(r'M(\d+)', x).group(1)) if re.search(r'M(\d+)', x) else 0)
-            
             for slot_name in sorted_inputs:
                 doc.add_paragraph(f"{slot_name}").style = 'ДОК Таблица Название'
                 add_table_mtrx_ins_core4(
@@ -451,18 +326,11 @@ class SettingBlanc:
                 )
                 doc.add_paragraph()
 
-        # --- ГЕНЕРАЦИЯ ВЫХОДОВ ---
         if final_dict_outputs:
-            #print(final_dict_outputs)
             doc.add_paragraph('Выходные реле').style = 'ДОК Заголовок 2'
-            
             sorted_outputs = sorted(final_dict_outputs.keys(), key=lambda x: int(re.search(r'M(\d+)', x).group(1)) if re.search(r'M(\d+)', x) else 0)
-            
             for slot_name in sorted_outputs:
                 doc.add_paragraph(f"{slot_name}").style = 'ДОК Таблица Название'
-                # Вызываем новую функцию для выходов
-
-                #print(sigs_list)
                 add_table_mtrx_outs_core4(
                     doc=doc,
                     outputs_list=final_dict_outputs[slot_name],
@@ -472,38 +340,18 @@ class SettingBlanc:
 
         return
 
-
     def extract_all_signals_from_structure(self, data_structure):
-        """
-        Извлекает все сигналы из структуры данных функций и подфункций.
-        
-        :param data_structure: Список словарей с ключами 'function' и 'subfunctions'
-        :return: Плоский список всех сигналов (desc)
-        """
         all_signals = []
-        
         for function_item in data_structure:
-            # Получаем название функции (для контекста, если нужно)
-            function_name = function_item.get('function', '')
-            
-            # Проходим по всем подфункциям
             subfunctions = function_item.get('subfunctions', [])
             for subfunc in subfunctions:
-                subfunc_name = subfunc.get('name', '')
-                
-                # Извлекаем данные (сигналы) из подфункции
                 data_list = subfunc.get('data', [])
                 for signal in data_list:
-                    if signal:  # Пропускаем пустые строки
+                    if signal:
                         all_signals.append(signal)
-        
         return all_signals
 
-
-    # РАЗДЕЛ СВЕТОДИОДОВ И ФК
     def _create_section_leds_core4(self, order_code, doc):
-
-        # парсим код заказа ИЧМ
         parts = order_code.split('-')
         result = [
             "Модуль расширения 1 на 16 светодиодов" if parts[3]=="С" else "Модуль расширения 1 на 16 функциональных кнопок" if parts[3]=="К" else "Модуль отсутствует",
@@ -512,18 +360,13 @@ class SettingBlanc:
             "Модуль расширения 4 на 16 светодиодов" if parts[6]=="С" else "Модуль расширения 4 на 16 функциональных кнопок" if parts[6]=="К" else "Модуль отсутствует"
         ]
 
-        #############################################################################
-        # СОЗДАЕМ РАЗДЕЛ НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ
-        add_new_section_landscape(doc) # Создаем раздел для матрицы вх/вых
-        # Добавляем заголовок
+        add_new_section_landscape(doc)
         p = doc.add_paragraph('НАСТРОЙКА СВЕТОДИОДОВ И ФУНКЦИОНАЛЬНЫХ КЛАВИШ')
         p.style = 'ДОК Заголовок 1'
         p = doc.add_paragraph('Светодиоды')
         p.style = 'ДОК Заголовок 2'
 
-        # вытаскиваем выпадающий список сигналов для светодиодов
         drop_list = self.order_handler.get_digital_signals_for_led()
-
         doc.add_paragraph("ИЧМ").style = 'ДОК Таблица Название'
         add_table_leds_new_core4(doc, drop_list)
 
@@ -533,24 +376,18 @@ class SettingBlanc:
                 doc.add_paragraph(res).style = 'ДОК Таблица Название'
                 add_table_leds_new_core4(doc, drop_list)                
 
-        ###############################################################
         p = doc.add_paragraph('Функциональные клавиши')
         p.style = 'ДОК Заголовок 2'
 
         buttons_list = self.order_handler.get_fsu_hmi_buttons()
         doc.add_paragraph("ИЧМ").style = 'ДОК Таблица Название'        
-        add_table_fks_core4(doc, buttons_list) #self.di_list
+        add_table_fks_core4(doc, buttons_list)
 
         for res in result:
             if "функциональных кнопок" in res:
                 doc.add_paragraph()
                 doc.add_paragraph(res).style = 'ДОК Таблица Название'
                 add_table_fks_core4(doc, drop_list)  
-
-
-    #########################################
-    #################### РАЗДЕЛ КОНФИГУРАЦИЯ 
-    #########################################
 
     def enum_calc(self, enum, default):
         result_str = " / ".join([item['VisibleValue'] for item in enum])
@@ -562,34 +399,21 @@ class SettingBlanc:
         return result_str, default_visible
 
     def parse_note(self, note, default):
-        """
-        Парсит строку вида "1 - Вывод, 2 - Ввод, 3 - Неизвестно"
-        """
-        # Разбиваем строку на части
         parts = [part.strip() for part in note.split(',')]
-        
-        # Извлекаем значения
         values = []
         default_value = None
-        
         for part in parts:
             if ' - ' in part:
                 key_str, value = part.split(' - ', 1)
                 key_str = key_str.strip()
                 value = value.strip()
                 values.append(value)
-                
-                # Сравниваем как строки (не преобразуем в int)
-                if key_str == str(default):  # Приводим default к строке
+                if key_str == str(default):
                     default_value = value
-        
-        # Формируем строку для отображения всех вариантов
         result_str = " / ".join(values)
-        
         return result_str, default_value
 
     def _create_section_config_core4(self, doc):
-
         add_new_section(doc)
         p = doc.add_paragraph('КОНФИГУРАЦИЯ')
         p.style = 'ДОК Заголовок 1'
@@ -597,8 +421,11 @@ class SettingBlanc:
         raw_data = self.order_handler.get_data_for_configuration()
 
         for datum in raw_data:
-            excluded_titles = {"ИЧМ", "Установка полномочий переключения на станционном уровне (LocSta)", "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
-                                "Синхронизация времени", "Модуль ЦП", "Параметры отладки", "Слот M1. Модуль питания (P02c)", "Слот M12. Измерительный модуль (M090)","Слот M14. Центральный процессор (C01)"}
+            excluded_titles = {"ИЧМ", "Установка полномочий переключения на станционном уровне (LocSta)",
+                               "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
+                               "Синхронизация времени", "Модуль ЦП", "Параметры отладки",
+                               "Слот M1. Модуль питания (P02c)", "Слот M12. Измерительный модуль (M090)",
+                               "Слот M14. Центральный процессор (C01)"}
             if datum["main_title"] in excluded_titles:
                 continue
             p = doc.add_paragraph(datum["main_title"])
@@ -609,11 +436,9 @@ class SettingBlanc:
 
                 fixed_rows = []
                 for row in table["rows"]:
-
                     row_name = row["name"]
                     row_data = self.config_handler.get_param_info(row_name)
                     enum_data = self.extension_handler.find_enum_by_parameter_name(row_name)
-                    #print(enum_data, row_name)
 
                     col1 = row_data["fullDescription"]
                     col2 = row_data["appliedDescription"]
@@ -625,38 +450,35 @@ class SettingBlanc:
                     if col3:
                         col3, col6 = self.parse_note(col3, col6)
 
-                    if str(col6)=="false":
+                    if str(col6) == "false":
                         col3 = 'Вывод / Ввод'
                         col6 = "Вывод"
-
-                    if str(col6)=="true":
+                    if str(col6) == "true":
                         col3 = 'Вывод / Ввод'
                         col6 = "Ввод"
 
                     if enum_data:
-                        col3, col6 =  self.enum_calc(enum_data, col6)
+                        col3, col6 = self.enum_calc(enum_data, col6)
                         col4 = col5 = '-'
                     elif col3:
-                        col4 = col5 = '-'                           
+                        col4 = col5 = '-'
                     elif row_data["minValue"] is None:
                         col3 = '-'
                     else:
-                        if row_data["minValue"]=="0" and row_data["maxValue"]=="1":
+                        if row_data["minValue"] == "0" and row_data["maxValue"] == "1":
                             col3 = 'Вывод / Ввод'
-                            col6 = "Вывод" if row_data["defaultValue"]=="0" else "Ввод"
+                            col6 = "Вывод" if row_data["defaultValue"] == "0" else "Ввод"
                             col5 = '-'
-                        else:    
+                        else:
                             col3 = row_data["minValue"] + ' ... ' + row_data["maxValue"]
 
                     fixed_rows.append((col1, col2, col3, col4, col5, col6))
+
                 add_table_binaries_core4(doc, fixed_rows)
                 p = doc.add_paragraph()
 
-
     def _create_section_disturb_core4(self, doc):
-        
         add_new_section_landscape(doc)
-
         p = doc.add_paragraph('НАСТРОЙКА РЕГИСТРАЦИИ')
         p.style = 'ДОК Заголовок 1'
 
@@ -666,43 +488,31 @@ class SettingBlanc:
             p = doc.add_paragraph(section["main_title"])
             p.style = 'ДОК Заголовок 2'
             
-            # Обрабатываем подразделы
             for subsection in section.get("subsections", []):
-                # Заголовок подраздела (например, "ТО РПН")
                 _name = subsection["title"].split("_")[0]
-                p_sub = doc.add_paragraph(self.abbr_dict.get(_name, _name))    #)  subsection["title"])
-                p_sub.style = 'ДОК Заголовок 3'  # или другой стиль для подраздела
+                p_sub = doc.add_paragraph(self.abbr_dict.get(_name, _name))
+                p_sub.style = 'ДОК Заголовок 3'
                 
-                # Таблицы внутри подраздела
                 for table_data in subsection["tables"]:
                     doc.add_paragraph(table_data["title"]).style = 'ДОК Таблица Название'
                     
                     data_rows = []
                     for param_name in table_data["parameters"]:
                         row_info = self.config_handler.get_param_info(param_name)
-                        
                         if row_info:
                             col1 = row_info.get("fullDescription", "")
                             col2 = row_info.get("appliedDescription", "")
                             param_type = row_info.get("type")
-                            
                             data_rows.append((col1, col2, param_type))
                     
                     if data_rows:
                         add_table_reg_core4(doc, data_rows)
                         doc.add_paragraph().style = 'TAGS'
 
-    
-
     def get_table_settings_latex(self, fb_key):
-        """
-        Собирает данные для LaTeX-таблицы уставок.
-        Возвращает словарь формата, ожидаемого _render_latex_settings_block.
-        """
         if not self.base_structure:
             self.get_all_settings()
 
-        # Поиск блока
         block = None
         for func_block in self.base_structure:
             if fb_key == func_block.get('func_name'):
@@ -716,15 +526,12 @@ class SettingBlanc:
         func_type = block.get('type', 'simple')
         
         def prepare_rows(rows_data):
-
-            """Подготавливает строки: применяет логику скобок и enum500"""
             result_rows = []
             for row_data in rows_data:
                 raw_col1 = row_data.get('col1', '')
                 param_name = row_data.get('col0')
                 enum500 = self.extension_handler.find_enum_by_parameter_name(param_name)
 
-                # Логика переноса последних скобок из col1 в col2
                 matches = list(re.finditer(r'\(([^()]*)\)', raw_col1))
                 final_col1 = raw_col1.strip()
                 final_col2 = ""
@@ -734,25 +541,19 @@ class SettingBlanc:
                     final_col2 = last_match.group(1)
                     final_col1 = (raw_col1[:last_match.start()] + raw_col1[last_match.end():]).strip()
 
-                # Обработка col3 (Значение / Диапазон)
                 col3_value = row_data.get('col3', '')
-                # ✅ СНАЧАЛА проверяем enum — он имеет приоритет
                 if enum500:
                     col3_value = " / ".join(item['VisibleValue'] for item in enum500)
                 elif isinstance(col3_value, str) and col3_value.startswith('note_{'):
-                    # Если нет enum, но есть note_ — оставляем как есть,
-                    # рендерер (parse_note_to_latex) обработает
                     pass
                     
-                # --- Обработка col6 (Значение по умолчанию) через enum ---
-                # Аналогично Word-версии: заменяем числовой индекс на VisibleValue
                 col6_value = row_data.get('col6', '')
                 if enum500:
                     lookup = {item['ParameterValue']: item['VisibleValue'] for item in enum500}
                     try:
                         col6_value = lookup.get(int(col6_value), col6_value)
                     except (ValueError, TypeError):
-                        pass  # Оставляем как есть, если не удалось преобразовать в int
+                        pass
 
                 result_rows.append({
                     "col1": final_col1,
@@ -765,7 +566,6 @@ class SettingBlanc:
                 })
             return result_rows
 
-        # ✅ ЕДИНСТВЕННОЕ определение output с func_name
         output = {
             "type": func_type,
             "func_name": block.get('func_name', fb_key)
@@ -785,7 +585,6 @@ class SettingBlanc:
                         "subtitle": sub_func.get('subtitle', ''),
                         "rows": prepare_rows(sub_func['rows'])
                     })
-            
             if subs:
                 output["sub_functions"] = subs
             else:
