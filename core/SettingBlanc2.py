@@ -241,7 +241,7 @@ class SettingBlanc:
         add_new_section(doc)
         add_table_final(doc)
 
-        name_for_save = f"{self.code} Бланк уставок {self.device_data['name']} ред.{last_version['edition']}"
+        name_for_save = f"БУ {self.device_data['name']} ({self.code})_v.{last_version['edition']}"
         doc.save(f'{name_for_save}.docx')
         Logger.info(f"Бланк уставок сохранен: '{name_for_save}.docx'")
         return doc
@@ -421,11 +421,7 @@ class SettingBlanc:
         raw_data = self.order_handler.get_data_for_configuration()
 
         for datum in raw_data:
-            excluded_titles = {"ИЧМ", "Установка полномочий переключения на станционном уровне (LocSta)",
-                               "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
-                               "Синхронизация времени", "Модуль ЦП", "Параметры отладки",
-                               "Слот M1. Модуль питания (P02c)", "Слот M12. Измерительный модуль (M090)",
-                               "Слот M14. Центральный процессор (C01)"}
+            excluded_titles = {}
             if datum["main_title"] in excluded_titles:
                 continue
             p = doc.add_paragraph(datum["main_title"])
