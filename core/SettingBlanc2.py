@@ -149,8 +149,8 @@ class SettingBlanc:
             row.cells[1].text = final_col1
             
             # Ячейка 2 (ИЧМ) - значение из последних скобок (или пусто)
-            row.cells[2].text = final_col2
-            row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            #row.cells[2].text = final_col2
+            #row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
             # Ячейка 3 (Значение / Диапазон) - из col3 с обработкой note_
             col3_value = row_data.get('col3', '')
@@ -158,16 +158,16 @@ class SettingBlanc:
                 col3_value = self._parse_note_dict(col3_value)
             if enum500:
                 col3_value = " / ".join(item['VisibleValue'] for item in enum500)                
-            row.cells[3].text = col3_value
-            row.cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
+            row.cells[2].text = col3_value
+            row.cells[2].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
             
             # Ячейка 4 (Ед. изм.) - из col4
-            row.cells[4].text = row_data.get('col4', '')
-            row.cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            row.cells[3].text = row_data.get('col4', '')
+            row.cells[3].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             
             # Ячейка 5 (Шаг) - из col5
-            row.cells[5].text = row_data.get('col5', '')
-            row.cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            row.cells[4].text = row_data.get('col5', '')
+            row.cells[4].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             
             # Ячейка 6 (Значение по умолчанию) - из col6
             col6_value = row_data.get('col6', '')
@@ -175,14 +175,14 @@ class SettingBlanc:
                 # Создаём словарь для мгновенного поиска вместо цикла
                 lookup = {item['ParameterValue']: item['VisibleValue'] for item in enum500}
                 col6_value = lookup.get(int(col6_value), col6_value)
-            row.cells[6].text = str(col6_value)
-            row.cells[6].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            row.cells[5].text = str(col6_value)
+            row.cells[5].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             
             # Ячейки 7-10 (Группы уставок) - не заполняем
+            row.cells[6].text = ''
             row.cells[7].text = ''
             row.cells[8].text = ''
             row.cells[9].text = ''
-            row.cells[10].text = ''
             
             # Устанавливаем размер шрифта
             for cell in row.cells:
