@@ -1,0 +1,901 @@
+
+\color{unimain}{\section[(справочное) Сопоставление сигналов устройства с моделью МЭК~61850]{(справочное)\\Сопоставление сигналов устройства с моделью МЭК 61850}\label{app:mapping}}
+\color{black}
+
+\medskip
+\setlength{\extrarowheight}{0.06cm}
+
+\par
+Сопоставление сигналов устройства в соответствии с моделью МЭК 61850 приведены в таблице \ref{app_set:mapping}.
+\begin{longtable}{|>{\raggedright\arraybackslash}m{0.5\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
+% Первая страница: полный заголовок
+\caption{Сопоставление сигналов в соответствии с моделью МЭК 61850\hfill\vspace{-0.5\baselineskip}}\label{app_set:mapping}\\
+\hline
+\rowcolor{unimain!40}
+\multicolumn{1}{|>{\centering\arraybackslash}m{0.5\textwidth}|}{\textbf{Адрес МЭК 61850}} & \multicolumn{1}{>{\centering\arraybackslash}m{0.45\textwidth}|}{\textbf{Наименование сигнала}} \\
+\hline
+\endfirsthead
+
+% Промежуточные страницы: «Продолжение таблицы»
+\caption*{\hspace{3pt}\emph{Продолжение таблицы \ref{app_set:mapping}\hfill\vspace{-0.5\baselineskip}}} \\
+\hline
+\rowcolor{unimain!40}
+\multicolumn{1}{|>{\centering\arraybackslash}m{0.5\textwidth}|}{\textbf{Адрес МЭК 61850}} & \multicolumn{1}{>{\centering\arraybackslash}m{0.45\textwidth}|}{\textbf{Наименование сигнала}} \\
+\hline
+\endhead
+
+SYS/LLN0.Mod.stVal & Текущий режим SYS \\
+\hline
+SYS/LLN0.Mod.Oper.ctlVal & Режим \\
+\hline
+SYS/LLN0.Beh.stVal & Текущее поведение SYS \\
+\hline
+SYS/LLN0.Health.stVal & Инд. испр. Health \\
+\hline
+SYS/LLN0.Loc.stVal & Местное \\
+\hline
+SYS/LLN0.LocSta.stVal & Перекл. ур. станц. \\
+\hline
+SYS/LLN0.LocKey.stVal & Местное \\
+\hline
+SYS/LLN0.LEDRs.stVal & Сброс \\
+\hline
+SYS/LLN0.LEDRs.Oper.ctlVal & Сброс от АСУ \\
+\hline
+SYS/LPHD1.PhyNam.swRev & Версия ПО устр. \\
+\hline
+SYS/LPHD1.PhyNam.serNum & Номер устройства \\
+\hline
+SYS/LPHD1.PhyHealth.stVal & Инд. испр. SYSPhyHealth \\
+\hline
+SYS/LPHD1.PwrUp.stVal & Наличие внешнего питания (общий) \\
+\hline
+SYS/LPHD1.PwrDn.stVal & Некрит. ошибка внешнего питания \\
+\hline
+SYS/LPHD1.PwrSupAlm.stVal & Некрит. ошибка модуля питания \\
+\hline
+SYS/LPHD1.PwrFail.stVal & Слот M1. Некрит. ошибка 12 В \\
+\hline
+SYS/LPHD1.Sim.stVal & Режим симуляции \\
+\hline
+SYS/LPHD1.RAMHealth.stVal & Неисправность ОЗУ ЦП \\
+\hline
+SYS/LPHD1.ROMHealth.stVal & Неисправность ПЗУ ЦП \\
+\hline
+SYS/LPHD1.AdcFail.stVal & Неисправность АЦП \\
+\hline
+SYS/LPHD1.TmpHealth.stVal & Температура ЦП в норме \\
+\hline
+SYS/LPHD1.DIOunitSt1.stVal & Отказ модуля дискретных входов \\
+\hline
+SYS/LPHD1.AuxIOUnitSt1.stVal & Отказ вспом.модулей \\
+\hline
+SYS/LPHD1.SrvConn.stVal & Подключение к сервисному порту \\
+\hline
+SYS/LPHD1.CybSecEvt.stVal & Ошибка авторизации \\
+\hline
+SYS/LPHD1.GooseErr.stVal & Ошибка GOOSE \\
+\hline
+SYS/GSAL1.AuthFail.cnt & Счетчик ошибок входа \\
+\hline
+SYS/GSAL1.SvcViol.cnt & Счетчик ошибок привилегий \\
+\hline
+SYS/GSAL1.Ina.cnt & Счетчик завершенных обменов \\
+\hline
+SYS/LTIM1.TmDT.stVal & Летнее время \\
+\hline
+SYS/LTIM1.TmOfsTmm.setVal & Смещение времени от UTC+0 \\
+\hline
+SYS/LTIM1.TmUseDT.setVal & Авт. переход на летнее время \\
+\hline
+SYS/LTMS1.TmSrc.stVal & Источник времени \\
+\hline
+SYS/LTMS1.TmSrcTyp.stVal & Источник времени \\
+\hline
+SYS/LTMS1.TmSyn.stVal & Статус синхронизации PTP \\
+\hline
+SYS/LTMS1.TmChSt1.stVal & Внешний источник синхронизации \\
+\hline
+SYS/SBLCCH1.FerCh.stVal & Х1.Частота ошибок \\
+\hline
+SYS/SBLCCH1.RedFerCh.stVal & Х2.Частота ошибок \\
+\hline
+SYS/SBLCCH1.ChMAC.stVal & Х1.Адрес MAC \\
+\hline
+SYS/SBLCCH1.RedChMAC.stVal & Х2.Адрес MAC \\
+\hline
+SYS/SBLCCH1.RxCnt.actVal & Х1.Принято сообщений \\
+\hline
+SYS/SBLCCH1.TxCnt.actVal & Х1.Передано сообщений \\
+\hline
+SYS/SBLCCH1.RedTxCnt.actVal & Х2.Передано сообщений \\
+\hline
+SYS/SBLCCH1.RedRxCnt.actVal & Х2.Принято сообщений \\
+\hline
+SYS/SBLCCH1.ChNam.setVal & Х1.Наименование \\
+\hline
+SYS/SBLCCH1.RedChNam.setVal & Х2.Наименование \\
+\hline
+SYS/SBLCCH1.RsrvTypSet.setVal & Протокол резервирования \\
+\hline
+SYS/SBLCCH2.FerCh.stVal & Х3.Частота ошибок \\
+\hline
+SYS/SBLCCH2.RedFerCh.stVal & Х4.Частота ошибок \\
+\hline
+SYS/SBLCCH2.ChMAC.stVal & Х3.Адрес MAC \\
+\hline
+SYS/SBLCCH2.RedChMAC.stVal & Х4.Адрес MAC \\
+\hline
+SYS/SBLCCH2.RxCnt.actVal & Х3.Принято сообщений \\
+\hline
+SYS/SBLCCH2.TxCnt.actVal & Х3.Передано сообщений \\
+\hline
+SYS/SBLCCH2.RedTxCnt.actVal & Х4.Передано сообщений \\
+\hline
+SYS/SBLCCH2.RedRxCnt.actVal & Х4.Принято сообщений \\
+\hline
+SYS/SBLCCH2.ChNam.setVal & Х3.Наименование \\
+\hline
+SYS/SBLCCH2.RedChNam.setVal & Х4.Наименование \\
+\hline
+SYS/SBLCCH2.RsrvTypSet.setVal & Протокол резервирования \\
+\hline
+DR/RDRE1.RcdMade.stVal & Осц. записана \\
+\hline
+DR/RDRE1.FltNum.stVal & Номер КЗ \\
+\hline
+DR/RDRE1.GriFltNum.stVal & Номер КЗЗ \\
+\hline
+DR/RDRE1.RcdStr.stVal & Старт \\
+\hline
+DR/RDRE1.TrgMod.setVal & Пуск записи \\
+\hline
+DR/RDRE1.LevMod.setVal & Режим пуска записи \\
+\hline
+DR/RDRE1.PreTmms.setVal & Длит. предавар. режим \\
+\hline
+DR/RDRE1.PstTmms.setVal & Общая длительность осциллограммы \\
+\hline
+DR/RDRE1.MemFull.setVal & Сигнал заполнения памяти \\
+\hline
+DR/RDRE1.PerTrgTms.setVal & Макс. длительность осциллограммы \\
+\hline
+DR/RDRE1.RcdMod.setVal & Режим работы памяти \\
+\hline
+HVBCTRL/LLN0.Mod.Oper.ctlVal & MMS. Режим УВ \\
+\hline
+HVBCTRL/LLN0.Beh.stVal & УВ / БУ: Поведение LD \\
+\hline
+HVBCTRL/LLN0.Health.stVal & УВ / БУ: Исправность LD \\
+\hline
+HVBCTRL/CBCSWI1.Beh.stVal & УВ / УВ: Поведение \\
+\hline
+HVBCTRL/CBCSWI1.Health.stVal & УВ / УВ: Исправность \\
+\hline
+HVBCTRL/CBCSWI1.Pos.Oper.ctlVal & MMS. Команда В АСУ \\
+\hline
+HVBCTRL/CBCSWI1.OpCls.general & УВ / УВ: Включить \\
+\hline
+HVTCBOFF/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО ВН \\
+\hline
+HVTCBOFF/LLN0.Beh.stVal & ЛО ВН / БУ: Поведение LD \\
+\hline
+HVTCBOFF/LLN0.Health.stVal & ЛО ВН / БУ: Исправность LD \\
+\hline
+HVTCBOFF/HVCBPTRC1.Beh.stVal & ЛО ВН / ЛО: Поведение \\
+\hline
+HVTCBOFF/HVCBPTRC1.Health.stVal & ЛО ВН / ЛО: Исправность \\
+\hline
+HVTCBOFF/HVCBPTRC1.Op.general & ЛО ВН / ЛО: Отключение \\
+\hline
+HVTCBOFF/HVCBPTRC1.Tr.general & ЛО ВН / ЛО: Отключить аварийно \\
+\hline
+IO/LLN0.Mod.Oper.ctlVal & MMS. Режим ПДС \\
+\hline
+IO/LLN0.Beh.stVal & ПДС / БУ: Поведение LD \\
+\hline
+IO/LLN0.Health.stVal & ПДС / БУ: Исправность LD \\
+\hline
+IO/LTCSIML1.Beh.stVal & ПДС / ГЗ РПН: Поведение \\
+\hline
+IO/LTCSIML1.Health.stVal & ПДС / ГЗ РПН: Исправность \\
+\hline
+IO/LTCSIML1.GasInsTr.stVal & ПДС / ГЗ РПН: Отключение \\
+\hline
+IO/LTCSIML1.Flt.stVal & ПДС / ГЗ РПН: Низкая изоляция \\
+\hline
+IO/PTRSIML1.Beh.stVal & ПДС / ГЗ Т: Поведение \\
+\hline
+IO/PTRSIML1.Health.stVal & ПДС / ГЗ Т: Исправность \\
+\hline
+IO/PTRSIML1.GasInsAlm.stVal & ПДС / ГЗ Т: Сигнал \\
+\hline
+IO/PTRSIML1.GasInsTr.stVal & ПДС / ГЗ Т: Отключение \\
+\hline
+IO/PTRSIML1.Flt.stVal & ПДС / ГЗ Т: Низкая изол. ГЗоткл \\
+\hline
+IO/SCBR1.Beh.stVal & ПДС / КЦВ: Поведение \\
+\hline
+IO/SCBR1.Health.stVal & ПДС / КЦВ: Исправность \\
+\hline
+IO/SCBR1.ColAlm1.stVal & ПДС / КЦВ: Контроль цепи ЭМВ \\
+\hline
+IO/SCBR1.ColAlm2.stVal & ПДС / КЦВ: Контроль цепи ЭМО1 \\
+\hline
+IO/SCBR1.ColAlm3.stVal & ПДС / КЦВ: Контроль цепи ЭМО2 \\
+\hline
+IO/SCBR1.ColOpn1.stVal & ПДС / КЦВ: Работа ЭМО1 \\
+\hline
+IO/SCBR1.ColOpn2.stVal & ПДС / КЦВ: Работа ЭМО2 \\
+\hline
+IO/SIMG1.Beh.stVal & ПДС / КИ: Поведение \\
+\hline
+IO/SIMG1.Health.stVal & ПДС / КИ: Исправность \\
+\hline
+IO/SIMG1.InsTr.stVal & ПДС / КИ: Авар.уров.изоляции \\
+\hline
+IO/SOPM1.Beh.stVal & ПДС / КПруж: Поведение \\
+\hline
+IO/SOPM1.Health.stVal & ПДС / КПруж: Исправность \\
+\hline
+IO/SOPM1.EnBlk.stVal & ПДС / КПруж: Пружина не заведена \\
+\hline
+IO/XCBR1.Beh.stVal & ПДС / В: Поведение \\
+\hline
+IO/XCBR1.Health.stVal & ПДС / В: Исправность \\
+\hline
+IO/XCBR1.Loc.stVal & ПДС / В: Повед. местн. упр. \\
+\hline
+IO/XCBR1.LocKey.stVal & ПДС / В: Ключ упр. \\
+\hline
+IO/XCBR1.LocSta.stVal & ПДС / В: Перекр. ур. станц. \\
+\hline
+IO/XCBR1.OpCnt.stVal & ПДС / В: Количество операций \\
+\hline
+IO/XCBR1.Pos.stVal & ПДС / В: Положение \\
+\hline
+LTCBLKTOC/LLN0.Mod.Oper.ctlVal & MMS. Режим ТО РПН \\
+\hline
+LTCBLKTOC/LLN0.Beh.stVal & ТО РПН / БУ: Поведение LD \\
+\hline
+LTCBLKTOC/LLN0.Health.stVal & ТО РПН / БУ: Исправность LD \\
+\hline
+LTCBLKTOC/PTOC1.Beh.stVal & ТО РПН / ТО РПН: Поведение \\
+\hline
+LTCBLKTOC/PTOC1.Health.stVal & ТО РПН / ТО РПН: Исправность \\
+\hline
+LTCBLKTOC/PTOC1.Str.general & ТО РПН / ТО РПН: Пуск \\
+\hline
+LTCBLKTOC/PTOC1.StrVal.setMag.f & ТО РПН / ТО РПН: РПН Iср \\
+\hline
+LVARCTOC/LLN0.Mod.Oper.ctlVal & MMS. Режим ТК ЗДЗ \\
+\hline
+LVARCTOC/LLN0.Beh.stVal & ТК ЗДЗ / БУ: Поведение LD \\
+\hline
+LVARCTOC/LLN0.Health.stVal & ТК ЗДЗ / БУ: Исправность LD \\
+\hline
+LVARCTOC/PTOC1.Beh.stVal & ТК ЗДЗ / ТК ЗДЗ: Поведение \\
+\hline
+LVARCTOC/PTOC1.Health.stVal & ТК ЗДЗ / ТК ЗДЗ: Исправность \\
+\hline
+LVARCTOC/PTOC1.Str.general & ТК ЗДЗ / ТК ЗДЗ: Пуск \\
+\hline
+LVARCTOC/PTOC1.StrVal.setMag.f & ТК ЗДЗ / ТК ЗДЗ: ЗДЗ Iср \\
+\hline
+LVCBSUP/LLN0.Mod.Oper.ctlVal & MMS. Режим КСВ \\
+\hline
+LVCBSUP/LLN0.Beh.stVal & КСВ / БУ: Поведение LD \\
+\hline
+LVCBSUP/LLN0.Health.stVal & КСВ / БУ: Исправность LD \\
+\hline
+LVCBSUP/RCBF1.Beh.stVal & КСВ / КСВ: Поведение \\
+\hline
+LVCBSUP/RCBF1.Health.stVal & КСВ / КСВ: Исправность \\
+\hline
+LVCBSUP/RCBF1.Alm.stVal & КСВ / КСВ: Неисправность В \\
+\hline
+LVCBSUP/RCBF1.TrAlm.stVal & КСВ / КСВ: В аварийно отключен \\
+\hline
+LVCBSUP/RCBF1.BlkCls.stVal & КСВ / КСВ: Блокировка вкл \\
+\hline
+LVCBSUP/RCBF1.BlkOpn.stVal & КСВ / КСВ: Блокировка откл \\
+\hline
+LVCBSUP/RCBF1.RdyTmms.setVal & КСВ / КСВ: Tгот в \\
+\hline
+LVNSTOC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЗОП \\
+\hline
+LVNSTOC/LLN0.Beh.stVal & ЗОП / БУ: Поведение LD \\
+\hline
+LVNSTOC/LLN0.Health.stVal & ЗОП / БУ: Исправность LD \\
+\hline
+LVNSTOC/NSPTOC1.Beh.stVal & ЗОП / ЗОП: Поведение \\
+\hline
+LVNSTOC/NSPTOC1.Health.stVal & ЗОП / ЗОП: Исправность \\
+\hline
+LVNSTOC/NSPTOC1.Str.general & ЗОП / ЗОП: Пуск \\
+\hline
+LVNSTOC/NSPTOC1.Op.general & ЗОП / ЗОП: Срабатывание \\
+\hline
+LVNSTOC/NSPTOC1.RatI2I1.setMag.f & ЗОП / ЗОП: Kнесим \\
+\hline
+LVNSTOC/NSPTOC1.StrValI2.setMag.f & ЗОП / ЗОП: I2ср \\
+\hline
+LVNSTOC/NSPTOC1.OpDlTmms.setVal & ЗОП / ЗОП: Tср \\
+\hline
+LVRBVTR1/LLN0.Mod.Oper.ctlVal & MMS. Режим КЦН НН1 \\
+\hline
+LVRBVTR1/LLN0.Beh.stVal & КЦН НН1 / БУ: Поведение LD \\
+\hline
+LVRBVTR1/LLN0.Health.stVal & КЦН НН1 / БУ: Исправность LD \\
+\hline
+LVRBVTR1/RVTR1.Beh.stVal & КЦН НН1 / КЦН: Поведение \\
+\hline
+LVRBVTR1/RVTR1.Health.stVal & КЦН НН1 / КЦН: Исправность \\
+\hline
+LVRBVTR1/RVTR1.Alm.stVal & КЦН НН1 / КЦН: Неисправность ЦН \\
+\hline
+LVRBVTR1/RVTR1.StrU2.stVal & КЦН НН1 / КЦН: Пуск по U2 \\
+\hline
+LVRBVTR1/RVTR1.StrUpp.stVal & КЦН НН1 / КЦН: Пуск по Uлин \\
+\hline
+LVRBVTR1/RVTR1.AlmDlTmms.setVal & КЦН НН1 / КЦН: НН1 Tср \\
+\hline
+LVRBVTR1/RVTR1.StrValU.setMag.f & КЦН НН1 / КЦН: НН1 Uср \\
+\hline
+LVRBVTR1/RVTR1.StrValU2.setMag.f & КЦН НН1 / КЦН: НН1 U2ср \\
+\hline
+LVRBVTR2/LLN0.Mod.Oper.ctlVal & MMS. Режим КЦН НН2 \\
+\hline
+LVRBVTR2/LLN0.Beh.stVal & КЦН НН2 / БУ: Поведение LD \\
+\hline
+LVRBVTR2/LLN0.Health.stVal & КЦН НН2 / БУ: Исправность LD \\
+\hline
+LVRBVTR2/RVTR1.Beh.stVal & КЦН НН2 / КЦН: Поведение \\
+\hline
+LVRBVTR2/RVTR1.Health.stVal & КЦН НН2 / КЦН: Исправность \\
+\hline
+LVRBVTR2/RVTR1.Alm.stVal & КЦН НН2 / КЦН: Неисправность ЦН \\
+\hline
+LVRBVTR2/RVTR1.StrU2.stVal & КЦН НН2 / КЦН: Пуск по U2 \\
+\hline
+LVRBVTR2/RVTR1.StrUpp.stVal & КЦН НН2 / КЦН: Пуск по Uлин \\
+\hline
+LVRBVTR2/RVTR1.AlmDlTmms.setVal & КЦН НН2 / КЦН: НН2 Tср \\
+\hline
+LVRBVTR2/RVTR1.StrValU.setMag.f & КЦН НН2 / КЦН: НН2 Uср \\
+\hline
+LVRBVTR2/RVTR1.StrValU2.setMag.f & КЦН НН2 / КЦН: НН2 U2ср \\
+\hline
+LVTOC/LLN0.Mod.Oper.ctlVal & MMS. Режим ТО \\
+\hline
+LVTOC/LLN0.Beh.stVal & ТО / БУ: Поведение LD \\
+\hline
+LVTOC/LLN0.Health.stVal & ТО / БУ: Исправность LD \\
+\hline
+LVTOC/PTOC1.Beh.stVal & ТО / ТО: Поведение \\
+\hline
+LVTOC/PTOC1.Health.stVal & ТО / ТО: Исправность \\
+\hline
+LVTOC/PTOC1.Str.general & ТО / ТО: Пуск \\
+\hline
+LVTOC/PTOC1.Op.general & ТО / ТО: Срабатывание \\
+\hline
+LVTOC/PTOC1.StrVal.setMag.f & ТО / ТО: Iср \\
+\hline
+LVTOC/PTOC1.OpDlTmms.setVal & ТО / ТО: Tср \\
+\hline
+LVTRESCBOFF1/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО НН1 \\
+\hline
+LVTRESCBOFF1/LLN0.Beh.stVal & ЛО НН1 / БУ: Поведение LD \\
+\hline
+LVTRESCBOFF1/LLN0.Health.stVal & ЛО НН1 / БУ: Исправность LD \\
+\hline
+LVTRESCBOFF1/LVBTSRBLC1.Mod.Oper.ctlVal & MMS. Режим ЛО НН1 / ЗАВР \\
+\hline
+LVTRESCBOFF1/LVBTSRBLC1.Beh.stVal & ЛО НН1 / ЗАВР: Поведение \\
+\hline
+LVTRESCBOFF1/LVBTSRBLC1.Health.stVal & ЛО НН1 / ЗАВР: Исправность \\
+\hline
+LVTRESCBOFF1/LVBTSRBLC1.BlkOp.stVal & ЛО НН1 / ЗАВР: Запрет АВР \\
+\hline
+LVTRESCBOFF1/LVCBPTRC1.Mod.Oper.ctlVal & MMS. Режим ЛО НН1 / ЛО \\
+\hline
+LVTRESCBOFF1/LVCBPTRC1.Beh.stVal & ЛО НН1 / ЛО: Поведение \\
+\hline
+LVTRESCBOFF1/LVCBPTRC1.Health.stVal & ЛО НН1 / ЛО: Исправность \\
+\hline
+LVTRESCBOFF1/LVCBPTRC1.Op.general & ЛО НН1 / ЛО: Отключение \\
+\hline
+LVTRESCBOFF1/LVCBPTRC1.Tr.general & ЛО НН1 / ЛО: Отключить аварийно \\
+\hline
+LVTRESCBOFF1/LVCBRECRBRE1.Mod.Oper.ctlVal & MMS. Режим ЛО НН1 / ЗАПВ \\
+\hline
+LVTRESCBOFF1/LVCBRECRBRE1.Beh.stVal & ЛО НН1 / ЗАПВ: Поведение \\
+\hline
+LVTRESCBOFF1/LVCBRECRBRE1.Health.stVal & ЛО НН1 / ЗАПВ: Исправность \\
+\hline
+LVTRESCBOFF1/LVCBRECRBRE1.BlkOp.stVal & ЛО НН1 / ЗАПВ: Запрет АПВ \\
+\hline
+LVTRESCBOFF2/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО НН2 \\
+\hline
+LVTRESCBOFF2/LLN0.Beh.stVal & ЛО НН2 / БУ: Поведение LD \\
+\hline
+LVTRESCBOFF2/LLN0.Health.stVal & ЛО НН2 / БУ: Исправность LD \\
+\hline
+LVTRESCBOFF2/LVBTSRBLC1.Mod.Oper.ctlVal & MMS. Режим ЛО НН2 / ЗАВР \\
+\hline
+LVTRESCBOFF2/LVBTSRBLC1.Beh.stVal & ЛО НН2 / ЗАВР: Поведение \\
+\hline
+LVTRESCBOFF2/LVBTSRBLC1.Health.stVal & ЛО НН2 / ЗАВР: Исправность \\
+\hline
+LVTRESCBOFF2/LVBTSRBLC1.BlkOp.stVal & ЛО НН2 / ЗАВР: Запрет АВР \\
+\hline
+LVTRESCBOFF2/LVCBPTRC1.Mod.Oper.ctlVal & MMS. Режим ЛО НН2 / ЛО \\
+\hline
+LVTRESCBOFF2/LVCBPTRC1.Beh.stVal & ЛО НН2 / ЛО: Поведение \\
+\hline
+LVTRESCBOFF2/LVCBPTRC1.Health.stVal & ЛО НН2 / ЛО: Исправность \\
+\hline
+LVTRESCBOFF2/LVCBPTRC1.Op.general & ЛО НН2 / ЛО: Отключение \\
+\hline
+LVTRESCBOFF2/LVCBPTRC1.Tr.general & ЛО НН2 / ЛО: Отключить аварийно \\
+\hline
+LVTRESCBOFF2/LVCBRECRBRE1.Mod.Oper.ctlVal & MMS. Режим ЛО НН2 / ЗАПВ \\
+\hline
+LVTRESCBOFF2/LVCBRECRBRE1.Beh.stVal & ЛО НН2 / ЗАПВ: Поведение \\
+\hline
+LVTRESCBOFF2/LVCBRECRBRE1.Health.stVal & ЛО НН2 / ЗАПВ: Исправность \\
+\hline
+LVTRESCBOFF2/LVCBRECRBRE1.BlkOp.stVal & ЛО НН2 / ЗАПВ: Запрет АПВ \\
+\hline
+LVTTOC/LLN0.Mod.Oper.ctlVal & MMS. Режим МТЗ \\
+\hline
+LVTTOC/LLN0.Beh.stVal & МТЗ / БУ: Поведение LD \\
+\hline
+LVTTOC/LLN0.Health.stVal & МТЗ / БУ: Исправность LD \\
+\hline
+LVTTOC/PHAR1.Beh.stVal & МТЗ / БНТ: Поведение \\
+\hline
+LVTTOC/PHAR1.Health.stVal & МТЗ / БНТ: Исправность \\
+\hline
+LVTTOC/PHAR1.Str.general & МТЗ / БНТ: Пуск \\
+\hline
+LVTTOC/PHAR1.StrVal.setMag.f & МТЗ / БНТ: Iср \\
+\hline
+LVTTOC/PHAR1.RatIh2Ih1.setMag.f & МТЗ / БНТ: Ih2/Ih1 \\
+\hline
+LVTTOC/PTOC1.Mod.Oper.ctlVal & MMS. Режим МТЗ 1 ст \\
+\hline
+LVTTOC/PTOC1.Beh.stVal & МТЗ / МТЗ 1 ст: Поведение \\
+\hline
+LVTTOC/PTOC1.Health.stVal & МТЗ / МТЗ 1 ст: Исправность \\
+\hline
+LVTTOC/PTOC1.Str.general & МТЗ / МТЗ 1 ст: Пуск \\
+\hline
+LVTTOC/PTOC1.Op.general & МТЗ / МТЗ 1 ст: Срабатывание \\
+\hline
+LVTTOC/PTOC1.StrVal.setMag.f & МТЗ / МТЗ 1 ст: Iср \\
+\hline
+LVTTOC/PTOC1.OpDlTmms.setVal & МТЗ / МТЗ 1 ст: Tср \\
+\hline
+LVTTOC/PTOC1.MICMod.setVal & МТЗ / МТЗ 1 ст: Реж БНТ \\
+\hline
+LVTTOC/PTOC1.ExVFlMod.setVal & МТЗ / МТЗ 1 ст: Реж БНН КПОН \\
+\hline
+LVTTOC/PTOC2.Mod.Oper.ctlVal & MMS. Режим МТЗ 2 ст \\
+\hline
+LVTTOC/PTOC2.Beh.stVal & МТЗ / МТЗ 2 ст: Поведение \\
+\hline
+LVTTOC/PTOC2.Health.stVal & МТЗ / МТЗ 2 ст: Исправность \\
+\hline
+LVTTOC/PTOC2.Str.general & МТЗ / МТЗ 2 ст: Пуск \\
+\hline
+LVTTOC/PTOC2.Op.general & МТЗ / МТЗ 2 ст: Срабатывание \\
+\hline
+LVTTOC/PTOC2.StrVal.setMag.f & МТЗ / МТЗ 2 ст: Iср \\
+\hline
+LVTTOC/PTOC2.OpDlTmms.setVal & МТЗ / МТЗ 2 ст: Tср \\
+\hline
+LVTTOC/PTOC2.MICMod.setVal & МТЗ / МТЗ 2 ст: Реж БНТ \\
+\hline
+LVTTOC/PTOC2.ExVFlMod.setVal & МТЗ / МТЗ 2 ст: Реж БНН КПОН \\
+\hline
+LVTTOC/PTOC3.Mod.Oper.ctlVal & MMS. Режим МТЗ 3 ст \\
+\hline
+LVTTOC/PTOC3.Beh.stVal & МТЗ / МТЗ 3 ст: Поведение \\
+\hline
+LVTTOC/PTOC3.Health.stVal & МТЗ / МТЗ 3 ст: Исправность \\
+\hline
+LVTTOC/PTOC3.Str.general & МТЗ / МТЗ 3 ст: Пуск \\
+\hline
+LVTTOC/PTOC3.Op.general & МТЗ / МТЗ 3 ст: Срабатывание \\
+\hline
+LVTTOC/PTOC3.StrVal.setMag.f & МТЗ / МТЗ 3 ст: Iср \\
+\hline
+LVTTOC/PTOC3.OpDlTmms.setVal & МТЗ / МТЗ 3 ст: Tср \\
+\hline
+LVTTOC/PTOC3.MICMod.setVal & МТЗ / МТЗ 3 ст: Реж БНТ \\
+\hline
+LVTTOC/PTOC3.ExVFlMod.setVal & МТЗ / МТЗ 3 ст: Реж БНН КПОН \\
+\hline
+LVTTOC/PTUV1.Beh.stVal & МТЗ / КПОН1: Поведение \\
+\hline
+LVTTOC/PTUV1.Health.stVal & МТЗ / КПОН1: Исправность \\
+\hline
+LVTTOC/PTUV1.Str.general & МТЗ / КПОН1: Пуск \\
+\hline
+LVTTOC/PTUV1.StrValU.setMag.f & МТЗ / КПОН1: Uср \\
+\hline
+LVTTOC/PTUV1.StrValU2.setMag.f & МТЗ / КПОН1: U2ср \\
+\hline
+LVTTOC/PTUV2.Beh.stVal & МТЗ / КПОН2: Поведение \\
+\hline
+LVTTOC/PTUV2.Health.stVal & МТЗ / КПОН2: Исправность \\
+\hline
+LVTTOC/PTUV2.Str.general & МТЗ / КПОН2: Пуск \\
+\hline
+LVTTOC/PTUV2.StrValU.setMag.f & МТЗ / КПОН2: Uср \\
+\hline
+LVTTOC/PTUV2.StrValU2.setMag.f & МТЗ / КПОН2: U2ср \\
+\hline
+LVTTOC/RBLC1.Beh.stVal & МТЗ / БЛЗШ: Поведение \\
+\hline
+LVTTOC/RBLC1.Health.stVal & МТЗ / БЛЗШ: Исправность \\
+\hline
+LVTTOC/RBLC1.BlkOp.stVal & МТЗ / БЛЗШ: Блокировка \\
+\hline
+LVTTOC/RBLC1.LvLgBlkSel.setVal & МТЗ / БЛЗШ: БлокЛЗШ выбор ст \\
+\hline
+MEAS/FLTMMXU1.A.phsA.cVal.mag.f & Iaflt \\
+\hline
+MEAS/FLTMMXU1.A.phsA.db & Iaflt. db \\
+\hline
+MEAS/FLTMMXU1.A.phsA.zeroDb & Iaflt. zeroDb \\
+\hline
+MEAS/FLTMMXU1.A.phsB.cVal.mag.f & Ibflt \\
+\hline
+MEAS/FLTMMXU1.A.phsB.db & Ibflt. db \\
+\hline
+MEAS/FLTMMXU1.A.phsB.zeroDb & Ibflt. zeroDb \\
+\hline
+MEAS/FLTMMXU1.A.phsC.cVal.mag.f & Icflt \\
+\hline
+MEAS/FLTMMXU1.A.phsC.db & Icflt. db \\
+\hline
+MEAS/FLTMMXU1.A.phsC.zeroDb & Icflt. zeroDb \\
+\hline
+MEAS/FLTMSQI1.SeqA.c1.cVal.mag.f & I1flt \\
+\hline
+MEAS/FLTMSQI1.SeqA.c1.db & I1flt. db \\
+\hline
+MEAS/FLTMSQI1.SeqA.c1.zeroDb & I1flt. zeroDb \\
+\hline
+MEAS/FLTMSQI1.SeqA.c2.cVal.mag.f & I2flt \\
+\hline
+MEAS/FLTMSQI1.SeqA.c2.db & I2flt. db \\
+\hline
+MEAS/FLTMSQI1.SeqA.c2.zeroDb & I2flt. zeroDb \\
+\hline
+MEAS/FLTMSQI1.SeqV.c1.cVal.mag.f & U1flt НН1 \\
+\hline
+MEAS/FLTMSQI1.SeqV.c1.db & U1flt НН1. db \\
+\hline
+MEAS/FLTMSQI1.SeqV.c1.zeroDb & U1flt НН1. zeroDb \\
+\hline
+MEAS/FLTMSQI1.SeqV.c2.cVal.mag.f & U2flt НН1 \\
+\hline
+MEAS/FLTMSQI1.SeqV.c2.db & U2flt НН1. db \\
+\hline
+MEAS/FLTMSQI1.SeqV.c2.zeroDb & U2flt НН1. zeroDb \\
+\hline
+MEAS/FLTMSQI2.SeqV.c1.cVal.mag.f & U1flt НН2 \\
+\hline
+MEAS/FLTMSQI2.SeqV.c1.db & U1flt НН2. db \\
+\hline
+MEAS/FLTMSQI2.SeqV.c1.zeroDb & U1flt НН2. zeroDb \\
+\hline
+MEAS/FLTMSQI2.SeqV.c2.cVal.mag.f & U2flt НН2 \\
+\hline
+MEAS/FLTMSQI2.SeqV.c2.db & U2flt НН2. db \\
+\hline
+MEAS/FLTMSQI2.SeqV.c2.zeroDb & U2flt НН2. zeroDb \\
+\hline
+MEAS/MMXU1.A.phsA.cVal.mag.f & Ia \\
+\hline
+MEAS/MMXU1.A.phsA.db & Ia. db \\
+\hline
+MEAS/MMXU1.A.phsA.zeroDb & Ia. zeroDb \\
+\hline
+MEAS/MMXU1.A.phsB.cVal.mag.f & Ib \\
+\hline
+MEAS/MMXU1.A.phsB.db & Ib. db \\
+\hline
+MEAS/MMXU1.A.phsB.zeroDb & Ib. zeroDb \\
+\hline
+MEAS/MMXU1.A.phsC.cVal.mag.f & Ic \\
+\hline
+MEAS/MMXU1.A.phsC.db & Ic. db \\
+\hline
+MEAS/MMXU1.A.phsC.zeroDb & Ic. zeroDb \\
+\hline
+PNL/LLN0.Mod.Oper.ctlVal & MMS. Режим ПДС НКУ \\
+\hline
+PNL/LLN0.Beh.stVal & ПДС НКУ / БУ: Поведение LD \\
+\hline
+PNL/LLN0.Health.stVal & ПДС НКУ / БУ: Исправность LD \\
+\hline
+PNL/ARCSOCC1.Beh.stVal & ПДС НКУ / ОТ ЗДЗ1: Поведение \\
+\hline
+PNL/ARCSOCC1.Health.stVal & ПДС НКУ / ОТ ЗДЗ1: Исправность \\
+\hline
+PNL/ARCSOCC1.OCAlm.stVal & ПДС НКУ / ОТ ЗДЗ1: Неисправность \\
+\hline
+PNL/ARCSOCC2.Beh.stVal & ПДС НКУ / ОТ ЗДЗ2: Поведение \\
+\hline
+PNL/ARCSOCC2.Health.stVal & ПДС НКУ / ОТ ЗДЗ2: Исправность \\
+\hline
+PNL/ARCSOCC2.OCAlm.stVal & ПДС НКУ / ОТ ЗДЗ2: Неисправность \\
+\hline
+PNL/AUXALMSOCC1.Beh.stVal & ПДС НКУ / ОТ цепей сигн. В ВН: Поведение \\
+\hline
+PNL/AUXALMSOCC1.Health.stVal & ПДС НКУ / ОТ цепей сигн. В ВН: Исправность \\
+\hline
+PNL/AUXALMSOCC1.OCAlm.stVal & ПДС НКУ / ОТ цепей сигн. В ВН: Неисправность \\
+\hline
+PNL/AUXCOL1SOCC1.Beh.stVal & ПДС НКУ / ОТ ЭМО1, ЭМВ В ВН: Поведение \\
+\hline
+PNL/AUXCOL1SOCC1.Health.stVal & ПДС НКУ / ОТ ЭМО1, ЭМВ В ВН: Исправность \\
+\hline
+PNL/AUXCOL1SOCC1.OCAlm.stVal & ПДС НКУ / ОТ ЭМО1, ЭМВ В ВН: Неисправность \\
+\hline
+PNL/AUXCOL2SOCC1.Beh.stVal & ПДС НКУ / ОТ ЭМО2 В ВН: Поведение \\
+\hline
+PNL/AUXCOL2SOCC1.Health.stVal & ПДС НКУ / ОТ ЭМО2 В ВН: Исправность \\
+\hline
+PNL/AUXCOL2SOCC1.OCAlm.stVal & ПДС НКУ / ОТ ЭМО2 В ВН: Неисправность \\
+\hline
+PNL/AUXGASSOCC1.Beh.stVal & ПДС НКУ / ОТ ГЗ: Поведение \\
+\hline
+PNL/AUXGASSOCC1.Health.stVal & ПДС НКУ / ОТ ГЗ: Исправность \\
+\hline
+PNL/AUXGASSOCC1.OCAlm.stVal & ПДС НКУ / ОТ ГЗ: Неисправность \\
+\hline
+PNL/AUXVTRSOCC1.Beh.stVal & ПДС НКУ / ОТ ИЭУ ТН1: Поведение \\
+\hline
+PNL/AUXVTRSOCC1.Health.stVal & ПДС НКУ / ОТ ИЭУ ТН1: Исправность \\
+\hline
+PNL/AUXVTRSOCC1.OCAlm.stVal & ПДС НКУ / ОТ ИЭУ ТН1: Неисправность \\
+\hline
+PNL/AUXVTRSOCC2.Beh.stVal & ПДС НКУ / ОТ ИЭУ ТН2: Поведение \\
+\hline
+PNL/AUXVTRSOCC2.Health.stVal & ПДС НКУ / ОТ ИЭУ ТН2: Исправность \\
+\hline
+PNL/AUXVTRSOCC2.OCAlm.stVal & ПДС НКУ / ОТ ИЭУ ТН2: Неисправность \\
+\hline
+PNL/BRFSOCC1.Beh.stVal & ПДС НКУ / ОТ УРОВ1: Поведение \\
+\hline
+PNL/BRFSOCC1.Health.stVal & ПДС НКУ / ОТ УРОВ1: Исправность \\
+\hline
+PNL/BRFSOCC1.OCAlm.stVal & ПДС НКУ / ОТ УРОВ1: Неисправность \\
+\hline
+PNL/BRFSOCC2.Beh.stVal & ПДС НКУ / ОТ УРОВ2: Поведение \\
+\hline
+PNL/BRFSOCC2.Health.stVal & ПДС НКУ / ОТ УРОВ2: Исправность \\
+\hline
+PNL/BRFSOCC2.OCAlm.stVal & ПДС НКУ / ОТ УРОВ2: Неисправность \\
+\hline
+PNL/IDOR1.Beh.stVal & ПДС НКУ / Дверь: Поведение \\
+\hline
+PNL/IDOR1.Health.stVal & ПДС НКУ / Дверь: Исправность \\
+\hline
+PNL/IDOR1.DOpn.stVal & ПДС НКУ / Дверь: Шкаф открыт \\
+\hline
+PNL/IDOR1.DCls.stVal & ПДС НКУ / Дверь: Шкаф закрыт \\
+\hline
+PNL/PLGSOCC1.Beh.stVal & ПДС НКУ / SG1: Поведение \\
+\hline
+PNL/PLGSOCC1.Health.stVal & ПДС НКУ / SG1: Исправность \\
+\hline
+PNL/PLGSOCC1.PwrPlgSupr.stVal & ПДС НКУ / SG1: Рабочее положение \\
+\hline
+PNL/PLGSOCC2.Beh.stVal & ПДС НКУ / SG2: Поведение \\
+\hline
+PNL/PLGSOCC2.Health.stVal & ПДС НКУ / SG2: Исправность \\
+\hline
+PNL/PLGSOCC2.PwrPlgSupr.stVal & ПДС НКУ / SG2: Рабочее положение \\
+\hline
+PNL/PLGSOCC3.Beh.stVal & ПДС НКУ / SG3: Поведение \\
+\hline
+PNL/PLGSOCC3.Health.stVal & ПДС НКУ / SG3: Исправность \\
+\hline
+PNL/PLGSOCC3.PwrPlgSupr.stVal & ПДС НКУ / SG3: Рабочее положение \\
+\hline
+PNL/SELSWISOCC1.Beh.stVal & ПДС НКУ / SA1: Поведение \\
+\hline
+PNL/SELSWISOCC1.Health.stVal & ПДС НКУ / SA1: Исправность \\
+\hline
+PNL/SELSWISOCC1.ClsCir.stVal & ПДС НКУ / SA1: Цепь введена \\
+\hline
+PNL/SELSWISOCC2.Beh.stVal & ПДС НКУ / SA2: Поведение \\
+\hline
+PNL/SELSWISOCC2.Health.stVal & ПДС НКУ / SA2: Исправность \\
+\hline
+PNL/SELSWISOCC2.ClsCir.stVal & ПДС НКУ / SA2: Цепь введена \\
+\hline
+PNL/SELSWISOCC3.Beh.stVal & ПДС НКУ / SA3: Поведение \\
+\hline
+PNL/SELSWISOCC3.Health.stVal & ПДС НКУ / SA3: Исправность \\
+\hline
+PNL/SELSWISOCC3.ClsCir.stVal & ПДС НКУ / SA3: Цепь введена \\
+\hline
+PNL/SELSWISOCC4.Beh.stVal & ПДС НКУ / SA4: Поведение \\
+\hline
+PNL/SELSWISOCC4.Health.stVal & ПДС НКУ / SA4: Исправность \\
+\hline
+PNL/SELSWISOCC4.ClsCir.stVal & ПДС НКУ / SA4: Цепь введена \\
+\hline
+PNL/SELSWISOCC5.Beh.stVal & ПДС НКУ / SA5: Поведение \\
+\hline
+PNL/SELSWISOCC5.Health.stVal & ПДС НКУ / SA5: Исправность \\
+\hline
+PNL/SELSWISOCC5.ClsCir.stVal & ПДС НКУ / SA5: Цепь введена \\
+\hline
+PNL/SELSWISOCC6.Beh.stVal & ПДС НКУ / SA6: Поведение \\
+\hline
+PNL/SELSWISOCC6.Health.stVal & ПДС НКУ / SA6: Исправность \\
+\hline
+PNL/SELSWISOCC6.ClsCir.stVal & ПДС НКУ / SA6: Цепь введена \\
+\hline
+SWCTRL/LLN0.Mod.Oper.ctlVal & MMS. Режим КП \\
+\hline
+SWCTRL/LLN0.Beh.stVal & КП / БУ: Поведение LD \\
+\hline
+SWCTRL/LLN0.Health.stVal & КП / БУ: Исправность LD \\
+\hline
+SWCTRL/CBCSWI1.Beh.stVal & КП / УВ: Поведение \\
+\hline
+SWCTRL/CBCSWI1.Health.stVal & КП / УВ: Исправность \\
+\hline
+SWCTRL/CBCSWI1.LocKey.stVal & КП / УВ: Ключ упр. \\
+\hline
+SWCTRL/CBCSWI1.Loc.stVal & КП / УВ: Повед. местн. упр. \\
+\hline
+SWCTRL/CBCSWI1.LocSta.stVal & КП / УВ: Перекр. ур. станц. \\
+\hline
+SWCTRL/CBCSWI1.Pos.stVal & КП / УВ: Положение \\
+\hline
+SWCTRL/CBCSWI1.Pos.Oper.ctlVal & MMS. Команда В АСУ \\
+\hline
+SWCTRL/CBCSWI1.OpOpn.general & КП / УВ: Отключить \\
+\hline
+SWCTRL/CBCSWI1.OpCls.general & КП / УВ: Включить \\
+\hline
+SWCTRL/CBCSWI1.OpTmAlm.stVal & КП / УВ: Прев. времени пер. \\
+\hline
+SWCTRL/CBCSWI1.BlkTmms.setVal & КП / УВ: Tблк \\
+\hline
+SWCTRL/CBCSWI1.OpTmms.setVal & КП / УВ: Tперекл \\
+\hline
+TALMGASLGC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО ГЗсигн \\
+\hline
+TALMGASLGC/LLN0.Beh.stVal & ЛО ГЗсигн / БУ: Поведение LD \\
+\hline
+TALMGASLGC/LLN0.Health.stVal & ЛО ГЗсигн / БУ: Исправность LD \\
+\hline
+TALMGASLGC/PTRC1.Beh.stVal & ЛО ГЗсигн / ЛО: Поведение \\
+\hline
+TALMGASLGC/PTRC1.Health.stVal & ЛО ГЗсигн / ЛО: Исправность \\
+\hline
+TALMGASLGC/PTRC1.Op.general & ЛО ГЗсигн / ЛО: Срабатывание \\
+\hline
+TLTCGASLGC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО ГЗ РПН \\
+\hline
+TLTCGASLGC/LLN0.Beh.stVal & ЛО ГЗ РПН / БУ: Поведение LD \\
+\hline
+TLTCGASLGC/LLN0.Health.stVal & ЛО ГЗ РПН / БУ: Исправность LD \\
+\hline
+TLTCGASLGC/LLN0.OpDlTmms.setVal & ЛО ГЗ РПН / БУ: ГЗ РПН Тбл \\
+\hline
+TLTCGASLGC/PTRC1.Beh.stVal & ЛО ГЗ РПН / ЛО: Поведение \\
+\hline
+TLTCGASLGC/PTRC1.Health.stVal & ЛО ГЗ РПН / ЛО: Исправность \\
+\hline
+TLTCGASLGC/PTRC1.Op.general & ЛО ГЗ РПН / ЛО: Срабатывание \\
+\hline
+TLTCGASLGC/PTRC1.Blk.stVal & ЛО ГЗ РПН / ЛО: Заблокировано \\
+\hline
+TOVCTOC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЗП \\
+\hline
+TOVCTOC/LLN0.Beh.stVal & ЗП / БУ: Поведение LD \\
+\hline
+TOVCTOC/LLN0.Health.stVal & ЗП / БУ: Исправность LD \\
+\hline
+TOVCTOC/HVPTOC1.Beh.stVal & ЗП / ЗП: Поведение \\
+\hline
+TOVCTOC/HVPTOC1.Health.stVal & ЗП / ЗП: Исправность \\
+\hline
+TOVCTOC/HVPTOC1.Str.general & ЗП / ЗП: Пуск \\
+\hline
+TOVCTOC/HVPTOC1.Op.general & ЗП / ЗП: Срабатывание \\
+\hline
+TOVCTOC/HVPTOC1.StrVal.setMag.f & ЗП / ЗП: Iср \\
+\hline
+TOVCTOC/HVPTOC1.OpDlTmms.setVal & ЗП / ЗП: Tср \\
+\hline
+TPBRF/LLN0.Mod.Oper.ctlVal & MMS. Режим УРОВ ВН \\
+\hline
+TPBRF/LLN0.Beh.stVal & УРОВ ВН / БУ: Поведение LD \\
+\hline
+TPBRF/LLN0.Health.stVal & УРОВ ВН / БУ: Исправность LD \\
+\hline
+TPBRF/GENRBRF1.Beh.stVal & УРОВ ВН / УРОВ: Поведение \\
+\hline
+TPBRF/GENRBRF1.Health.stVal & УРОВ ВН / УРОВ: Исправность \\
+\hline
+TPBRF/GENRBRF1.Str.general & УРОВ ВН / УРОВ: Пуск \\
+\hline
+TPBRF/GENRBRF1.OpEx.general & УРОВ ВН / УРОВ: Срабатывание \\
+\hline
+TPBRF/GENRBRF1.FailTmms.setVal & УРОВ ВН / УРОВ: ВН Tср \\
+\hline
+TPBRF/GENRBRF1.DetValA.setMag.f & УРОВ ВН / УРОВ: ВН Iср \\
+\hline
+TRESOFFLVLGC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО Т \\
+\hline
+TRESOFFLVLGC/LLN0.Beh.stVal & ЛО Т / БУ: Поведение LD \\
+\hline
+TRESOFFLVLGC/LLN0.Health.stVal & ЛО Т / БУ: Исправность LD \\
+\hline
+TRESOFFLVLGC/LVCBRBLC1.Beh.stVal & ЛО Т / ЗАВР: Поведение \\
+\hline
+TRESOFFLVLGC/LVCBRBLC1.Health.stVal & ЛО Т / ЗАВР: Исправность \\
+\hline
+TRESOFFLVLGC/LVCBRBLC1.BlkOp.stVal & ЛО Т / ЗАВР: Запрет АВР \\
+\hline
+TRESOFFLVLGC/PTRC1.Mod.Oper.ctlVal & MMS. Режим ЛО Т / ЛО \\
+\hline
+TRESOFFLVLGC/PTRC1.Beh.stVal & ЛО Т / ЛО: Поведение \\
+\hline
+TRESOFFLVLGC/PTRC1.Health.stVal & ЛО Т / ЛО: Исправность \\
+\hline
+TRESOFFLVLGC/PTRC1.Op.general & ЛО Т / ЛО: Срабатывание \\
+\hline
+TRESOFFLVLGC/RBRE1.Mod.Oper.ctlVal & MMS. Режим ЛО Т / ЗАПВ \\
+\hline
+TRESOFFLVLGC/RBRE1.Beh.stVal & ЛО Т / ЗАПВ: Поведение \\
+\hline
+TRESOFFLVLGC/RBRE1.Health.stVal & ЛО Т / ЗАПВ: Исправность \\
+\hline
+TRESOFFLVLGC/RBRE1.BlkOp.stVal & ЛО Т / ЗАПВ: Запрет АПВ \\
+\hline
+TTOCLGC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛЗТ \\
+\hline
+TTOCLGC/LLN0.Beh.stVal & ЛЗТ / БУ: Поведение LD \\
+\hline
+TTOCLGC/LLN0.Health.stVal & ЛЗТ / БУ: Исправность LD \\
+\hline
+TTOCLGC/PTRC1.Beh.stVal & ЛЗТ / ЛЗТ: Поведение \\
+\hline
+TTOCLGC/PTRC1.Health.stVal & ЛЗТ / ЛЗТ: Исправность \\
+\hline
+TTOCLGC/PTRC1.Str.general & ЛЗТ / ЛЗТ: Пуск \\
+\hline
+TTOCLGC/PTRC1.Op.general & ЛЗТ / ЛЗТ: Срабатывание \\
+\hline
+TTRGASLGC/LLN0.Mod.Oper.ctlVal & MMS. Режим ЛО ГЗоткл \\
+\hline
+TTRGASLGC/LLN0.Beh.stVal & ЛО ГЗоткл / БУ: Поведение LD \\
+\hline
+TTRGASLGC/LLN0.Health.stVal & ЛО ГЗоткл / БУ: Исправность LD \\
+\hline
+TTRGASLGC/LLN0.OpDlTmms.setVal & ЛО ГЗоткл / БУ: ГЗоткл Тбл \\
+\hline
+TTRGASLGC/PTRC1.Beh.stVal & ЛО ГЗоткл / ЛО: Поведение \\
+\hline
+TTRGASLGC/PTRC1.Health.stVal & ЛО ГЗоткл / ЛО: Исправность \\
+\hline
+TTRGASLGC/PTRC1.Op.general & ЛО ГЗоткл / ЛО: Срабатывание \\
+\hline
+TTRGASLGC/PTRC1.Blk.stVal & ЛО ГЗоткл / ЛО: Заблокировано \\
+\hline
+\end{longtable}
