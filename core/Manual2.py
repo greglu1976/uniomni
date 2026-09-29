@@ -448,7 +448,7 @@ class Manual:
                     continue
 
 
-                table.append('\\rowcolor{gray!10}\n')
+                table.append('\\rowcolor{unimain!20}\n')
                 header_needed = self.setting_blanc.abbr_dict.get(_name, _name)
                 table.append(f'\\multicolumn{{9}}{{c}}{{{header_needed}}} \\\\\n\\hline\n')
 
@@ -458,7 +458,7 @@ class Manual:
                     header2 = table_data["title"].replace('_',r'\_')
                     if table_data["title"]!='БУ' and header_needed!=header2 and subsection["title"]!=table_data["title"]: # subsection["title"]!=table_data["title"] появилось в АРНТ где АРНТ_1 и АРНТ_1
                         #print(table_data["title"])
-                        table.append('\\rowcolor{gray!5}\n')
+                        table.append('\\rowcolor{unimain!10}\n')
                         table.append(f'\\multicolumn{{9}}{{c}}{{{header2}}} \\\\\n\\hline\n')  
 
                     for param_name in table_data["parameters"]:
