@@ -198,9 +198,11 @@ class SettingBlanc:
                 # чтобы порядок был предсказуемым (0, 1, 2...), так как словари в старых Python не упорядочены,
                 # а в новых хотя и сохраняют порядок вставки, но явная сортировка надежнее для конфигов.
                 # Если ключи всегда строковые цифры, можно отсортировать как числа или как строки.
-                sorted_items = sorted(note_dict.items(), key=lambda item: int(item[0]) if item[0].isdigit() else item[0])
-                values = [str(v) for k, v in sorted_items]
+                # sorted_items = sorted(note_dict.items(), key=lambda item: int(item[0]) if item[0].isdigit() else item[0])
+                # values = [str(v) for k, v in sorted_items]
                 
+                values = [str(v) for v in note_dict.values()]
+
                 return ' /\n'.join(values)
         except Exception as e:
             Logger.warning(f"Ошибка парсинга note_dict: {e}")
@@ -584,8 +586,9 @@ class SettingBlanc:
         raw_data = self.order_handler.get_data_for_configuration()
 
         for datum in raw_data:
-            excluded_titles = {"ИЧМ", "Установка полномочий переключения на станционном уровне (LocSta)", "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
-                                "Синхронизация времени", "Модуль ЦП", "Параметры отладки", "Слот M1. Модуль питания (P02c)", "Слот M12. Измерительный модуль (M090)","Слот M14. Центральный процессор (C01)"}
+            excluded_titles = set() #{"ИЧМ", "Установка полномочий переключения на станционном уровне (LocSta)", "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
+                                #"Синхронизация времени", "Модуль ЦП", "Параметры отладки", "Слот M1. Модуль питания (P02c)", "Слот M12. Измерительный модуль (M090)","Слот M14. Центральный процессор (C01)"}
+            
             if datum["main_title"] in excluded_titles:
                 continue
             p = doc.add_paragraph(datum["main_title"])
@@ -604,7 +607,8 @@ class SettingBlanc:
 
                     col1 = row_data["fullDescription"]
                     col2 = row_data["appliedDescription"]
-                    col3 = row_data["note"] if row_data["note"].count('-') >= 2 else ""
+                    note = row_data["note"]
+                    col3 = note if note and note.count('-') >= 2 else ""
                     col4 = row_data["units"] if row_data["units"] else '-'
                     col5 = row_data["step"] if row_data["step"] else '-'
                     col6 = row_data["defaultValue"]
