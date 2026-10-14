@@ -338,7 +338,7 @@ class SettingBlanc:
         Генерирует раздел документации "Матрица входов и выходов".
         """
         # ======================================================================
-        # ЧАСТЬ 0: Подготовка общих списков сигналов для Dropdown
+        # ЧАСТЬ 0: Подготовка общих списков сигналов для Dropdown 
         # ======================================================================
         try:
             raw_sigs, raw_di_sigs = self.order_handler.get_fsu_signals()
@@ -354,6 +354,7 @@ class SettingBlanc:
             return str(item)
 
         # Очищенные списки строк для dropdown
+        #print(raw_sigs)
         sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
         di_sigs_list = [desc for desc in [extract_description(s) for s in raw_di_sigs] if desc]
         self.di_list =  di_sigs_list
@@ -393,9 +394,54 @@ class SettingBlanc:
         pattern_outputs = re.compile(r'^M\d+_K\d{3}_K\d+_Status$')
         final_dict_outputs = {}
         
-        sigs_list_outputs = self.order_handler.get_fsu_out_signals()
-        
-        outs_list = self.extract_all_signals_from_structure(sigs_list_outputs)
+        #sigs_list_outputs = self.order_handler.get_fsu_out_signals()
+        #outs_list = self.extract_all_signals_from_structure(sigs_list_outputs) appliedDescription
+
+
+        raw_outs = self.order_handler.get_fsu_out_signals()
+
+
+        #outs_list = [desc for desc in [extract_description(s) for s in raw_outs] if desc]
+
+
+        # Формируем outs_list с осмысленными именами для виртуальных ключей/кнопок
+        outs_list = []
+        for s in raw_outs:
+            name = s.get("name", "")
+
+            if "VirtualKey_" in name or "VirtualButton_" in name:
+                # Ищем имя родительской группы в GROUPING.json
+                parent_group = self.order_handler.find_virt_key_desc(name)
+                applied = s.get("appliedDescription") or s.get("fullDescription") or name
+
+                if parent_group:
+                    label = f"{parent_group} ({applied})"
+                else:
+                    label = applied
+
+                outs_list.append(label)
+            else:
+                # Обычные сигналы — appliedDescription (или fullDescription)
+                desc = (s.get("appliedDescription") or 
+                        s.get("fullDescription") or 
+                        s.get("description") or 
+                        name)
+                if desc:
+                    outs_list.append(desc)
+
+
+
+
+        def extract_description(item):
+            if isinstance(item, dict):
+                return (item.get('appliedDescription') or 
+                        item.get('fullDescription') or 
+                        item.get('description') or 
+                        item.get('name', ''))
+            return str(item)
+
+        #outs_list = [desc for desc in [extract_description(s) for s in raw_outs] if desc]
+
 
         for slot_name, params_list in items_to_process:
             #print(slot_name, params_list)

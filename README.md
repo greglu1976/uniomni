@@ -247,3 +247,5 @@ v0.6.9
                 # values = [str(v) for k, v in sorted_items]
                 
                 values = [str(v) for v in note_dict.values()]
+
+LocSta прописан как command - но отображается в ЮС в матрице входов и выходов
