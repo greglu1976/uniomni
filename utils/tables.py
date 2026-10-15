@@ -1030,7 +1030,7 @@ def add_table_settings_core4(doc):
 # Константа ширины колонок
 TABLE_WIDTHS_MTRX_INS_CORE4 = (Inches(2), Inches(4))
 
-def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, sigs, di_sigs):
+def add_table_mtrx_ins_core4_old(doc, slot_name, inputs_list, sigs, di_sigs):
     """
     Создает статическую таблицу для одного слота без использования Jinja2.
     
@@ -1093,12 +1093,12 @@ def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, sigs, di_sigs):
         
         # Вызываем вашу функцию добавления dropdown
         # Предполагаем, что она модифицирует paragraph на месте
-        if 'add_formatted_dropdown3' in globals():
-            add_formatted_dropdown3(
+        if 'add_formatted_dropdown2' in globals():
+            add_formatted_dropdown2(
                 paragraph=par_right,
-                inputs_choices=sigs,      # Передаем общие сигналы
-                controls_choices=di_sigs, # Передаем дискретные сигналы
-            )
+                choices=list(sigs) + list(di_sigs),     # Передаем общие сигналы
+                default="Не назначено",
+                )
         else:
             # Заглушка, если функции нет
             par_right.text = "[Нет сигнала]"
@@ -1116,7 +1116,65 @@ def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, sigs, di_sigs):
     return table
 
 
+def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, choices):
+    """
+    Создает статическую таблицу для одного слота.
 
+    :param doc: объект Document
+    :param slot_name: имя слота
+    :param inputs_list: список описаний входов
+    :param choices: единый список сигналов для dropdown
+    """
+    if not inputs_list:
+        return None
+
+    num_rows = len(inputs_list) + 1
+    table = doc.add_table(rows=num_rows, cols=2)
+    table.style = 'Стиль6'
+    table.allow_autofit = False
+
+    try:
+        tbl_pr = table._tbl.xpath('./w:tblPr')[0]
+        tbl_layout = parse_xml(r'<w:tblLayout xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" w:type="fixed"/>')
+        tbl_pr.append(tbl_layout)
+    except Exception:
+        pass
+
+    # Заголовки
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Дискретный вход'
+    hdr_cells[1].text = 'Назначенный сигнал'
+    for i in range(2):
+        p = hdr_cells[i].paragraphs[0]
+        p.style = 'ДОК Таблица Заголовок'
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        set_cell_vertical_alignment(hdr_cells[i], align="center")
+    set_repeat_table_header(table.rows[0])
+
+    # Данные
+    for idx, input_desc in enumerate(inputs_list):
+        row_cells = table.rows[idx + 1].cells
+        row_cells[0].text = input_desc
+        row_cells[0].paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+        par_right = row_cells[1].paragraphs[0]
+        par_right.clear()
+
+        add_formatted_dropdown2(
+            paragraph=par_right,
+            choices=choices,            # ← один список
+        )
+        par_right.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # Ширина колонок
+    for row in table.rows:
+        try:
+            row.cells[0].width = TABLE_WIDTHS_MTRX_INS_CORE4[0]
+            row.cells[1].width = TABLE_WIDTHS_MTRX_INS_CORE4[1]
+        except Exception:
+            pass
+
+    return table
 
 # Ширина колонок для таблицы выходов: [Имя реле, Сигнал 1, Сигнал 2, ..., Сигнал 5]
 TABLE_WIDTHS_OUTS = (Inches(2), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7), Inches(1.7))

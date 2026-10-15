@@ -333,7 +333,7 @@ class SettingBlanc:
 
 
     # РАЗДЕЛ ПАРАМЕТРИРОВАНИЯ ВХОДОВ И ВЫХОДОВ
-    def _create_section_inouts_core4(self, doc):
+    def _create_section_inouts_core4_1(self, doc):
         """
         Генерирует раздел документации "Матрица входов и выходов".
         """
@@ -431,7 +431,6 @@ class SettingBlanc:
 
 
 
-
         def extract_description(item):
             if isinstance(item, dict):
                 return (item.get('appliedDescription') or 
@@ -509,6 +508,141 @@ class SettingBlanc:
         return
 
 
+    def _create_section_inouts_core4(self, doc):
+        """..."""
+        # ======================================================================
+        # ЧАСТЬ 0: Подготовка списка сигналов для Dropdown
+        # ======================================================================
+        try:
+            raw_sigs, _ = self.order_handler.get_fsu_signals()    # ← игнорируем второй
+        except Exception:
+            raw_sigs = []
+
+        def extract_description(item):
+            if isinstance(item, dict):
+                return (item.get('appliedDescription') or
+                        item.get('fullDescription') or
+                        item.get('description') or
+                        item.get('name', ''))
+            return str(item)
+
+        # ОДИН список для dropdown — как в выходах / светодиодах / ФК
+        sigs_list = [desc for desc in [extract_description(s) for s in raw_sigs] if desc]
+
+        # Получаем данные слотов
+        slots_data = self.order_handler.get_slots_data()
+        items_to_process = []
+        if isinstance(slots_data, list):
+            for slot_dict in slots_data:
+                items_to_process.extend(slot_dict.items())
+        elif isinstance(slots_data, dict):
+            items_to_process.extend(slots_data.items())
+
+        # ======================================================================
+        # ЧАСТЬ 1: ОБРАБОТКА ВХОДОВ
+        # ======================================================================
+        pattern_inputs = re.compile(r'^M\d+_B\d{3}_B\d+_Status$')
+        final_dict_inputs = {}
+
+        for slot_name, params_list in items_to_process:
+            status_signals = [p for p in params_list if pattern_inputs.match(p)]
+            if not status_signals:
+                continue
+            clean_sig_list = []
+            for sig in status_signals:
+                try:
+                    d = self.config_handler.get_param_info(sig)
+                    desc = d.get("appliedDescription", sig)
+                    clean_sig_list.append(desc.replace(". Статус", "").strip())
+                except Exception:
+                    clean_sig_list.append(sig)
+            if clean_sig_list:
+                final_dict_inputs[slot_name] = clean_sig_list
+
+        # ======================================================================
+        # ЧАСТЬ 2: ОБРАБОТКА ВЫХОДОВ
+        # ======================================================================
+        pattern_outputs = re.compile(r'^M\d+_K\d{3}_K\d+_Status$')
+        final_dict_outputs = {}
+
+        raw_outs = self.order_handler.get_fsu_out_signals()
+
+        outs_list = []
+        for s in raw_outs:
+            name = s.get("name", "")
+            if "VirtualKey_" in name or "VirtualButton_" in name:
+                parent_group = self.order_handler.find_virt_key_desc(name)
+                applied = s.get("appliedDescription") or s.get("fullDescription") or name
+                label = f"{parent_group} ({applied})" if parent_group else applied
+                outs_list.append(label)
+            else:
+                desc = (s.get("appliedDescription") or
+                        s.get("fullDescription") or
+                        s.get("description") or
+                        name)
+                if desc:
+                    outs_list.append(desc)
+
+        for slot_name, params_list in items_to_process:
+            status_signals = [p for p in params_list if pattern_outputs.match(p)]
+            if not status_signals:
+                continue
+            clean_sig_list = []
+            for sig in status_signals:
+                try:
+                    d = self.config_handler.get_param_info(sig)
+                    desc = d.get("appliedDescription", sig)
+                    clean_sig_list.append(desc.replace(". Статус", "").strip())
+                except Exception:
+                    clean_sig_list.append(sig)
+            if clean_sig_list:
+                final_dict_outputs[slot_name] = clean_sig_list
+
+        # ======================================================================
+        # ЧАСТЬ 3: ГЕНЕРАЦИЯ ДОКУМЕНТА
+        # ======================================================================
+        if not final_dict_inputs and not final_dict_outputs:
+            return
+
+        add_new_section_landscape(doc)
+
+        p = doc.add_paragraph('МАТРИЦА ВХОДОВ И ВЫХОДНЫХ РЕЛЕ')
+        p.style = 'ДОК Заголовок 1'
+
+        # --- ВХОДЫ ---
+        if final_dict_inputs:
+            doc.add_paragraph('Дискретные входы').style = 'ДОК Заголовок 2'
+            sorted_inputs = sorted(final_dict_inputs.keys(),
+                                key=lambda x: int(re.search(r'M(\d+)', x).group(1)) if re.search(r'M(\d+)', x) else 0)
+
+            for slot_name in sorted_inputs:
+                doc.add_paragraph(f"{slot_name}").style = 'ДОК Таблица Название'
+                add_table_mtrx_ins_core4(
+                    doc=doc,
+                    slot_name=slot_name,
+                    inputs_list=final_dict_inputs[slot_name],
+                    choices=sigs_list,            # ← один список
+                )
+                doc.add_paragraph()
+
+        # --- ВЫХОДЫ ---
+        if final_dict_outputs:
+            doc.add_paragraph('Выходные реле').style = 'ДОК Заголовок 2'
+            sorted_outputs = sorted(final_dict_outputs.keys(),
+                                    key=lambda x: int(re.search(r'M(\d+)', x).group(1)) if re.search(r'M(\d+)', x) else 0)
+
+            for slot_name in sorted_outputs:
+                doc.add_paragraph(f"{slot_name}").style = 'ДОК Таблица Название'
+                add_table_mtrx_outs_core4(
+                    doc=doc,
+                    outputs_list=final_dict_outputs[slot_name],
+                    sigs_list=outs_list,
+                )
+                doc.add_paragraph()
+
+        return
+
+
     def extract_all_signals_from_structure(self, data_structure):
         """
         Извлекает все сигналы из структуры данных функций и подфункций.
@@ -573,14 +707,18 @@ class SettingBlanc:
         p = doc.add_paragraph('Функциональные клавиши')
         p.style = 'ДОК Заголовок 2'
 
+        # Список сигналов для КНОПОК (виртуальные ключи)
+        drop_list_fk = self.order_handler.get_digital_signals_for_fk()
+
+
         doc.add_paragraph("ИЧМ").style = 'ДОК Таблица Название'        
-        add_table_fks_core4(doc, self.di_list)
+        add_table_fks_core4(doc, drop_list_fk)
 
         for res in result:
             if "функциональных кнопок" in res:
                 doc.add_paragraph()
                 doc.add_paragraph(res).style = 'ДОК Таблица Название'
-                add_table_fks_core4(doc, drop_list)  
+                add_table_fks_core4(doc, drop_list_fk)  
 
 
     #########################################

@@ -467,7 +467,7 @@ class OrderHandler:
 
 
 
-    def get_fsu_signals(self):
+    def get_fsu_signals1(self):
         if self._fsu_signals_loaded:
             return self.fsu_signals, self.fsu_di_signals
 
@@ -508,6 +508,50 @@ class OrderHandler:
         self._fsu_signals_loaded = True
         return self.fsu_signals, self.fsu_di_signals
 
+
+
+    def get_fsu_signals(self):
+        if self._fsu_signals_loaded:
+            return self.fsu_signals, self.fsu_di_signals
+
+        self.fsu_signals = []
+        self.fsu_di_signals = []
+
+        if not self.general_sigs_of_func_logic:
+            self._drag_gen_sigs_of_func_logic()
+
+        gen_signals = self.general_sigs_of_func_logic or []
+
+        if not gen_signals:
+            Logger.warning("Узел 'Общие сигналы ФС' не найден в GROUPING.json")
+            self._fsu_signals_loaded = True
+            return self.fsu_signals, self.fsu_di_signals
+
+        fail_count = 0
+        for signal in gen_signals:
+            name = signal.get("Name")
+            if not name:
+                continue
+
+            try:
+                sig_data = self.config_handler.get_param_info(name)
+            except Exception:
+                fail_count += 1
+                continue
+
+            if sig_data is None:
+                fail_count += 1
+                continue
+
+            # ВСЕ сигналы — в fsu_signals (порядок дерева)
+            self.fsu_signals.append(sig_data)
+
+            # DI — дополнительно в fsu_di_signals
+            if "DI_" in (sig_data.get("name") or ""):
+                self.fsu_di_signals.append(sig_data)
+
+        self._fsu_signals_loaded = True
+        return self.fsu_signals, self.fsu_di_signals
 
 
     def get_fsu_signals_old(self):
@@ -659,8 +703,6 @@ class OrderHandler:
             result.append(sig_data)
 
         self.fsu_out_signals = result
-        print(f"=== Собрано выходных сигналов: {len(result)} "
-            f"(fail: {fail_count}) ===")
         return self.fsu_out_signals
 
 
@@ -702,29 +744,169 @@ class OrderHandler:
 ################################################################################
     #########################################################################
     # ДАННЫЕ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА СВЕТОДИОДОВ
+
     def get_digital_signals_for_led(self):
+        """
+        Порядок сигналов в dropdown светодиодов:
+        1. Общие сигналы ФС:
+            - сначала сигналы из ParametersToHmiButtonsTree
+            - затем сигналы из ParametersToHmiSignalizationTree → Общие сигналы ФС
+        2. Дерево внутренних переменных СПЛ
+        3. Слоты M1..M99 (по номеру)
+        4. Остальные группы (ДЗ_1, БК_1, ...)
 
-        sigs_of_func_logic = []
+        Виртуальные ключи (VirtualKeyParametersTree) ИСКЛЮЧЕНЫ — они идут на кнопки (ФК).
+        """
+        result = []
+
+        def _handle_param(name, parent_group):
+            if not name:
+                return
+            try:
+                raw = self.config_handler.get_param_info(name)
+            except Exception:
+                return
+            if not raw:
+                return
+            applied = raw.get("appliedDescription") or raw.get("fullDescription") or name
+            result.append(f"{parent_group}: {applied}" if parent_group else applied)
+
+        def walk(nodes, current_group=None):
+            for node in nodes or []:
+                node_type = node.get("Type")
+                if node_type == "Group":
+                    walk(node.get("Nodes", []), current_group=node.get("Name"))
+                elif node_type == "Parameter":
+                    _handle_param(node.get("Name"), current_group)
+
+        def walk_forced_group(nodes, forced_group):
+            """Обходит дерево, всегда используя forced_group как префикс."""
+            for node in nodes or []:
+                node_type = node.get("Type")
+                if node_type == "Group":
+                    walk_forced_group(node.get("Nodes", []), forced_group)
+                elif node_type == "Parameter":
+                    _handle_param(node.get("Name"), forced_group)
+
+        def find_group(nodes, name):
+            for n in nodes or []:
+                if n.get("Type") == "Group" and n.get("Name") == name:
+                    return n
+            return None
+
+        def sort_key_slot(name):
+            import re
+            m = re.search(r'Слот\s+M(\d+)', name or "")
+            return int(m.group(1)) if m else 999999
+
+        # ==================================================
+        # ParametersToHmiSignalizationTree
+        # ==================================================
+        hmi_nodes = None
         for data in self.data:
-            if data["Name"] == "DigitalSignalsTree":
-                m = data["Nodes"]
-                for node in m:
-                    if node["Name"] == "Обобщенные сигналы" or node["Name"] == "Периферийные блоки" :
-                        continue
-                    sigs_of_func_logic.append(node)
-        q = self.extract_parameters(sigs_of_func_logic)
+            if data.get("Name") == "ParametersToHmiSignalizationTree":
+                hmi_nodes = data.get("Nodes", [])
+                break
+        if not hmi_nodes:
+            return result
 
-        raw_list = []
-        for par in q:
-            if "VirtualKey_" in par or "VirtualButton_" in par:
-                raw = self.find_virt_key_desc(par)
-                desc = self.config_handler.get_param_info(par)
-                raw_list.append(f"{raw} ({desc['appliedDescription']})")
-            else:
-                raw = self.config_handler.get_param_info(par)
-                if raw["size"]==1 and raw["group"]!="Setting" and "Convert_SPS" not in raw["name"] and "BitTest_" not in raw["name"] and "_ACS_" not in raw["name"] and "GOOSE_" not in raw["name"] and "FB_" not in raw["name"] and "HMI" not in raw["name"] and "DI_" not in raw["name"] and "APCSRst_CLS_Reset" not in raw["name"] and "Convert_" not in raw["name"]: 
-                    raw_list.append(raw["appliedDescription"])
-        return raw_list
+        # 1. Общие сигналы ФС — сначала сигналы из ParametersToHmiButtonsTree
+        for data in self.data:
+            if data.get("Name") == "ParametersToHmiButtonsTree":
+                walk_forced_group(data.get("Nodes", []), "Общие сигналы ФС")
+                break
+
+        # 2. Затем сигналы из HMI → «Общие сигналы ФС»
+        grp = find_group(hmi_nodes, "Общие сигналы ФС")
+        if grp:
+            walk(grp.get("Nodes", []), current_group=grp.get("Name"))
+
+        # 3. Дерево внутренних переменных СПЛ
+        grp = find_group(hmi_nodes, "Дерево внутренних переменных СПЛ")
+        if grp:
+            walk(grp.get("Nodes", []), current_group=grp.get("Name"))
+
+        # 4. Слоты — по номеру M<N>
+        slot_groups = [n for n in hmi_nodes
+                    if n.get("Type") == "Group"
+                    and "Слот" in (n.get("Name") or "")]
+        slot_groups.sort(key=lambda n: sort_key_slot(n.get("Name", "")))
+        for grp in slot_groups:
+            walk(grp.get("Nodes", []), current_group=grp.get("Name"))
+
+        # 5. Остальные — в порядке появления
+        already_processed = {
+            "Общие сигналы ФС",
+            "Дерево внутренних переменных СПЛ",
+        }
+        for grp in hmi_nodes:
+            if grp.get("Type") != "Group":
+                continue
+            name = grp.get("Name") or ""
+            if name in already_processed or "Слот" in name:
+                continue
+            walk(grp.get("Nodes", []), current_group=name)
+
+        return result
+
+
+################################################################################
+    #########################################################################
+    # ДАННЫЕ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА ФК
+
+    def get_digital_signals_for_fk(self):
+        """
+        Собирает сигналы для dropdown функциональных клавиш (ФК) из VirtualKeyParametersTree.
+
+        Формат: "<Name> (<appliedDescription от LedParameter>)"
+                например: "ФК: Ввод терминала (Опер. вывод)"
+        """
+        result = []
+
+        # 1. Находим дерево VirtualKeyParametersTree
+        tree_nodes = None
+        for data in self.data:
+            if data.get("Name") == "VirtualKeyParametersTree":
+                tree_nodes = data.get("Nodes", [])
+                break
+
+        if not tree_nodes:
+            return result
+
+        # 2. Рекурсивно обходим, обрабатывая узлы типа VirtualKey
+        def walk(nodes):
+            for node in nodes or []:
+                node_type = node.get("Type")
+
+                if node_type == "Group":
+                    walk(node.get("Nodes", []))
+
+                elif node_type == "VirtualKey":
+                    display_name = node.get("Name") or ""
+                    led_param = node.get("LedParameter") or node.get("ButtonParameter") or ""
+
+                    applied = ""
+                    if led_param:
+                        try:
+                            raw = self.config_handler.get_param_info(led_param)
+                            if raw:
+                                applied = raw.get("appliedDescription") or ""
+                        except Exception:
+                            applied = ""
+
+                    if not display_name:
+                        continue
+
+                    if applied:
+                        result.append(f"{display_name} ({applied})")
+                    else:
+                        result.append(display_name)
+
+        walk(tree_nodes)
+        return result
+
+
+
 
     def extract_parameters(self, nodes):
         """
