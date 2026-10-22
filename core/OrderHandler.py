@@ -11,6 +11,9 @@ from collections import defaultdict
 
 from core.MainConfigHandler import MainConfigHandler
 
+# Задание уставок
+TARGET_UNIT_TYPE = "Secondary"   # "Primary" | "Secondary" | "Relative"  
+
 class NodeResolver:
     def __init__(self, hard_nodes_structure, config_handler):
         """
@@ -173,7 +176,10 @@ class OrderHandler:
         return result
 
 
+
     def prepare_data_for_table(self, fb_name):
+
+      
 
         enum500 = self.extension_handler.find_enum_by_parameter_name(fb_name)
         raw = self.config_handler.get_param_info(fb_name)
@@ -213,16 +219,15 @@ class OrderHandler:
             is_sgf = True
 
 
+        unit_typed = self.extension_handler.find_units_by_type(fb_name, TARGET_UNIT_TYPE)
         unit, units = self.extension_handler.find_trans_by_parameter_name(fb_name)
-        #print(fb_name)
-        #col4 = "-" #if raw["units"] == '' else raw["units"]
-        #if unit:
-            #col4 = unit
 
-        if raw["units"] == '' and unit:
-            col4 = unit
+        if unit_typed:
+            col4 = unit_typed               # "А (вторич.)" / "В (вторич.)" / "Ом (вторич.)" и т.п.
         elif raw["units"] != '':
             col4 = raw["units"]
+        elif unit:
+            col4 = unit                     # fallback: "о.е." если в трансформации нет нужного типа
         else:
             col4 = "-"
 

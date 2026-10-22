@@ -61,7 +61,28 @@ class ExtensionHandler:
         # Если цикл закончился, значит Enum с таким именем не найден в разделе "Enums"
         return None, None 
 
+    def find_units_by_type(self, name, unit_type="Secondary"):
+        """
+        unit_type: 'Primary' | 'Secondary' | 'Relative'
+        Возвращает строку с единицей нужного типа или None.
+        """
+        pars = self.data.get("Parameters", [])
+        trans_name = None
+        for par in pars:
+            if par.get("Parameter") == name:
+                trans_name = par.get("Transformation")
+                break
+        if not trans_name:
+            return None
 
+        for en in self.data.get("Transformations", []):
+            if en.get("Transformation") != trans_name:
+                continue
+            for u in en.get("AvailableUnits", []):
+                if u.get("Type") == unit_type:
+                    return u.get("Units")
+            return None
+        return None
 
 #a = ExtensionHandler()
 #m = a.find_enum_by_parameter_name("Supervision_TimeSource")
