@@ -3,6 +3,7 @@
 
 # В РАЗРАБОТКЕ
 
+import os
 import json
 from typing import List, Dict, Any
 from collections import defaultdict
@@ -11,7 +12,9 @@ from core.MainConfigHandler import MainConfigHandler
 
 class OrderHandler:
 
-    def __init__(self, config_handler = None, extension_handler = None, root_path = ''):
+
+
+    def __init1__(self, config_handler = None, extension_handler = None, root_path = ''):
         with open(root_path+"grouping.json", 'r', encoding='utf-8') as f:
             self.data = json.load(f)
         self.settings_group1 = None
@@ -34,6 +37,46 @@ class OrderHandler:
 
 
         self.general_sigs_of_func_logic = [] # Общие сигналы функциональной логики вытащенные из GROUPING
+
+    def __init__(self, config_handler=None, extension_handler=None, root_path='',
+                 grouping_path=None, meta_path=None):
+        """
+        root_path     — папка, где лежат grouping.json и meta.json (обратная совместимость).
+        grouping_path — полный путь к grouping.json (приоритетнее root_path).
+        meta_path     — полный путь к meta.json (приоритетнее root_path+"meta.json").
+        """
+        # --- 1. Загрузка grouping ---
+        if grouping_path is None:
+            grouping_path = os.path.join(root_path or '', "grouping.json")
+        with open(grouping_path, 'r', encoding='utf-8') as f:
+            self.data = json.load(f)
+
+        # --- 2. Группа уставок 1 ---
+        self.settings_group1 = None
+        self._extrude_settings_group1()
+
+        # --- 3. meta.json ---
+        if config_handler:
+            self.config_handler = config_handler
+        else:
+            if meta_path is None:
+                meta_path = os.path.join(root_path or '', "meta.json")
+            self.config_handler = MainConfigHandler.from_json_file(meta_path)
+
+        # --- 4. extension ---
+        self.extension_handler = extension_handler
+
+        # --- 5. Прочее ---
+        self.mapping = {}
+        self._create_mapping_from_structure()
+
+        self.fsu_signals = []
+        self.fsu_di_signals = []
+        self.fsu_out_signals = []
+        self._fsu_signals_loaded = False
+
+        self.general_sigs_of_func_logic = []
+
 
     def _extrude_settings_group1(self):
         """Извлекает структуру 'Группа уставок 1' из JSON"""
@@ -1282,3 +1325,36 @@ class OrderHandler:
             return False
         
         return search(root_nodes)
+
+
+    def get_signals_by_name(self, tree_name: str) -> List[Dict[str, Any]]:
+        """
+        Возвращает список узлов (Nodes) для указанного дерева по его имени.
+        Ищет на верхнем уровне, затем — рекурсивно по вложенным группам.
+
+        Пример:
+            nodes = handler.get_signals_by_name("DigitalSignalsTree")
+        """
+        if not tree_name:
+            return []
+
+        # 1. Верхний уровень
+        for data in self.data:
+            if data.get("Name") == tree_name:
+                return data.get("Nodes", [])
+
+        # 2. Рекурсивный поиск
+        def find(nodes):
+            for n in nodes or []:
+                if n.get("Name") == tree_name:
+                    return n
+                if n.get("Type") == "Group":
+                    res = find(n.get("Nodes", []))
+                    if res is not None:
+                        return res
+            return None
+
+        found = find(self.data)
+        if found is not None:
+            return found.get("Nodes", [])
+        return []    
