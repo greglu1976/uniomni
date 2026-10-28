@@ -319,3 +319,8 @@ v0.6.7
  v0.0.3 22.10.26
 # Задание уставок
 TARGET_UNIT_TYPE = "Secondary"   # "Primary" | "Secondary" | "Relative"  
+
+**28.10.26** OMNI for M500 deepseek edition
+ v0.0.4 28.10.26
+ 1. Произведен рефакторинг deepseek-v4-flash-vision-exp
+ 2. Сделан пересчет уставок по extension.json по коэффициентом с выбором в интерфейсе. Даннык пакеты поддержки как будто кривые (шаг КРИВОЙ?)
