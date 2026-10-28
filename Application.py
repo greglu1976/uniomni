@@ -10,6 +10,10 @@ from core.DeviceDataManager import DeviceDataManager
 from core.LatexDoc import LatexDoc
 from core.Manual2 import Manual
 from core.SettingBlanc2 import SettingBlanc
+from core.UnitConverter import (
+    DEFAULT_UNIT_TYPE,
+    UNIT_TYPE_TITLES,
+)
 from logger.logger import Logger
 from utils.additional import create_directories
 
@@ -49,7 +53,7 @@ class Application:
         dpg.bind_font(default_font)
 
         # Главное окно
-        with dpg.window(label="Главное окно", width=400, height=400, pos=[20, 20]):
+        with dpg.window(label="Главное окно", width=400, height=470, pos=[20, 20]):
             self.device_combo = dpg.add_combo(
                 label="Устройство",
                 items=[],
@@ -60,8 +64,19 @@ class Application:
 
             dpg.add_separator()
             dpg.add_spacer(height=5)
+
+            dpg.add_text("Единицы уставок")
+            self.unit_combo = dpg.add_combo(
+                items=list(UNIT_TYPE_TITLES.values()),
+                default_value=UNIT_TYPE_TITLES[DEFAULT_UNIT_TYPE],
+                width=300,
+            )
+            dpg.add_spacer(height=5)
+
             dpg.add_button(label="Создать бланк уставок в docx",
                            callback=self.generate_setting_blanc_docx, width=300)
+            dpg.add_button(label="Создать раздел «Уставки» в tex",
+                           callback=self.generate_settings_tex, width=300)
             dpg.add_spacer(height=5)
             dpg.add_separator()
             dpg.add_spacer(height=5)
@@ -97,7 +112,7 @@ class Application:
 
         Logger.set_container(LOG_CONTENT_TAG, LOG_SCROLL_TAG)
 
-        dpg.create_viewport(title=WINDOW_TITLE, width=1400, height=550)
+        dpg.create_viewport(title=WINDOW_TITLE, width=1400, height=620)
         dpg.setup_dearpygui()
 
     # ------------------------------------------------------------ задачи
@@ -110,6 +125,14 @@ class Application:
         except Exception as error:
             Logger.error(f"Ошибка выполнения задачи: {error}")
             Logger.error(traceback.format_exc())
+
+    def _selected_unit_type(self):
+        """Выбранная в интерфейсе система единиц уставок."""
+        title = dpg.get_value(self.unit_combo)
+        for unit_type, unit_title in UNIT_TYPE_TITLES.items():
+            if unit_title == title:
+                return unit_type
+        return DEFAULT_UNIT_TYPE
 
     def _require_device(self):
         """Проверяет, что устройство выбрано, и загружает его данные."""
@@ -145,8 +168,22 @@ class Application:
         self._safe(self._task_setting_blanc_docx)
 
     def _task_setting_blanc_docx(self):
-        Logger.info('Начинаем создавать бланк уставок...')
-        SettingBlanc(self.device_data).get_blanc()
+        unit_type = self._selected_unit_type()
+        Logger.info(f"Начинаем создавать бланк уставок "
+                    f"({UNIT_TYPE_TITLES[unit_type]})...")
+        SettingBlanc(self.device_data, unit_type=unit_type).get_blanc()
+
+    def generate_settings_tex(self):
+        if not self._require_device():
+            return
+        self._safe(self._task_settings_tex)
+
+    def _task_settings_tex(self):
+        unit_type = self._selected_unit_type()
+        Logger.info(f"Формируем раздел «Уставки» в tex "
+                    f"({UNIT_TYPE_TITLES[unit_type]})...")
+        path = SettingBlanc(self.device_data, unit_type=unit_type).export_settings_tex()
+        Logger.info(f"Файл создан: {path}")
 
     def renew_setting_tables_re(self):
         if not self._require_device():
@@ -155,7 +192,7 @@ class Application:
 
     def _task_renew_setting_tables_re(self):
         Logger.info('Обновляем таблицы с уставками в РЭ...')
-        Manual(device_data=self.device_data).renew_setting_tables_re()
+
         Logger.info('Таблицы с уставками в РЭ обновлены')
 
     def renew_sum_table_latex(self):
@@ -165,7 +202,7 @@ class Application:
 
     def _task_renew_sum_table_latex(self):
         Logger.info('Обновляем таблицу сигналов в РЭ...')
-        Manual(device_data=self.device_data).renew_sum_table_latex()
+
         Logger.info('Таблица сигналов в РЭ обновлена')
 
     def renew_abbrs(self):
@@ -174,7 +211,8 @@ class Application:
         self._safe(self._task_renew_abbrs)
 
     def _task_renew_abbrs(self):
-        result = Manual(device_data=self.device_data).renew_abbrs()
+        result = Manual(device_data=self.device_data,
+                        unit_type=self._selected_unit_type()).renew_abbrs()
         if result in (None, 'ok', 'noabbrs'):
             Logger.info('Перечень сокращений в РЭ обновлен')
         else:
@@ -186,7 +224,8 @@ class Application:
         self._safe(self._task_renew_abbrs_ru)
 
     def _task_renew_abbrs_ru(self):
-        result = Manual(device_data=self.device_data).renew_abbrs_ru()
+        result = Manual(device_data=self.device_data,
+                        unit_type=self._selected_unit_type()).renew_abbrs_ru()
         if result == 0:
             Logger.info('Перечень сокращений в РУ обновлен')
         else:

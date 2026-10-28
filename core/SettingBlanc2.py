@@ -6,6 +6,7 @@ import json
 import os
 import re
 import tempfile
+from pathlib import Path
 
 from docx import Document
 from docxtpl import DocxTemplate, RichText
@@ -13,6 +14,7 @@ from docxtpl import DocxTemplate, RichText
 from core.ExtensionHandler import ExtensionHandler
 from core.MainConfigHandler import MainConfigHandler
 from core.OrderHandler import OrderHandler
+from core.UnitConverter import DEFAULT_UNIT_TYPE
 from logger.logger import Logger
 from utils.docx_handler import (
     add_new_section,
@@ -50,11 +52,12 @@ _PARENTHESIS_RE = re.compile(r'\(([^()]*)\)')
 class SettingBlanc:
     """Бланк уставок: docx-документ с таблицами уставок, входов/выходов и т.д."""
 
-    def __init__(self, device_data):
+    def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE):
         packet_path = device_data.get('path_to_support_packets')
         Logger.info(f"Путь к пакетам поддержки: {packet_path}")
 
         self.device_data = device_data
+        self.unit_type = unit_type or DEFAULT_UNIT_TYPE
         self.code = self.device_data.get("setting_blanc_code", "")
         self.versions = self.device_data.get("versions") or []
         self.base_structure = None
@@ -69,7 +72,8 @@ class SettingBlanc:
             raise FileNotFoundError(f"В пакете поддержки не найден meta.json: {packet_path}")
         self.config_handler = MainConfigHandler.from_json_file(str(meta_path))
 
-        self.order_handler = OrderHandler(self.config_handler, self.extension_handler, packet_path)
+        self.order_handler = OrderHandler(self.config_handler, self.extension_handler,
+                                          packet_path, unit_type=self.unit_type)
 
         self.di_list = []
         self.maps = self.order_handler.get_mapping()
@@ -105,6 +109,17 @@ class SettingBlanc:
         last_match = matches[-1]
         name = (raw_text[:last_match.start()] + raw_text[last_match.end():]).strip()
         return name, last_match.group(1).strip()
+
+    def _display_name(self, raw_col1):
+        """Наименование уставки для таблицы.
+
+        В meta.json краткое обозначение идёт в скобках в конце; оно терялось.
+        Возвращаем его, только если оно не повторяет уже имеющийся текст.
+        """
+        name, short_name = self._split_parenthesis(raw_col1)
+        if short_name and short_name not in name:
+            return f"{name} ({short_name})"
+        return name
 
     @staticmethod
     def _parse_note_dict(note_str):
@@ -179,12 +194,7 @@ class SettingBlanc:
             parameter_name = row_data.get('col0')
             enum500 = self.extension_handler.find_enum_by_parameter_name(parameter_name)
 
-            name, short_name = self._split_parenthesis(row_data.get('col1', ''))
-            # Раньше часть в скобках просто отбрасывалась. Возвращаем её только
-            # тогда, когда она не повторяет уже имеющийся текст наименования.
-            display_name = name
-            if short_name and short_name not in name:
-                display_name = f"{name} ({short_name})"
+            display_name = self._display_name(row_data.get('col1', ''))
 
             set_cell_text(cells[0], i)
             set_paragraph_alignment(cells[0].paragraphs[0], ALIGN_CENTER)
@@ -578,6 +588,28 @@ class SettingBlanc:
                         add_table_reg_core4(doc, data_rows)
                         add_paragraph(doc, '', STYLE_TAGS)
 
+    # ------------------------------------------------------- экспорт в tex
+
+    def get_settings_tex(self, unit_type=None):
+        """Текст .tex-документа с разделом «Уставки»."""
+        from core.SettingsTex import build_settings_document
+        return build_settings_document(self, unit_type or self.unit_type)
+
+    def _default_tex_path(self):
+        edition = self.versions[-1].get('edition') if self.versions else ''
+        name = f"Уставки {self.device_data.get('name', '')} ({self.code})"
+        if edition:
+            name += f"_v.{edition}"
+        return project_path(f"{name}.tex")
+
+    def export_settings_tex(self, output_path=None, unit_type=None):
+        """Сохраняет раздел «Уставки» в .tex и возвращает путь к файлу."""
+        text = self.get_settings_tex(unit_type)
+        path = Path(output_path) if output_path else self._default_tex_path()
+        path.write_text(text, encoding='utf-8')
+        Logger.info(f"Раздел «Уставки» сохранён в tex: '{path}'")
+        return path
+
     # ------------------------------------------------- уставки для latex
 
     def get_table_settings_latex(self, fb_key):
@@ -623,6 +655,7 @@ class SettingBlanc:
                 result_rows.append({
                     "col1": name,
                     "col2": short_name,
+                    "display_name": self._display_name(raw_col1),
                     "col3": str(col3_value),
                     "col4": row_data.get('col4', ''),
                     "col5": row_data.get('col5', ''),

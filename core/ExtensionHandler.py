@@ -36,6 +36,11 @@ class ExtensionHandler:
         enum = self._enums.get(enum_name)
         return enum.get("Value") if enum else None
 
+    def find_transformation_by_parameter_name(self, name):
+        """Возвращает описание трансформации параметра (или None)."""
+        parameter = self._parameters.get(name) or {}
+        return self._transformations.get(parameter.get("Transformation"))
+
     def find_trans_by_parameter_name(self, name):
         """Возвращает (единицы из InitialDeclarationUnits, "ед1 / ед2 / ...").
 

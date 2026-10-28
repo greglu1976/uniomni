@@ -7,11 +7,9 @@ from decimal import Decimal
 from typing import Any, Dict, List
 
 from core.MainConfigHandler import MainConfigHandler
+from core.UnitConverter import DEFAULT_UNIT_TYPE, UnitConverter, format_value, to_float
 from logger.logger import Logger
 from utils.paths import load_packet_json
-
-# Задание уставок
-TARGET_UNIT_TYPE = "Secondary"   # "Primary" | "Secondary" | "Relative"
 
 # Деревья GROUPING.json
 TREE_SETTINGS = "SettingsTree"
@@ -91,7 +89,8 @@ class NodeResolver:
 
 class OrderHandler:
 
-    def __init__(self, config_handler=None, extension_handler=None, root_path=''):
+    def __init__(self, config_handler=None, extension_handler=None, root_path='',
+                 unit_type=DEFAULT_UNIT_TYPE):
         self.data, self.path = load_packet_json(root_path, "grouping.json")
 
         self.settings_group1 = []
@@ -104,6 +103,11 @@ class OrderHandler:
             self.config_handler = MainConfigHandler(meta)
 
         self.extension_handler = extension_handler
+
+        # Пересчёт значений уставок в выбранную систему единиц
+        self.unit_type = unit_type or DEFAULT_UNIT_TYPE
+        self.unit_converter = UnitConverter(
+            self.config_handler, self.extension_handler, self.unit_type)
 
         self.mapping = {}
         self._create_mapping_from_structure()
@@ -170,9 +174,45 @@ class OrderHandler:
         except (TypeError, ValueError):
             return str(value)
 
+    def set_unit_type(self, unit_type):
+        """Переключает систему единиц без пересоздания обработчика."""
+        self.unit_type = unit_type or DEFAULT_UNIT_TYPE
+        self.unit_converter.set_target_type(self.unit_type)
+
+    def _conversion_needed(self, parameter_name) -> bool:
+        """Нужен ли пересчёт значений этого параметра."""
+        return self.unit_converter.scale_factor(parameter_name) is not None
+
+    def _convert_number(self, parameter_name, raw_value):
+        """Пересчитывает число (None, если значение не числовое)."""
+        number = to_float(raw_value)
+        if number is None:
+            return None
+        return self.unit_converter.convert(parameter_name, number)
+
+    @staticmethod
+    def _format_converted(value, decimals=None) -> str:
+        """Форматирует пересчитанное значение (запятая, без лишних нулей)."""
+        if value is None:
+            return '-'
+        number = float(value)
+        # Совсем малые величины в фиксированной записи дают «0» — показываем
+        # экспоненту (например, шаг 4,5e-9 о.е.).
+        if decimals is None or (number and abs(number) < 1e-6):
+            return format_value(value)
+
+        text = f"{number:.{decimals}f}"
+        if '.' in text:
+            text = text.rstrip('0').rstrip('.')
+        return text.replace('.', ',') or '0'
+
     def prepare_data_for_table(self, parameter_name):
         """Строка таблицы уставок: (ключ, наименование, обозначение, диапазон,
-        ед. изм., шаг, значение по умолчанию, пустое поле)."""
+        ед. изм., шаг, значение по умолчанию, пустое поле).
+
+        Числовые значения (диапазон, шаг, значение по умолчанию) пересчитываются
+        в систему единиц, выбранную в интерфейсе (первичные/вторичные/о.е.).
+        """
         info = self.config_handler.get_param_info(parameter_name)
         if not info:
             raise KeyError(f"Параметр отсутствует в meta.json: {parameter_name}")
@@ -192,36 +232,46 @@ class OrderHandler:
 
         options = {}
         is_sgf = bool(note)
+        convert = self._conversion_needed(parameter_name)
+
+        # Точность для пересчитанных чисел берём из пересчитанного же шага
+        decimals = None
+        if convert and step:
+            converted_step = self._convert_number(parameter_name, step)
+            if converted_step:
+                decimals = min(8, self._decimals_count(converted_step))
 
         # --- Значение / Диапазон ---
         if note:
             options = self.parse_options(note)
             col3 = "note_" + str(options)
+        elif convert:
+            converted_min = self._convert_number(parameter_name, min_value)
+            converted_max = self._convert_number(parameter_name, max_value)
+            if converted_min is not None and converted_max is not None:
+                col3 = (f"{self._format_converted(converted_min, decimals)}..."
+                        f"{self._format_converted(converted_max, decimals)}")
+            else:
+                col3 = '-'
         elif step and min_value is not None and max_value is not None:
-            decimals = self._decimals_count(step)
-            col3 = (f"{self._format_step_value(min_value, decimals)}..."
-                    f"{self._format_step_value(max_value, decimals)}")
+            legacy_decimals = self._decimals_count(step)
+            col3 = (f"{self._format_step_value(min_value, legacy_decimals)}..."
+                    f"{self._format_step_value(max_value, legacy_decimals)}")
         elif min_value is not None and max_value is not None:
             col3 = f"{min_value}...{max_value}"
         else:
             col3 = '-'
 
-        # --- Единицы измерения ---
-        unit_typed = self.extension_handler.find_units_by_type(parameter_name, TARGET_UNIT_TYPE)
-        initial_units, _all_units = self.extension_handler.find_trans_by_parameter_name(parameter_name)
-
-        if unit_typed:
-            col4 = unit_typed
-        elif info.get("units"):
-            col4 = info["units"]
-        elif initial_units:
-            col4 = initial_units
-        else:
-            col4 = "-"
+        # --- Единицы измерения (подпись выбранной системы единиц) ---
+        col4 = self.unit_converter.unit_label(parameter_name) or str(info.get("units") or "") or "-"
 
         # --- Шаг ---
         if note:
             col5 = "-"
+        elif convert:
+            converted_step = self._convert_number(parameter_name, step)
+            col5 = (self._format_converted(converted_step, decimals)
+                    if converted_step is not None else "-")
         elif step:
             col5 = self._format_step_value(step, self._decimals_count(step))
         else:
@@ -237,6 +287,10 @@ class OrderHandler:
             if is_sgf:
                 # SGF-параметр: заменяем код на текстовое описание
                 col6 = options.get(str(default_value), default_value)
+            elif convert:
+                converted_default = self._convert_number(parameter_name, default_value)
+                col6 = (converted_default if converted_default is None
+                        else self._format_converted(converted_default, decimals))
             elif step:
                 col6 = self._format_step_value(default_value, self._decimals_count(step))
             else:

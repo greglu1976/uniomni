@@ -2,52 +2,31 @@
 # Класс, представляющий руководство по эксплуатации: обновление таблиц
 # уставок, суммарной таблицы сигналов и перечня сокращений в latex-проекте.
 
-import ast
 import os
 from pathlib import Path
 
 from core.SettingBlanc2 import SettingBlanc
+from core.UnitConverter import DEFAULT_UNIT_TYPE
 from logger.logger import Logger
 from utils.abbrs import start_abbr
+from utils.latex import escape_name, format_mark, format_numeric, parse_note_to_latex
 
 START_SETTINGS_TAG = '%===m>'
 END_SETTINGS_TAG = '%===m\n'
 SUMM_TABLE_TAG = '%===t2\n'
 
-# LaTeX-символы, которые обязательно экранируются в текстовых ячейках
-_LATEX_SPECIALS = (
-    ('\\', r'\textbackslash{}'),
-    ('&', r'\&'),
-    ('%', r'\%'),
-    ('#', r'\#'),
-    ('_', r'\_'),
-)
-
-
 class Manual:
     """Руководство по эксплуатации (РЭ) в формате latex."""
 
-    def __init__(self, device_data):
+    def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE):
         self.device_data = device_data
+        self.unit_type = unit_type
         self.path_to_latex_desc = device_data["path_to_latex_desc"]
         self.path_to_ru_desc = device_data["path_to_ru_desc"]
 
-        self.setting_blanc = SettingBlanc(self.device_data)
+        self.setting_blanc = SettingBlanc(self.device_data, unit_type=unit_type)
 
     # --------------------------------------------------------------- утилиты
-
-    @staticmethod
-    def escape_latex(text):
-        """Экранирует специальные символы LaTeX в текстовой ячейке."""
-        text = "" if text is None else str(text)
-        for char, replacement in _LATEX_SPECIALS:
-            text = text.replace(char, replacement)
-        return text
-
-    def escape_name(self, text):
-        """Экранирование наименования уставки (без изменения дефисов)."""
-        text = self.escape_latex(text)
-        return text.replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
 
     def _read_lines(self, path):
         with open(path, 'r', encoding='utf-8') as file:
@@ -59,10 +38,10 @@ class Manual:
         """Строки latex-таблицы уставок по данным одного ФБ."""
         def render_row(row):
             parts = [
-                r'\centering ' + self.escape_name(row.get("col2")),
-                r'\centering ' + self.parse_note_to_latex(row.get("col3")),
-                r'\centering ' + self._format_numeric(row.get("col4"), escape_percent=True),
-                r'\centering ' + self._format_numeric(row.get("col5")),
+                r'\centering ' + escape_name(row.get("col2")),
+                r'\centering ' + parse_note_to_latex(row.get("col3")),
+                r'\centering ' + format_numeric(row.get("col4"), escape_percent=True),
+                r'\centering ' + format_numeric(row.get("col5")),
                 r'\centering \arraybackslash ' + ("" if row.get("col6") is None else str(row.get("col6"))),
             ]
             return ' & '.join(parts) + ' \\\\\n'
@@ -96,38 +75,6 @@ class Manual:
 
         table.append('\\hline\n')
         return table
-
-    @staticmethod
-    def _format_numeric(value, escape_percent=False):
-        """Форматирует числовую ячейку latex (дефис → тире)."""
-        text = "" if value is None else str(value)
-        text = text.replace('-', r'--')
-        if escape_percent:
-            text = text.replace('%', r'\%')
-        return text
-
-    def parse_note_to_latex(self, note_str):
-        """'note_{"0": "a", "1": "b"}' → 'a \\\\ b', иначе строка как есть."""
-        if not isinstance(note_str, str) or not note_str.startswith("note_"):
-            return "" if note_str is None else str(note_str)
-
-        try:
-            note_dict = ast.literal_eval(note_str[5:])
-            if not isinstance(note_dict, dict):
-                return str(note_dict)
-            sorted_values = [
-                str(value) for _, value in sorted(
-                    note_dict.items(),
-                    key=lambda item: (0, int(item[0]))
-                    if str(item[0]).isdigit()
-                    else (1, str(item[0])),
-                )
-            ]
-        except (ValueError, SyntaxError, TypeError) as error:
-            Logger.warning(f"Не удалось разобрать значения уставки: {error}")
-            return note_str
-
-        return " \\\\ ".join(sorted_values)
 
     def renew_setting_tables_re(self):
         """Обновляет таблицы уставок в приложении «Уставки» РЭ."""
@@ -295,11 +242,11 @@ class Manual:
         """Генерирует строки суммарной таблицы сигналов для latex."""
         def generate_row(row):
             cells = [
-                r'\raggedright ' + self.escape_name(row[0]),
-                r'\centering ' + self.escape_name(row[1]),
+                r'\raggedright ' + escape_name(row[0]),
+                r'\centering ' + escape_name(row[1]),
             ]
-            cells.extend(r'\centering ' + self._format_mark(value) for value in row[2:8])
-            cells.append(r'\centering \arraybackslash ' + self._format_mark(row[8]))
+            cells.extend(r'\centering ' + format_mark(value) for value in row[2:8])
+            cells.append(r'\centering \arraybackslash ' + format_mark(row[8]))
             return ' & '.join(cells) + ' \\\\ \\hline\n'
 
         table = []
@@ -371,18 +318,13 @@ class Manual:
         for row in data_rows:
             table.append(self._generate_summ_row(row))
 
-    @staticmethod
-    def _format_mark(value):
-        text = "" if value is None else str(value)
-        return text.replace('-', r'--').replace('*', r'$\ast$')
-
     def _generate_summ_row(self, row):
         cells = [
-            r'\raggedright ' + self.escape_name(row[0]),
-            r'\centering ' + self.escape_name(row[1]),
+            r'\raggedright ' + escape_name(row[0]),
+            r'\centering ' + escape_name(row[1]),
         ]
-        cells.extend(r'\centering ' + self._format_mark(value) for value in row[2:8])
-        cells.append(r'\centering \arraybackslash ' + self._format_mark(row[8]))
+        cells.extend(r'\centering ' + format_mark(value) for value in row[2:8])
+        cells.append(r'\centering \arraybackslash ' + format_mark(row[8]))
         return ' & '.join(cells) + ' \\\\ \\hline\n'
 
     # ------------------------------------------------------------ сокращения
