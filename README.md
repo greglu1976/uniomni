@@ -1,4 +1,48 @@
-# Сделано на замену скриптов создания отчетов по терминалам РЭ, БУ
+# Omni for M500
+
+Генератор документации по терминалам РЭ/БУ: бланк уставок в docx и
+обновление таблиц (уставки, суммарные сигналы, перечень сокращений)
+в latex-проекте руководства по эксплуатации.
+
+## Установка и запуск
+
+```bash
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
+./venv/bin/python main.py
+```
+
+Запускать нужно из корня проекта: пути к `devices.ini`, `origin.docx`,
+`abbr.json`, `dictionary.json` и каталогу сборки `latex_build` берутся
+от каталога проекта, а не от текущего рабочего каталога.
+
+Логи пишутся в окно интерфейса и в файл `logs/app.log`.
+
+## Структура
+
+| Файл | Назначение |
+| --- | --- |
+| `main.py` | точка входа |
+| `Application.py` | GUI (Dear PyGui) и обработчики кнопок |
+| `core/DeviceDataManager.py` | чтение `devices.ini` |
+| `core/MainConfigHandler.py` | доступ к `meta.json` (параметры устройства) |
+| `core/ExtensionHandler.py` | доступ к `EXTENSION.json` (перечисления, единицы) |
+| `core/OrderHandler.py` | разбор `GROUPING.json` (уставки, сигналы, конфигурация) |
+| `core/SettingBlanc2.py` | сборка бланка уставок docx |
+| `core/Manual2.py` | обновление таблиц в latex-проекте РЭ |
+| `core/LatexDoc.py` | сборка `raw.tex` |
+| `utils/tables.py`, `utils/dropdowns.py` | таблицы и выпадающие списки Word |
+| `utils/abbrs.py` | перечень сокращений по pdf |
+| `utils/paths.py` | пути проекта и поиск файлов без учёта регистра |
+| `logger/logger.py` | логи в GUI и в файл |
+
+Пакет поддержки устройства задаётся в `devices.ini`
+(`path_to_support_packets`) и должен содержать `meta.json`,
+`GROUPING.json`/`grouping.json` (регистр имени файла не важен) и
+`EXTENSION.json`.
+
+## История версий
+
 чтобы был единый подход
 
 Выполнены рабочие версии bu_generator v0.1.1 

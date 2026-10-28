@@ -1,56 +1,64 @@
-
 # OrderHandler.py
-# класс обвертка вокруг файла порядка следования для ИЧМ, файл находится в данных ЮнитСервис
-# и называется как func_order.json, GROUPING.json - в ЮНИТ СЕРВИС РЗА пакет поддержки
+# Обёртка вокруг файла порядка следования (GROUPING.json пакета поддержки
+# ЮНИТ Сервис РЗА): уставки, сигналы, конфигурация, регистрация.
 
-# В РАЗРАБОТКЕ
-
-import json
-from typing import List, Dict, Any
-from collections import defaultdict
+import re
+from decimal import Decimal
+from typing import Any, Dict, List
 
 from core.MainConfigHandler import MainConfigHandler
+from logger.logger import Logger
+from utils.paths import load_packet_json
 
 # Задание уставок
-TARGET_UNIT_TYPE = "Secondary"   # "Primary" | "Secondary" | "Relative"  
+TARGET_UNIT_TYPE = "Secondary"   # "Primary" | "Secondary" | "Relative"
+
+# Деревья GROUPING.json
+TREE_SETTINGS = "SettingsTree"
+TREE_CONFIGURATION = "ConfigurationTree"
+TREE_DIGITAL_SIGNALS = "DigitalSignalsTree"
+TREE_HARDWARE_INPUTS = "ParametersToHardwareDigitalInputsTree"
+TREE_HARDWARE_OUTPUTS = "ParametersToHardwareDigitalOutputsTree"
+TREE_HMI_BUTTONS = "ParametersToHmiButtonsTree"
+TREE_HMI_SIGNALS = "ParametersToHmiSignalizationTree"
+TREE_FB_LOGIC_INPUTS = "FunctionalBlockLogicInputsTree"
+
+# Признаки служебных сигналов, которые не выводим в списках назначения
+EXCLUDED_SIGNAL_MARKERS = (
+    "Convert_SPS", "BitTest_", "_ACS_", "GOOSE_", "FB_", "HMI", "DI_",
+    "APCSRst_CLS_Reset", "Convert_",
+)
+
 
 class NodeResolver:
+    """Формирует читаемые пути вида «Группа / Подгруппа: Описание»."""
+
     def __init__(self, hard_nodes_structure, config_handler):
-        """
-        :param hard_nodes_structure: Список словарей с узлами (inputs_hard_nodes)
-        :param config_handler: Объект с методом get_param_info(name)
-        """
         self.config_handler = config_handler
-        # Словарь для быстрого поиска: { "ParamName": ["Parent1", "Parent2"] }
+        # Словарь для быстрого поиска: {"ParamName": ["Parent1", "Parent2"]}
         self._path_index = {}
-        
-        # Предварительная индексация структуры при инициализации
-        self._build_index(hard_nodes_structure)
+        self._build_index(hard_nodes_structure or [])
 
     def _build_index(self, nodes, current_path=None):
-        """Рекурсивно обходит структуру и сохраняет путь до каждого Parameter"""
+        """Рекурсивно обходит структуру и сохраняет путь до каждого Parameter."""
         if current_path is None:
             current_path = []
-            
+
         for node in nodes:
+            if not isinstance(node, dict):
+                continue
+
             name = node.get('Name')
-            n_type = node.get('Type')
-            
-            if n_type == 'Parameter':
-                # Сохраняем копию текущего пути для этого параметра
+            node_type = node.get('Type')
+
+            if node_type == 'Parameter':
                 self._path_index[name] = list(current_path)
-            elif n_type == 'Group' and 'Nodes' in node:
-                # Если это группа, добавляем её имя в путь и идем глубже
-                new_path = current_path + [name]
-                self._build_index(node['Nodes'], new_path)
+            elif node_type == 'Group' and 'Nodes' in node:
+                self._build_index(node['Nodes'], current_path + [name])
 
     def get_formatted_info(self, param_name: str) -> str:
-        try:
-            info = self.config_handler.get_param_info(param_name)
-            description = info.get("description", "").strip()
-        except Exception:
-            path_parts = self._path_index.get(param_name)
-            return " / ".join(path_parts) if path_parts else param_name
+        info = self.config_handler.get_param_info(param_name) or {}
+        description = str(info.get("description") or "").strip()
 
         path_parts = self._path_index.get(param_name)
         prefix = " / ".join(path_parts) if path_parts else param_name
@@ -58,56 +66,44 @@ class NodeResolver:
         if not description:
             return prefix
 
-        # Агрессивная очистка: убираем из описания все сегменты пути
+        # Убираем из описания все сегменты пути
         clean_desc = description
         if path_parts:
-            # Сортируем сегменты по длине (убираем самые длинные сначала)
-            # чтобы "ОУ1 ТЗНП" убралось раньше чем "ТЗНП"
-            sorted_parts = sorted(path_parts, key=len, reverse=True)
-            
-            for part in sorted_parts:
-                # Убираем часть с возможными разделителями после неё
-                for sep in [": ", "/", " / ", ":"]:
+            # Сначала самые длинные сегменты: «ОУ1 ТЗНП» раньше, чем «ТЗНП»
+            for part in sorted(path_parts, key=len, reverse=True):
+                for sep in (": ", "/", " / ", ":"):
                     pattern = part + sep
                     while clean_desc.startswith(pattern):
                         clean_desc = clean_desc[len(pattern):].strip()
-                    # Также убираем если часть стоит в начале без разделителя
-                    # но только если дальше идёт пробел или конец строки
-                    if clean_desc.startswith(part) and (len(clean_desc) == len(part) or clean_desc[len(part)] in (' ', ':', '/')):
-                        clean_desc = clean_desc[len(part):].strip().lstrip(':').lstrip('/').strip()
+                if clean_desc.startswith(part) and (
+                    len(clean_desc) == len(part)
+                    or clean_desc[len(part)] in (' ', ':', '/')
+                ):
+                    clean_desc = clean_desc[len(part):].strip().lstrip(':').lstrip('/').strip()
 
-        # Финальная зачистка ведущих разделителей
         clean_desc = clean_desc.lstrip(':').lstrip('/').strip()
-
-        if clean_desc:
-            return f"{prefix}: {clean_desc}"
-        return prefix
+        return f"{prefix}: {clean_desc}" if clean_desc else prefix
 
     def get_all_formatted_info(self) -> List[str]:
-        """
-        Возвращает список строк для всех параметров в структуре
-        Формат: 'Группа / Подгруппа: Описание'
-        """
-        result = []
-        for param_name in self._path_index.keys():
-            formatted = self.get_formatted_info(param_name)
-            result.append(formatted)
-        return result
+        """Список строк «Группа / Подгруппа: Описание» для всех параметров."""
+        return [self.get_formatted_info(name) for name in self._path_index]
+
 
 class OrderHandler:
 
-    def __init__(self, config_handler = None, extension_handler = None, root_path = ''):
-        with open(root_path+"grouping.json", 'r', encoding='utf-8') as f:
-            self.data = json.load(f)
-        self.settings_group1 = None
+    def __init__(self, config_handler=None, extension_handler=None, root_path=''):
+        self.data, self.path = load_packet_json(root_path, "grouping.json")
+
+        self.settings_group1 = []
         self._extrude_settings_group1()
 
         if config_handler:
             self.config_handler = config_handler
         else:
-            self.config_handler = MainConfigHandler.from_json_file("meta.json")
+            meta, _ = load_packet_json(root_path, "meta.json")
+            self.config_handler = MainConfigHandler(meta)
 
-        self.extension_handler = extension_handler 
+        self.extension_handler = extension_handler
 
         self.mapping = {}
         self._create_mapping_from_structure()
@@ -115,1121 +111,584 @@ class OrderHandler:
         self.fsu_signals = []
         self.fsu_di_signals = []
         self.fsu_out_signals = []
+        self.resolver = None
 
         self.all_nodes_sigs = None
+        self.general_sigs_of_func_logic = []
 
+        # Кэш множеств имён параметров по деревьям (для is_in_*_tree)
+        self._tree_names_cache = {}
 
-        self.general_sigs_of_func_logic = [] # Общие сигналы функциональной логики вытащенные из GROUPING
-
+    # ------------------------------------------------------------------ уставки
 
     def _extrude_settings_group1(self):
-        """Извлекает структуру 'Группа уставок 1' из JSON"""
-        for root_node in self.data:
-            if root_node.get("Name") == "SettingsTree":
-                setting_tree = root_node
-                break
-        
-        for nodes in setting_tree.get("Nodes", []):
-            if nodes.get("Name") == "Группа уставок 1":
-                settings = nodes
-                break
-        
-        self.settings_group1 = settings.get("Nodes", []) if settings else []
+        """Извлекает структуру «Группа уставок 1» из GROUPING.json."""
+        setting_tree = next(
+            (node for node in self.data if node.get("Name") == TREE_SETTINGS), None)
+        if setting_tree is None:
+            raise ValueError(f"В grouping.json отсутствует дерево {TREE_SETTINGS}")
 
-    
-    def get_settings_by_fb_name(self, fb_name):
-        result = []
-        for setting in self.settings_group1:
-            if setting["Name"] == fb_name:
-                settings = setting["Nodes"]
-                for setting in settings:
-                    result.append(setting["Name"])
-        return result
+        settings = next(
+            (node for node in setting_tree.get("Nodes", [])
+             if node.get("Name") == "Группа уставок 1"), None)
+        if settings is None:
+            Logger.warning("В grouping.json нет группы «Группа уставок 1»")
+            self.settings_group1 = []
+            return
+
+        self.settings_group1 = settings.get("Nodes", [])
 
     def get_data_by_fb_name(self, fb_name):
         for settings in self.settings_group1:
-            if settings["Name"]!=fb_name:
-                continue
-            else:
+            if settings.get("Name") == fb_name:
                 return settings
-            
-    def parse_options(self, options_str):
-        """Парсит строку вида '0 - Вывод, 1 - По ЭМО1, ЭМО2' в словарь"""
-        import re
-        result = {}
+        return None
 
-        if options_str is None:
+    def parse_options(self, options_str):
+        """Парсит строку вида '0 - Вывод, 1 - По ЭМО1, ЭМО2' в словарь {код: текст}."""
+        if not options_str:
             return {}
 
-
-        # Ищем все вхождения "цифра - значение" (значение может содержать запятые)
-        # ?: - несохраняющая группа
-        # \s*\d+\s*-\s* - цифра, тире с пробелами
-        # (.*?) - значение (любые символы) лениво до...
-        # (?=\s*\d+\s*-|$) - ...следующей цифры с тире или конца строки
+        result = {}
         pattern = r'(\d+)\s*[–—-]\s*(.*?)(?=\s*\d+\s*[–—-]|$)'
         for match in re.finditer(pattern, options_str):
-            key = match.group(1)
-            value = match.group(2).strip().rstrip(',')
-            result[key] = value
-        
+            result[match.group(1)] = match.group(2).strip().rstrip(',')
         return result
 
+    @staticmethod
+    def _decimals_count(step) -> int:
+        """Количество знаков после запятой в шаге уставки."""
+        try:
+            text = format(Decimal(str(step)).normalize(), 'f')
+        except Exception:
+            return 0
+        return len(text.split('.')[1]) if '.' in text else 0
 
+    def _format_step_value(self, value, decimals: int) -> str:
+        try:
+            return f"{float(value):.{decimals}f}".replace('.', ',')
+        except (TypeError, ValueError):
+            return str(value)
 
-    def prepare_data_for_table(self, fb_name):
+    def prepare_data_for_table(self, parameter_name):
+        """Строка таблицы уставок: (ключ, наименование, обозначение, диапазон,
+        ед. изм., шаг, значение по умолчанию, пустое поле)."""
+        info = self.config_handler.get_param_info(parameter_name)
+        if not info:
+            raise KeyError(f"Параметр отсутствует в meta.json: {parameter_name}")
 
-      
+        description = str(info.get("description") or "")
+        short_description = description.split("_", 1)[1] if "_" in description else description
 
-        enum500 = self.extension_handler.find_enum_by_parameter_name(fb_name)
-        raw = self.config_handler.get_param_info(fb_name)
-        s = raw["description"]
+        col0 = parameter_name
+        col1 = f"{info.get('fullDescription', '')} ({short_description}) "
+        col2 = info.get("appliedDescription", "")
 
-        desc = s # Различие в М500 и М300 , в М300 ФБ имеют обозначение типа ДЗ_1, в М500 такого нет
-        if "_" in s:
-            desc = "_".join(s.split("_", 1)[1:]) 
+        note = str(info.get("note") or "")
+        step = info.get("step")
+        min_value = info.get("minValue")
+        max_value = info.get("maxValue")
+        default_value = info.get("defaultValue")
 
-        col1 = raw["fullDescription"] + " (" + desc + ") "
-        col2 = raw["appliedDescription"]
-        col0 = fb_name
+        options = {}
+        is_sgf = bool(note)
 
-        op_dict = {}
-        is_sgf = False
-        # Форматирование col3
-        if not raw["note"]: #if raw["note"] == '':
-            # Форматируем min и max с учётом шага
-            if raw["step"] and raw["step"] != '':
-                step = float(raw["step"])
-                # Определяем количество знаков после запятой
-                step_str = str(step).rstrip('0').rstrip('.')
-                decimals = len(step_str.split('.')[1]) if '.' in step_str else 0
-                
-                min_val = float(raw["minValue"])
-                max_val = float(raw["maxValue"])
-                min_formatted = f"{min_val:.{decimals}f}".replace('.', ',')
-                max_formatted = f"{max_val:.{decimals}f}".replace('.', ',')
-                col3 = f"{min_formatted}...{max_formatted}"
-            else:
-                # Шага нет - выводим как есть
-                col3 = f"{raw['minValue']}...{raw['maxValue']}"
+        # --- Значение / Диапазон ---
+        if note:
+            options = self.parse_options(note)
+            col3 = "note_" + str(options)
+        elif step and min_value is not None and max_value is not None:
+            decimals = self._decimals_count(step)
+            col3 = (f"{self._format_step_value(min_value, decimals)}..."
+                    f"{self._format_step_value(max_value, decimals)}")
+        elif min_value is not None and max_value is not None:
+            col3 = f"{min_value}...{max_value}"
         else:
-            col3 = raw["note"]
-            op_dict = self.parse_options(col3)
-            col3 ="note_"+str(op_dict)
-            is_sgf = True
+            col3 = '-'
 
-
-        unit_typed = self.extension_handler.find_units_by_type(fb_name, TARGET_UNIT_TYPE)
-        unit, units = self.extension_handler.find_trans_by_parameter_name(fb_name)
+        # --- Единицы измерения ---
+        unit_typed = self.extension_handler.find_units_by_type(parameter_name, TARGET_UNIT_TYPE)
+        initial_units, _all_units = self.extension_handler.find_trans_by_parameter_name(parameter_name)
 
         if unit_typed:
-            col4 = unit_typed               # "А (вторич.)" / "В (вторич.)" / "Ом (вторич.)" и т.п.
-        elif raw["units"] != '':
-            col4 = raw["units"]
-        elif unit:
-            col4 = unit                     # fallback: "о.е." если в трансформации нет нужного типа
+            col4 = unit_typed
+        elif info.get("units"):
+            col4 = info["units"]
+        elif initial_units:
+            col4 = initial_units
         else:
             col4 = "-"
 
-
-        # col5 - сохраняем старую логику: "-" если note не пустой, иначе step
-        if raw["note"] != '' and raw["note"]:
+        # --- Шаг ---
+        if note:
             col5 = "-"
+        elif step:
+            col5 = self._format_step_value(step, self._decimals_count(step))
         else:
-            if raw["step"] and raw["step"] != '':
-                step = float(raw["step"])
-                step_str = str(step).rstrip('0').rstrip('.')
-                decimals = len(step_str.split('.')[1]) if '.' in step_str else 0
-                col5 = f"{step:.{decimals}f}".replace('.', ',')
-            else:
-                col5 = "-"
+            col5 = "-"
+
+        enum500 = self.extension_handler.find_enum_by_parameter_name(parameter_name)
         if enum500:
-            col5 = "-"       
-        # col6 - форматируем defaultValue
+            col5 = "-"
+
+        # --- Значение по умолчанию ---
         col6 = "-"
-        if raw["defaultValue"] and raw["defaultValue"] != '':
+        if default_value:
             if is_sgf:
-                # SGF параметр - заменяем код на текстовое описание
-                col6 = op_dict.get(raw["defaultValue"], raw["defaultValue"])
-            elif raw["step"] and raw["step"] != '':
-                # Обычный параметр с шагом
-                step = float(raw["step"])
-                step_str = str(step).rstrip('0').rstrip('.')
-                decimals = len(step_str.split('.')[1]) if '.' in step_str else 0
-                default_val = float(raw["defaultValue"])
-                col6 = f"{default_val:.{decimals}f}".replace('.', ',')
+                # SGF-параметр: заменяем код на текстовое описание
+                col6 = options.get(str(default_value), default_value)
+            elif step:
+                col6 = self._format_step_value(default_value, self._decimals_count(step))
             else:
-                # Обычный параметр без шага
-                col6 = raw["defaultValue"]
-        
-        col7=''
-        return col0, col1, col2, col3, col4, col5, col6, col7
+                col6 = default_value
+
+        return col0, col1, col2, col3, col4, col5, col6, ''
 
     def parse_rza_structure(self, data: List[Dict[str, Any]], all_struct: bool = True) -> List[Dict[str, Any]]:
+        """Преобразует дерево уставок в список блоков для генерации таблиц.
+
+        all_struct=True — обрабатывается весь SettingsTree,
+        all_struct=False — data уже является группой уставок/блоком.
         """
-        Преобразует структуру JSON РЗА в список блоков для шаблона Jinja2.
-        Каждая уставка (параметр) становится отдельной строкой таблицы.
-        all_struct = True если нужно прогнать весь файл с уставками, если отдельный ФБ - то all_struct=False, потом переделать автоматически определение структуры
-        """
-        
+
         def is_simple_group(node: Dict) -> bool:
-            """
-            Группа простая, если не содержит дочерних групп (только параметры).
-            """
-            if 'Nodes' not in node or not node['Nodes']:
+            """Группа простая, если не содержит дочерних групп (только параметры)."""
+            if not node.get('Nodes'):
                 return True
-            
-            for child in node['Nodes']:
-                if child.get('Type') == 'Group':
-                    return False
-            return True
+            return not any(child.get('Type') == 'Group' for child in node['Nodes'])
 
-        def create_row(param_name: str) -> Dict[str, str]:
-            """
-            Создает словарь для одной строки таблицы.
-            col1 - Имя параметра (для поиска в БД)
-            col2-col4 - заглушки для будущих данных (Значение, Ед.изм, Описание)
-            """
-
-            col0, col1, col2, col3, col4, col5, col6, col7 = self.prepare_data_for_table(param_name)
+        def create_row(param_name: str):
+            try:
+                col0, col1, col2, col3, col4, col5, col6, col7 = \
+                    self.prepare_data_for_table(param_name)
+            except KeyError as error:
+                Logger.warning(f"Строка уставки пропущена: {error}")
+                return None
 
             return {
-                "col0": col0, # обозначение ключа
-                "col1": col1, 
-                "col2": col2,  # Место для значения из БД
-                "col3": col3,  # Место для ед. измерения
-                "col4": col4,   # Место для описания
-                "col5": col5,   # Место для описания
-                "col6": col6,   # Место для значения по умолчанию
-                "col7": col7  # Место для выставленного значения - для режимов
+                "col0": col0,   # обозначение ключа
+                "col1": col1,   # наименование с кратким обозначением
+                "col2": col2,   # обозначение ФСУ / ИЧМ
+                "col3": col3,   # значение / диапазон
+                "col4": col4,   # ед. изм.
+                "col5": col5,   # шаг
+                "col6": col6,   # значение по умолчанию
+                "col7": col7,   # выставленное значение
             }
 
         def process_group(node: Dict) -> List[Dict]:
-            """
-            Рекурсивная обработка. Возвращает список блоков.
-            """
             result_blocks = []
-            
-            # --- ДОБАВЛЕННАЯ ПРОВЕРКА ---
-            # Если имя самой группы (функции) начинается с "GOOSE", 
-            # мы просто возвращаем пустой список, игнорируя всё внутри.
-            if node.get('Name', '').startswith("GOOSE") or node.get('Name', '').startswith("ВКл:"):
-                return [] 
+
+            # Служебные группы не выводим
+            name = node.get('Name', '')
+            if name.startswith("GOOSE") or name.startswith("ВКл:"):
+                return []
 
             if is_simple_group(node):
-                # --- ПРОСТАЯ ФУНКЦИЯ ---
-                # Собираем все параметры в список строк
-                rows = []
-                if 'Nodes' in node:
-                    for child in node['Nodes']:
-                        if child.get('Type') == 'Parameter':
-                            rows.append(create_row(child.get('Name', '')))
-                
+                rows = [create_row(child.get('Name', ''))
+                        for child in node.get('Nodes', [])
+                        if child.get('Type') == 'Parameter']
                 result_blocks.append({
                     "type": "simple",
-                    "func_name": node.get('Name', ''),
-                    "rows": rows
+                    "func_name": name,
+                    "rows": [row for row in rows if row],
                 })
-                
             else:
-                # --- СЛОЖНАЯ ФУНКЦИЯ ---
-                # Сама группа является контейнером для подфункций
                 complex_block = {
                     "type": "complex",
-                    "func_name": node.get('Name', ''),
-                    "sub_functions": []
+                    "func_name": name,
+                    "sub_functions": [],
                 }
-                
                 for child in node.get('Nodes', []):
-                    if child.get('Type') == 'Group':
-                        # Обрабатываем подгруппу
-                        sub_rows = []
-                        if 'Nodes' in child:
-                            for param_node in child['Nodes']:
-                                if param_node.get('Type') == 'Parameter':
-                                    sub_rows.append(create_row(param_node.get('Name', '')))
-                        
-                        complex_block["sub_functions"].append({
-                            "subtitle": child.get('Name', ''),
-                            "rows": sub_rows
-                        })
-                    
+                    if child.get('Type') != 'Group':
+                        continue
+                    sub_rows = [create_row(param.get('Name', ''))
+                                for param in child.get('Nodes', [])
+                                if param.get('Type') == 'Parameter']
+                    complex_block["sub_functions"].append({
+                        "subtitle": child.get('Name', ''),
+                        "rows": [row for row in sub_rows if row],
+                    })
                 result_blocks.append(complex_block)
-                
+
             return result_blocks
 
-        # --- Основная точка входа ---
         final_output = []
-        
         if not data:
             return final_output
 
         if all_struct:
-
-            # 1. Находим корень SettingsTree
-            settings_tree = data[0] 
-            
-            # 2. Находим первую группу уставок (например, "Группа уставок 1")
+            settings_tree = data[0]
             top_nodes = settings_tree.get('Nodes', [])
             if not top_nodes:
                 return final_output
-                
-            first_settings_group = top_nodes[0]
-            # Перебираем функциональные группы
-            functional_groups = first_settings_group.get('Nodes', [])
-            for func_group in functional_groups:
+
+            for func_group in top_nodes[0].get('Nodes', []):
                 if func_group.get('Type') == 'Group':
-                    blocks = process_group(func_group)
-                    final_output.extend(blocks)
-        
+                    final_output.extend(process_group(func_group))
         else:
-            # Режим: data - это уже группа уставок или отдельный блок
-            if isinstance(data, list):
-                for item in data:
-                    if item.get('Type') == 'Group':
-                        blocks = process_group(item)
-                        final_output.extend(blocks)
-            elif isinstance(data, dict) and data.get('Type') == 'Group':
-                # Если передан один блок
-                blocks = process_group(data)
-                final_output.extend(blocks)
-                    
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                if isinstance(item, dict) and item.get('Type') == 'Group':
+                    final_output.extend(process_group(item))
+
         return final_output
-    
 
-    # ВЕРСИЯ С ПРОВЕРКОЙ ТОЛЬКО _1_
-    def _create_mapping_from_structure1(self) -> Dict[str, str]:
-        """Создаёт mapping префикс -> имя верхней группы (рекурсивно)"""
-        
-        mapping = {}
-        
-        def process_nodes(nodes, root_group_name):
-            """Рекурсивно обходит узлы, сохраняя имя корневой группы"""
-            if not nodes:
-                return
-                
-            for node in nodes:
-                if not isinstance(node, dict):
-                    continue
-                    
-                node_type = node.get('Type')
-                
-                # Если это Группа - спускаемся внутрь неё рекурсивно
-                if node_type == 'Group':
-                    # Важно: мы передаем то же самое root_group_name, 
-                    # чтобы параметры внутри получили имя верхней группы (например, "ЛО Т_1")
-                    process_nodes(node.get('Nodes', []), root_group_name)
-                    
-                # Если это Параметр
-                elif node_type == 'Parameter':
-                    param_name = node.get('Name', '')
-                    if '_1_' not in param_name:
-                        continue
-                        
-                    prefix = param_name.split('_1_')[0]
-                    
-                    # Пропускаем служебные
-                    if prefix == "Номинальный ток входа":
-                        continue
-                    
-                    # Добавляем в маппинг, если такого префикса еще нет
-                    if prefix not in mapping:
-                        mapping[prefix] = root_group_name
+    # ------------------------------------------------------------------ маппинг
 
-        # Основной цикл по верхнему уровню
-        for group in self.settings_group1:
-            if not isinstance(group, dict) or group.get('Type') != 'Group':
-                continue
-                
-            group_name = group.get('Name', '')
-            
-            # Пропускаем служебные верхние группы
-            if group_name.startswith("GOOSE") or group_name.startswith("ВКл:"):
-                continue
-            
-            # Запускаем рекурсию для узлов этой группы
-            process_nodes(group.get('Nodes', []), group_name)
-
-        self.mapping = mapping
-        return mapping
-
-    # ВЕРСИЯ С ПРОВЕРКОЙ ТОЛЬКО _1_ и _2_
     def _create_mapping_from_structure(self) -> Dict[str, str]:
-        """Создаёт mapping префикс -> имя верхней группы (рекурсивно)"""
-        
-        mapping = {}
-        
-        def process_nodes(nodes, root_group_name):
-            """Рекурсивно обходит узлы, сохраняя имя корневой группы"""
-            if not nodes:
-                return
-                
-            for node in nodes:
-                if not isinstance(node, dict):
-                    continue
-                    
-                node_type = node.get('Type')
-                
-                # Если это Группа - спускаемся внутрь неё рекурсивно
-                if node_type == 'Group':
-                    # Важно: мы передаем то же самое root_group_name, 
-                    # чтобы параметры внутри получили имя верхней группы (например, "ЛО Т_1")
-                    process_nodes(node.get('Nodes', []), root_group_name)
-                    
-                # Если это Параметр
-                elif node_type == 'Parameter':
-                    param_name = node.get('Name', '')
-                    
-                    # Определяем разделитель и получаем префикс
-                    prefix = None
-                    if '_1_' in param_name:
-                        prefix = param_name.split('_1_')[0]
-                    elif '_2_' in param_name:
-                        prefix = param_name.split('_2_')[0]
-                        #print(param_name)
-                    else:
-                        continue  # Нет ни одного из разделителей - пропускаем
-                    
-                    # Пропускаем служебные
-                    if prefix == "Номинальный ток входа":
-                        continue
-                    
-                    # Добавляем в маппинг, если такого префикса еще нет
-                    if prefix not in mapping:
-                        mapping[prefix] = root_group_name
+        """Соответствие «имя ФБ в описании latex» → «имя группы в пакете поддержки».
 
-        # Основной цикл по верхнему уровню
-        for group in self.settings_group1:
-            if not isinstance(group, dict) or group.get('Type') != 'Group':
-                continue
-                
-            group_name = group.get('Name', '')
-            
-            # Пропускаем служебные верхние группы
-            if group_name.startswith("GOOSE") or group_name.startswith("ВКл:"):
-                continue
-            
-            # Запускаем рекурсию для узлов этой группы
-            process_nodes(group.get('Nodes', []), group_name)
-
-        #print(self.settings_group1)
-        # упрощенный подход к маппингу для М500
-        mapping = {}
-        for bl in self.settings_group1:
-            key = bl["Name"]
-            value = bl["Name"]
-            mapping[key] = value  # теперь bl — это текущий элемент цикла
-
-
-        self.mapping = mapping
-
-        return mapping
-
+        Для М500 имена верхних групп совпадают с обозначениями ФБ,
+        поэтому маппинг — тождественный.
+        """
+        self.mapping = {
+            group.get("Name"): group.get("Name")
+            for group in self.settings_group1
+            if isinstance(group, dict) and group.get("Name")
+        }
+        return self.mapping
 
     def get_setting_group1(self):
         return self.settings_group1
+
     def get_mapping(self):
         return self.mapping
 
+    # ------------------------------------------------------------- сигналы ФСУ
 
-    # возвращает список дискретных сигналов 
-    def _drag_all_sigs_of_func_logic(self, tree_name = "FunctionalBlockLogicInputsTree"):
-        for data in self.data:
-            if data["Name"] == tree_name:
-                self.all_nodes_sigs = data["Nodes"]
+    def _tree(self, tree_name):
+        """Возвращает список узлов дерева по имени (или пустой список)."""
+        for datum in self.data:
+            if datum.get("Name") == tree_name:
+                return datum.get("Nodes", [])
+        Logger.warning(f"В grouping.json отсутствует дерево {tree_name}")
+        return []
+
+    def _drag_all_sigs_of_func_logic(self, tree_name=TREE_FB_LOGIC_INPUTS):
+        self.all_nodes_sigs = self._tree(tree_name)
+
+    def _drag_gen_sigs_of_func_logic(self, tree_name="MeasurementsTree"):
+        for node in self._tree(tree_name):
+            if node.get("Name") == "Сигналы функциональной логики":
+                self.general_sigs_of_func_logic = node.get("Nodes", [])
                 break
 
-
-    # возвращает список дискретных сигналов 
-    def _drag_gen_sigs_of_func_logic(self, tree_name = "MeasurementsTree"):
-        for data in self.data:
-            if data["Name"] == tree_name:
-                m = data["Nodes"]
-                for node in m:
-                    if node["Name"] == "Сигналы функциональной логики":
-                        self.general_sigs_of_func_logic = node["Nodes"]
-                        break
-
-
-
     def get_general_inputs(self, rza_nodes_names):
-
-        # Очищаем списки перед сбором, чтобы не дублировать при повторном вызове
+        """Общие сигналы (не относящиеся к конкретному ФБ) из дерева входов."""
+        if self.resolver is None:
+            self.resolver = NodeResolver(self._tree(TREE_HARDWARE_INPUTS),
+                                         self.config_handler)
         result = []
-        for data in self.data:
-            if data["Name"] == "ParametersToHardwareDigitalInputsTree":
-                inputs_nodes = data["Nodes"]
-
-                for inputs_node in inputs_nodes:
-                    if inputs_node["Name"] in rza_nodes_names:
-                        continue
-                    for param_node in inputs_node.get("Nodes", []):
-                        o = self.resolver.get_formatted_info(param_node['Name'])
-                        result.append(o)
-             
+        for inputs_node in self._tree(TREE_HARDWARE_INPUTS):
+            if inputs_node.get("Name") in rza_nodes_names:
+                continue
+            for param_node in inputs_node.get("Nodes", []):
+                result.append(self.resolver.get_formatted_info(param_node.get('Name')))
         return result
 
-
     def get_fsu_signals(self):
+        """(сигналы ФБ логики, общие сигналы) для матрицы дискретных входов."""
+        inputs_hard_nodes = self._tree(TREE_HARDWARE_INPUTS)
+        self.resolver = NodeResolver(inputs_hard_nodes, self.config_handler)
 
-        for data in self.data:
-            if data["Name"] == "ParametersToHardwareDigitalInputsTree":
-                inputs_hard_nodes = data["Nodes"]
-
-        self.resolver = NodeResolver(inputs_hard_nodes, self.config_handler) # Объект класса поиска в структуре
         rza_nodes_names = []
         result = []
-        for data in self.data:
-            if data["Name"] == "FunctionalBlockLogicInputsTree":
-                inputs_nodes = data["Nodes"]
-
-                for inputs_node in inputs_nodes:
-                    rza_nodes_names.append(inputs_node["Name"])                   
-                    for param_node in inputs_node.get("Nodes", []):
-                        o = self.resolver.get_formatted_info(param_node['Name'])
-                        result.append(o)
+        for inputs_node in self._tree(TREE_FB_LOGIC_INPUTS):
+            rza_nodes_names.append(inputs_node.get("Name"))
+            for param_node in inputs_node.get("Nodes", []):
+                result.append(self.resolver.get_formatted_info(param_node.get('Name')))
 
         gen_signs = self.get_general_inputs(rza_nodes_names)
-
         return result, gen_signs
 
-
-
     def get_fsu_hmi_buttons(self):
-
-        for data in self.data:
-            if data["Name"] == "ParametersToHmiButtonsTree":
-                inputs_hard_nodes = data["Nodes"]
-
-        resolver = NodeResolver(inputs_hard_nodes, self.config_handler) # Объект класса поиска в структуре
-
+        """Список сигналов для функциональных клавиш."""
+        resolver = NodeResolver(self._tree(TREE_HMI_BUTTONS), self.config_handler)
         return resolver.get_all_formatted_info()
 
-
-
     def get_fsu_out_signals(self):
+        """Выходные сигналы функциональной логики, сгруппированные по функциям."""
         if self.fsu_out_signals:
             return self.fsu_out_signals
 
-        # Находим "Сигналы функциональной логики"
-        sigs_of_func_logic = []
-        for data in self.data:
-            if data["Name"] == "DigitalSignalsTree":
-                m = data["Nodes"]
-                for node in m:
-                    if node["Name"] == "Сигналы функциональной логики":
-                        sigs_of_func_logic = node["Nodes"]
-                        break
-                break
-
-        def collect_subfunctions(nodes):
-            """Рекурсивно собирает подфункции с их параметрами"""
-            subfunctions = []
-            
-            for node in nodes:
-                if node.get("Type") == "Group":
-                    # Собираем параметры только для этой конкретной группы
-                    params_data = []
-                    for child in node.get("Nodes", []):
-                        if child.get("Type") == "Parameter":
-                            t = self.config_handler.get_param_info(child["Name"])
-                            if t.get("size") == 1:
-                                params_data.append(t.get("appliedDescription", ""))
-                        elif child.get("Type") == "Group":
-                            # Если внутри есть вложенные группы, рекурсивно собираем их
-                            params_data.extend(collect_flat_params(child))
-                    
-                    subfunctions.append({
-                        "name": node["Name"],
-                        "data": params_data
-                    })
-            
-            return subfunctions
-
         def collect_flat_params(node):
-            """Собирает параметры из узла и всех его вложенных групп (плоский список)"""
+            """Параметры размера 1 из узла и всех вложенных групп."""
             params = []
             for child in node.get("Nodes", []):
                 if child.get("Type") == "Parameter":
-                    t = self.config_handler.get_param_info(child["Name"])
-                    if t.get("size") == 1:
-                        params.append(t.get("appliedDescription", ""))
+                    info = self.config_handler.get_param_info(child.get("Name")) or {}
+                    if info.get("size") == 1:
+                        params.append(info.get("appliedDescription", ""))
                 elif child.get("Type") == "Group":
                     params.extend(collect_flat_params(child))
             return params
 
-        # Словарь для группировки по функциям
-        functions_dict = {}
+        sigs_of_func_logic = []
+        for node in self._tree(TREE_DIGITAL_SIGNALS):
+            if node.get("Name") == "Сигналы функциональной логики":
+                sigs_of_func_logic = node.get("Nodes", [])
+                break
 
+        functions_dict = {}
         for signal in sigs_of_func_logic:
             signal_name = signal.get("Name", "")
-            
-            # Пропускаем ненужные сигналы
-            if (signal_name == "Общие сигналы ФС" or 
-                "GOOSE" in signal_name or 
-                "ВКл:" in signal_name or 
-                "ВКн:" in signal_name):
+
+            if (signal_name == "Общие сигналы ФС"
+                    or "GOOSE" in signal_name
+                    or "ВКл:" in signal_name
+                    or "ВКн:" in signal_name):
                 continue
 
             function_name = signal_name.split("_")[0]
+            subfunctions = [
+                {"name": node.get("Name"), "data": collect_flat_params(node)}
+                for node in signal.get("Nodes", [])
+                if node.get("Type") == "Group"
+            ]
 
-            # Собираем подфункции
-            subfunctions = []
-            if "Nodes" in signal:
-                for node in signal["Nodes"]:
-                    if node.get("Type") == "Group":
-                        # Собираем параметры для этой подгруппы
-                        params_data = collect_flat_params(node)
-                        subfunctions.append({
-                            "name": node["Name"],
-                            "data": params_data
-                        })
-
-            # Группируем
-            if function_name not in functions_dict:
-                functions_dict[function_name] = {
-                    "function": function_name,
-                    "subfunctions": []
-                }
-            
-            # Добавляем найденные подфункции
-            functions_dict[function_name]["subfunctions"].extend(subfunctions)
+            functions_dict.setdefault(
+                function_name, {"function": function_name, "subfunctions": []}
+            )["subfunctions"].extend(subfunctions)
 
         self.fsu_out_signals = list(functions_dict.values())
         return self.fsu_out_signals
 
+    # --------------------------------------------------------------- слоты/платы
 
-
-    # Собираем данные по платам в слотах
     def get_slots_data(self):
-        sigs_of_func_logic = []
-        for data in self.data:
-            if data["Name"] == "DigitalSignalsTree":
-                m = data["Nodes"]
-                for node in m:
-                    if "Слот" in node["Name"]:
-                        #print(node["Name"])
-                        sigs = node["Nodes"]
-                        #print(sigs)
-                        
-                        # Extract only parameter names
-                        param_names = []
-                        for item in sigs:
-                            if item["Type"] == "Parameter":
-                                param_names.append(item["Name"])
-                            elif item["Type"] == "Group" and "Nodes" in item:
-                                # If there are nested parameters in groups
-                                for nested in item["Nodes"]:
-                                    if nested["Type"] == "Parameter":
-                                        param_names.append(nested["Name"])
-                        
-                        a = {
-                            node["Name"]: param_names
-                        }
-                        sigs_of_func_logic.append(a)
-                        
-                break
-        
-        return sigs_of_func_logic
+        """Параметры статусов по слотам (ключ — имя слота)."""
+        slots = []
+        for node in self._tree(TREE_DIGITAL_SIGNALS):
+            if "Слот" not in node.get("Name", ""):
+                continue
 
+            param_names = []
+            for item in node.get("Nodes", []):
+                if item.get("Type") == "Parameter":
+                    param_names.append(item.get("Name"))
+                elif item.get("Type") == "Group":
+                    param_names.extend(
+                        nested.get("Name")
+                        for nested in item.get("Nodes", [])
+                        if nested.get("Type") == "Parameter"
+                    )
+            slots.append({node.get("Name"): param_names})
 
-################################################################################
-    #########################################################################
-    # ДАННЫЕ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА СВЕТОДИОДОВ
+        return slots
+
     def get_digital_signals_for_led(self):
+        """Список сигналов для назначения на светодиоды."""
+        excluded_nodes = {"Обобщенные сигналы", "Периферийные блоки"}
+        nodes = [node for node in self._tree(TREE_DIGITAL_SIGNALS)
+                 if node.get("Name") not in excluded_nodes]
 
-        sigs_of_func_logic = []
-        for data in self.data:
-            if data["Name"] == "DigitalSignalsTree":
-                m = data["Nodes"]
-                for node in m:
-                    if node["Name"] == "Обобщенные сигналы" or node["Name"] == "Периферийные блоки" :
-                        continue
-                    sigs_of_func_logic.append(node)
-        q = self.extract_parameters(sigs_of_func_logic)
+        signals = []
+        for parameter_name in self.extract_parameters(nodes):
+            info = self.config_handler.get_param_info(parameter_name)
+            if not info:
+                continue
 
-        raw_list = []
-        for par in q:
-            if "VirtualKey_" in par or "VirtualButton_" in par:
-                raw = self.find_virt_key_desc(par)
-                desc = self.config_handler.get_param_info(par)
-                raw_list.append(f"{raw} ({desc['appliedDescription']})")
-            else:
-                raw = self.config_handler.get_param_info(par)
-                if raw["size"]==1 and raw["group"]!="Setting" and "Convert_SPS" not in raw["name"] and "BitTest_" not in raw["name"] and "_ACS_" not in raw["name"] and "GOOSE_" not in raw["name"] and "FB_" not in raw["name"] and "HMI" not in raw["name"] and "DI_" not in raw["name"] and "APCSRst_CLS_Reset" not in raw["name"] and "Convert_" not in raw["name"]: 
-                    raw_list.append(raw["appliedDescription"])
-        return raw_list
+            if "VirtualKey_" in parameter_name or "VirtualButton_" in parameter_name:
+                parent_group = self.find_virt_key_desc(parameter_name)
+                signals.append(f"{parent_group} ({info.get('appliedDescription', '')})")
+                continue
+
+            param_name = info.get("name", "")
+            if info.get("size") != 1:
+                continue
+            if self.config_handler.is_group(info, "setting"):
+                continue
+            if any(marker in param_name for marker in EXCLUDED_SIGNAL_MARKERS):
+                continue
+
+            signals.append(info.get("appliedDescription", ""))
+
+        return signals
 
     def extract_parameters(self, nodes):
-        """
-        Рекурсивная функция для извлечения только имен параметров (сигналов).
-        
-        Args:
-            nodes (list): Список узлов (групп или параметров).
-            
-        Returns:
-            list: Плоский список строк с именами сигналов.
-        """
-        signal_names = []
-        
+        """Плоский список имён параметров из дерева групп."""
         if not isinstance(nodes, list):
-            return signal_names
+            return []
 
+        signal_names = []
         for node in nodes:
-            name = node.get('Name', '')
-            node_type = node.get('Type', '')
-            
-            if node_type == 'Parameter':
-                # Добавляем только имя сигнала
-                if name: # Исключаем пустые имена, если такие возможны
-                    signal_names.append(name)
-            elif node_type == 'Group':
-                # Рекурсивно обрабатываем вложенные узлы
-                sub_nodes = node.get('Nodes', [])
-                signal_names.extend(self.extract_parameters(sub_nodes))
-                
+            if not isinstance(node, dict):
+                continue
+            if node.get('Type') == 'Parameter':
+                if node.get('Name'):
+                    signal_names.append(node['Name'])
+            elif node.get('Type') == 'Group':
+                signal_names.extend(self.extract_parameters(node.get('Nodes', [])))
         return signal_names
 
     def find_virt_key_desc(self, target_name):
-        """
-        Ищет параметр с именем target_name в структуре self.data
-        и возвращает имя родительской группы.
-        
-        Args:
-            target_name (str): Имя искомого параметра (например, "VirtualKey_1_FuncOperOut")
-            
-        Returns:
-            str or None: Имя родительской группы или None, если не найдено.
-        """
-        # Внутренняя рекурсивная функция
-        def _search_recursive(nodes, parent_group_name=None):
+        """Возвращает имя родительской группы для виртуальной кнопки/клавиши."""
+
+        def search(nodes, parent_group_name=None):
             if not isinstance(nodes, list):
                 return None
-
             for node in nodes:
-                name = node.get('Name')
-                node_type = node.get('Type')
-                sub_nodes = node.get('Nodes', [])
-
-                # Если это группа, запоминаем её имя как потенциального родителя
-                # и спускаемся глубже
-                if node_type == 'Group':
-                    result = _search_recursive(sub_nodes, parent_group_name=name)
+                if not isinstance(node, dict):
+                    continue
+                if node.get('Type') == 'Group':
+                    result = search(node.get('Nodes', []), parent_group_name=node.get('Name'))
                     if result:
                         return result
-                
-                # Если это параметр, проверяем имя
-                elif node_type == 'Parameter':
-                    if name == target_name:
-                        # Возвращаем имя последней запомненной группы
-                        return parent_group_name
-            
+                elif node.get('Type') == 'Parameter' and node.get('Name') == target_name:
+                    return parent_group_name
             return None
 
-        # Запуск поиска с корневого уровня
-        # Для корневого элемента parent_group_name пока None, 
-        # но так как структура начинается с Groups, первая найденная Group станет родителем
-        return _search_recursive(self.data)
+        return search(self.data)
 
-
-        
-
-    # Сбор сигналов для раздела конфигурация !!!!!!!!!!!!!!! ДОРАБОТАТЬ !!!!!!!!!!!!!!!!!!!!
-    def get_data_for_configuration1(self):
-        """
-        Сбор сигналов для раздела конфигурация.
-        Возвращает структуру для Word:
-        [
-            {
-                'main_title': 'Название группы',
-                'tables': [
-                    {'title': 'Название подгруппы', 'rows': [{'name': 'параметр1', 'value': ''}, ...]},
-                    ...
-                ]
-            },
-            ...
-        ]
-        """
-        # 1. Получаем дерево конфигурации
-        config_tree = None
-        for data in self.data:
-            if data["Name"] == "ConfigurationTree":
-                config_tree = data["Nodes"]
-                break
-        
-        if not config_tree:
-            return []
-        
-        # 2. Рекурсивный обход для построения структуры
-        result = []
-        
-        def process_node(node, parent_group=None):
-            """
-            Рекурсивно обрабатывает узлы дерева.
-            Возвращает список таблиц для текущей группы.
-            """
-            node_name = node.get('Name')
-            node_type = node.get('Type')
-            children = node.get('Nodes', [])
-            
-            if node_type == 'Group':
-                # Группа может быть как контейнером для таблиц, так и самой таблицей
-                
-                # Сначала находим все параметры в этой группе (прямые дети)
-                direct_params = [child for child in children if child.get('Type') == 'Parameter']
-                # И все вложенные группы
-                sub_groups = [child for child in children if child.get('Type') == 'Group']
-                
-                if direct_params:
-                    # Если есть прямые параметры - создаем таблицу для этой группы
-                    current_table = {
-                        'title': node_name,
-                        'rows': [{'name': param.get('Name'), 'value': ''} for param in direct_params]
-                    }
-                    
-                    # Обрабатываем вложенные группы - они станут отдельными таблицами
-                    nested_tables = []
-                    for sub_group in sub_groups:
-                        nested_result = process_node(sub_group, node_name)
-                        if isinstance(nested_result, list):
-                            nested_tables.extend(nested_result)
-                        elif nested_result:
-                            nested_tables.append(nested_result)
-                    
-                    # Возвращаем текущую таблицу + вложенные
-                    return [current_table] + nested_tables if nested_tables else [current_table]
-                
-                elif sub_groups:
-                    # Если параметров нет, но есть вложенные группы - просто обрабатываем их
-                    all_tables = []
-                    for sub_group in sub_groups:
-                        sub_result = process_node(sub_group, node_name)
-                        if isinstance(sub_result, list):
-                            all_tables.extend(sub_result)
-                        elif sub_result:
-                            all_tables.append(sub_result)
-                    return all_tables
-                
-                else:
-                    # Пустая группа - игнорируем
-                    return []
-            
-            return []
-        
-        # 3. Обрабатываем корневые узлы
-        for root_node in config_tree:
-            if root_node.get('Type') == 'Group':
-                tables = process_node(root_node)
-                if tables:
-                    result.append({
-                        'main_title': root_node.get('Name'),
-                        'tables': tables
-                    })
-        
-        return result
-
+    # ------------------------------------------------------------ конфигурация
 
     def get_data_for_configuration(self):
-        """
-        Сбор сигналов для раздела конфигурация.
-        Возвращает структуру для Word.
-        """
+        """Сбор сигналов для раздела «Конфигурация» (структура для Word)."""
         exclude_nodes = {
             "Установка полномочий переключения на станционном уровне (LocSta)",
             "Установка режима симуляции для получения GOOSE и SV от испытательных систем (Sim)",
             "Синхронизация времени",
-            "Модуль ЦП"
+            "Модуль ЦП",
         }
 
         def is_excluded_by_pattern(name: str) -> bool:
-            """Исключает узлы по паттернам"""
-            if "Слот" in name and "Измерительный модуль" in name:
-                return True
-            if "Слот" in name and "Модуль питания" in name:
-                return True
-            if "Слот" in name and "Центральный процессор" in name:
-                return True            
-            return False
+            return (
+                ("Слот" in name and "Измерительный модуль" in name)
+                or ("Слот" in name and "Модуль питания" in name)
+                or ("Слот" in name and "Центральный процессор" in name)
+            )
 
-        # 1. Получаем дерево конфигурации
-        config_tree = None
-        for data in self.data:
-            if data["Name"] == "ConfigurationTree":
-                config_tree = data["Nodes"]
-                break
-
+        config_tree = self._tree(TREE_CONFIGURATION)
         if not config_tree:
             return []
 
-        result = []
-
-        def process_node(node, parent_group=None):
-            node_name = node.get('Name')
-
+        def process_node(node):
+            node_name = node.get('Name', '')
             if node_name in exclude_nodes or is_excluded_by_pattern(node_name):
                 return []
 
-            node_type = node.get('Type')
-            children = node.get('Nodes', [])
-
-            if node_type == 'Group':
-                direct_params = [child for child in children if child.get('Type') == 'Parameter']
-                sub_groups = [child for child in children if child.get('Type') == 'Group']
-
-                if direct_params:
-                    current_table = {
-                        'title': node_name,
-                        'rows': [{'name': param.get('Name'), 'value': ''} for param in direct_params]
-                    }
-                    nested_tables = []
-                    for sub_group in sub_groups:
-                        nested_result = process_node(sub_group, node_name)
-                        if isinstance(nested_result, list):
-                            nested_tables.extend(nested_result)
-                        elif nested_result:
-                            nested_tables.append(nested_result)
-                    return [current_table] + nested_tables if nested_tables else [current_table]
-
-                elif sub_groups:
-                    all_tables = []
-                    for sub_group in sub_groups:
-                        sub_result = process_node(sub_group, node_name)
-                        if isinstance(sub_result, list):
-                            all_tables.extend(sub_result)
-                        elif sub_result:
-                            all_tables.append(sub_result)
-                    return all_tables
-
+            if node.get('Type') != 'Group':
                 return []
 
-            return []
+            children = node.get('Nodes', [])
+            direct_params = [child for child in children if child.get('Type') == 'Parameter']
+            sub_groups = [child for child in children if child.get('Type') == 'Group']
 
+            nested_tables = []
+            for sub_group in sub_groups:
+                nested_tables.extend(process_node(sub_group))
+
+            if direct_params:
+                current_table = {
+                    'title': node_name,
+                    'rows': [{'name': param.get('Name'), 'value': ''}
+                             for param in direct_params],
+                }
+                return [current_table] + nested_tables
+
+            return nested_tables
+
+        result = []
         for root_node in config_tree:
-            root_name = root_node.get('Name')
+            root_name = root_node.get('Name', '')
             if (root_node.get('Type') == 'Group'
                     and root_name not in exclude_nodes
                     and not is_excluded_by_pattern(root_name)):
                 tables = process_node(root_node)
                 if tables:
-                    result.append({
-                        'main_title': root_name,
-                        'tables': tables
-                    })
+                    result.append({'main_title': root_name, 'tables': tables})
 
         return result
 
+    # -------------------------------------------------------------- регистрация
 
-
-
-
-
-
-
-
-
-    # Сбор сигналов для раздела Настройка регистрации
     def get_data_for_registration(self):
+        """Структура раздела «Настройка регистрации»."""
+        nodes = [node for node in self._tree(TREE_DIGITAL_SIGNALS)
+                 if node.get("Name") != "Периферийные блоки"]
+        return self.build_configuration_structure(nodes)
 
-        sigs_of_func_logic = []
-        for data in self.data:
-            if data["Name"] == "DigitalSignalsTree":
-                m = data["Nodes"]
-                for node in m:
-                    if node["Name"] == "Периферийные блоки" :
-                        continue
-                    sigs_of_func_logic.append(node)
-        #print(sigs_of_func_logic)
-        return self.build_configuration_structure(sigs_of_func_logic)
-        
     def build_configuration_structure(self, data):
-        """
-        Формирует структуру для вывода конфигурации в Word
-        
-        Returns:
-            [
-                {
-                    'main_title': 'Название раздела',
-                    'subsections': [  # <-- изменено: вместо tables теперь subsections
-                        {
-                            'title': 'Название подраздела (группы)',
-                            'tables': [
-                                {
-                                    'title': 'Название таблицы',
-                                    'parameters': ['параметр1', ...]
-                                },
-                                ...
-                            ]
-                        },
-                        ...
-                    ]
-                },
-                ...
-            ]
-        """
-        result = []
-        
-        root_groups = [item for item in data if item.get('Type') == 'Group']
-        
-        for root in root_groups:
-            section = {
-                'main_title': root.get('Name'),
-                'subsections': []
-            }
-            
-            def process_group(group_node, parent_path=""):
-                """Рекурсивная обработка группы, возвращает структуру подразделов"""
-                group_name = group_node.get('Name')
-                children = group_node.get('Nodes', [])
-                
-                # Собираем прямые параметры группы
-                direct_params = [child for child in children if child.get('Type') == 'Parameter']
-                
-                # Собираем вложенные группы
-                sub_groups = [child for child in children if child.get('Type') == 'Group']
-                
-                # Текущий подраздел для этой группы
-                subsection = {
+        """Формирует иерархию «раздел → подразделы → таблицы параметров»."""
+        def process_group(group_node):
+            group_name = group_node.get('Name')
+            children = group_node.get('Nodes', [])
+
+            direct_params = [child for child in children if child.get('Type') == 'Parameter']
+            sub_groups = [child for child in children if child.get('Type') == 'Group']
+
+            subsection = {'title': group_name, 'tables': []}
+
+            if direct_params:
+                subsection['tables'].append({
                     'title': group_name,
-                    'tables': []
-                }
-                
-                # Если есть прямые параметры - создаем таблицу для них
-                if direct_params:
-                    subsection['tables'].append({
-                        'title': group_name,  # таблица с тем же именем, что и группа
-                        'parameters': [param.get('Name') for param in direct_params]
-                    })
-                
-                # Рекурсивно обрабатываем вложенные группы
-                for sub_group in sub_groups:
-                    sub_subsection = process_group(sub_group)
-                    # Добавляем таблицы из вложенной группы в текущий подраздел
-                    subsection['tables'].extend(sub_subsection['tables'])
-                
-                return subsection
-            
-            # Обрабатываем все вложенные группы корневого раздела
+                    'parameters': [param.get('Name') for param in direct_params],
+                })
+
+            for sub_group in sub_groups:
+                subsection['tables'].extend(process_group(sub_group)['tables'])
+
+            return subsection
+
+        result = []
+        for root in [item for item in data if item.get('Type') == 'Group']:
+            section = {'main_title': root.get('Name'), 'subsections': []}
+
             for child in root.get('Nodes', []):
                 if child.get('Type') == 'Group':
-                    subsection = process_group(child)
-                    section['subsections'].append(subsection)
-            
-            # Также обрабатываем прямые параметры корневого раздела
-            direct_params = [child for child in root.get('Nodes', []) if child.get('Type') == 'Parameter']
+                    section['subsections'].append(process_group(child))
+
+            direct_params = [child for child in root.get('Nodes', [])
+                             if child.get('Type') == 'Parameter']
             if direct_params:
                 section['subsections'].append({
                     'title': root.get('Name'),
                     'tables': [{
                         'title': root.get('Name'),
-                        'parameters': [param.get('Name') for param in direct_params]
-                    }]
+                        'parameters': [param.get('Name') for param in direct_params],
+                    }],
                 })
-            
-            result.append(section)
-        
-        return result
-    
-    def is_in_outputs_tree(self, parameter_name):
-        # Находим корневой узел
-        root_nodes = []
-        for datum in self.data:
-            if datum.get("Name") == "ParametersToHardwareDigitalOutputsTree":
-                root_nodes = datum.get("Nodes", [])
-                break
-        
-        # Рекурсивный поиск
-        def search(nodes):
-            if not nodes:
-                return False
-            
-            for node in nodes:
-                # Если текущий узел — искомый параметр
-                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
-                    return True
-                
-                # Если у узла есть вложенные узлы — идём глубже
-                if "Nodes" in node and node["Nodes"]:
-                    if search(node["Nodes"]):
-                        return True
-            return False
-        
-        return search(root_nodes)
 
+            result.append(section)
+
+        return result
+
+    # ------------------------------------------------------- поиск по деревьям
+
+    def _tree_parameter_names(self, tree_name):
+        """Множество имён параметров дерева (строится один раз)."""
+        cached = self._tree_names_cache.get(tree_name)
+        if cached is not None:
+            return cached
+
+        names = set()
+        stack = list(self._tree(tree_name))
+        while stack:
+            node = stack.pop()
+            if not isinstance(node, dict):
+                continue
+            if node.get("Type") == "Parameter":
+                names.add(node.get("Name"))
+            if node.get("Nodes"):
+                stack.extend(node["Nodes"])
+
+        self._tree_names_cache[tree_name] = names
+        return names
+
+    def _is_in_tree(self, tree_name, parameter_name) -> bool:
+        if not parameter_name:
+            return False
+        return parameter_name in self._tree_parameter_names(tree_name)
+
+    def is_in_outputs_tree(self, parameter_name):
+        return self._is_in_tree(TREE_HARDWARE_OUTPUTS, parameter_name)
 
     def is_in_inputs_tree(self, parameter_name):
-        # Находим корневой узел
-        root_nodes = []
-        for datum in self.data:
-            if datum.get("Name") == "ParametersToHardwareDigitalInputsTree":
-                root_nodes = datum.get("Nodes", [])
-                break
-        
-        # Рекурсивный поиск
-        def search(nodes):
-            if not nodes:
-                return False
-            
-            for node in nodes:
-                # Если текущий узел — искомый параметр
-                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
-                    return True
-                
-                # Если у узла есть вложенные узлы — идём глубже
-                if "Nodes" in node and node["Nodes"]:
-                    if search(node["Nodes"]):
-                        return True
-            return False
-        
-        return search(root_nodes)
-    
+        return self._is_in_tree(TREE_HARDWARE_INPUTS, parameter_name)
+
     def is_in_hmi_sign_tree(self, parameter_name):
-        # Находим корневой узел
-        root_nodes = []
-        for datum in self.data:
-            if datum.get("Name") == "ParametersToHmiSignalizationTree":
-                root_nodes = datum.get("Nodes", [])
-                break
-        
-        # Рекурсивный поиск
-        def search(nodes):
-            if not nodes:
-                return False
-            
-            for node in nodes:
-                # Если текущий узел — искомый параметр
-                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
-                    return True
-                
-                # Если у узла есть вложенные узлы — идём глубже
-                if "Nodes" in node and node["Nodes"]:
-                    if search(node["Nodes"]):
-                        return True
-            return False
-        
-        return search(root_nodes)
-    
+        return self._is_in_tree(TREE_HMI_SIGNALS, parameter_name)
+
     def is_in_digit_sign_tree(self, parameter_name):
-        # Находим корневой узел
-        root_nodes = []
-        for datum in self.data:
-            if datum.get("Name") == "DigitalSignalsTree":
-                root_nodes = datum.get("Nodes", [])
-                break
-        
-        # Рекурсивный поиск
-        def search(nodes):
-            if not nodes:
-                return False
-            
-            for node in nodes:
-                # Если текущий узел — искомый параметр
-                if node.get("Type") == "Parameter" and node.get("Name") == parameter_name:
-                    return True
-                
-                # Если у узла есть вложенные узлы — идём глубже
-                if "Nodes" in node and node["Nodes"]:
-                    if search(node["Nodes"]):
-                        return True
-            return False
-        
-        return search(root_nodes)
+        return self._is_in_tree(TREE_DIGITAL_SIGNALS, parameter_name)

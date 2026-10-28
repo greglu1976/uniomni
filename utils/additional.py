@@ -1,43 +1,46 @@
-import os
-from pathlib import Path
+"""Каталог сборки latex."""
+
 import shutil
-import pickle
+from pathlib import Path
 
 from logger.logger import Logger
+from utils.paths import BUILD_DIR
 
-def create_directories(base_path="."):
+
+def create_directories(base_path=None):
+    """Пересоздаёт каталог сборки latex_build (и подкаталоги images, obj).
+
+    Args:
+        base_path: базовый каталог; по умолчанию — корень проекта.
+
+    Returns:
+        bool: True, если каталоги готовы к работе.
     """
-    Удаляет существующую директорию latex_build (если есть), затем создаёт
-    заново latex_build и latex_build/images в указанной базовой папке.
-    """
-    base_dir = Path(base_path)
-    build_dir = base_dir / "latex_build"
+    build_dir = Path(base_path) / "latex_build" if base_path else Path(BUILD_DIR)
     images_dir = build_dir / "images"
     obj_dir = build_dir / "obj"
-    
-    try:
-        # Если директория latex_build существует — удаляем её и всё содержимое
-        if build_dir.exists() and build_dir.is_dir():
+
+    # Страховка: удаляем только каталог сборки, а не произвольный путь
+    if build_dir.exists() and build_dir.is_dir():
+        if build_dir.name != "latex_build":
+            Logger.error(f"Отказ удалять каталог с неожиданным именем: {build_dir}")
+            return False
+        try:
             shutil.rmtree(build_dir)
-            Logger.info(f"Удалена существующая директория: {build_dir.absolute()}")
+            Logger.info(f"Удалена существующая директория: {build_dir}")
+        except OSError as error:
+            Logger.error(f"Не удалось удалить {build_dir}: {error}")
+            return False
 
-        # Создаём заново (с поддиректорией images)
-        images_dir.mkdir(parents=True, exist_ok=False)  # parents=True создаст и build_dir тоже
+    try:
+        images_dir.mkdir(parents=True, exist_ok=False)
         obj_dir.mkdir(parents=True, exist_ok=False)
-        Logger.info(f"Созданы новые директории:")
-        Logger.info(f"  - {build_dir.absolute()}")
-        Logger.info(f"  - {images_dir.absolute()}")
-        Logger.info(f"  - {obj_dir.absolute()}")
-        
-        return True
-    except Exception as e:
-        Logger.error(f"Ошибка при обработке директорий: {e}")
+    except OSError as error:
+        Logger.error(f"Ошибка при создании директорий: {error}")
         return False
-    
-def save_obj(obj):
-    with open('latex_build/obj/object.pkl', 'wb') as file:
-        pickle.dump(obj, file)
 
-def load_obj():
-    with open('latex_build/obj/object.pkl', 'rb') as file:
-        return pickle.load(file)
+    Logger.info("Созданы новые директории:")
+    Logger.info(f"  - {build_dir}")
+    Logger.info(f"  - {images_dir}")
+    Logger.info(f"  - {obj_dir}")
+    return True

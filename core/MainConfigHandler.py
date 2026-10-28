@@ -122,13 +122,22 @@ class MainConfigHandler:
             return param["description"]
         return None
     
+    @staticmethod
+    def is_group(param: Dict[str, Any], group_name: str) -> bool:
+        """Сравнение группы без учёта регистра.
+
+        В meta.json одна и та же группа встречается в разном регистре
+        ('setting'/'Setting', 'Measurement'/'measurement').
+        """
+        return str(param.get("group", "")).strip().lower() == group_name.strip().lower()
+
     def find_measurement_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """
         Возвращает параметр с указанным именем, только если он принадлежит группе 'measurement'.
         Если параметр не найден или его группа не 'measurement' — возвращает None.
         """
         param = self._params.get(name)
-        if param and param.get("group") == "measurement":
+        if param and self.is_group(param, "measurement"):
             return param
         return None
     
@@ -180,7 +189,7 @@ class MainConfigHandler:
         
         for name, param in self._params.items():
             # 1. Проверка группы
-            if param.get("group") != "measurement":
+            if not self.is_group(param, "measurement"):
                 continue
             
             # 2. Проверка размера (должен быть 1 для бинарного сигнала)

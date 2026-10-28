@@ -1,101 +1,80 @@
-# вынесено сюда всякое создание разделов 
+"""Работа с документом Word: секции и стили."""
 
 from docx.enum.section import WD_ORIENTATION, WD_SECTION
 from docx.shared import Inches, Mm
 
+
 def add_new_section(doc):
-    """Добавляет портретную секцию"""
-    if len(doc.sections) == 0:
-        return doc
-    
-    current_section = doc.sections[-1]
-    
-    # Добавляем разрыв страницы перед созданием новой секции
+    """Добавляет портретную секцию."""
+    # Разрыв страницы перед созданием новой секции
     doc.add_paragraph()
-    
-    # Создаем новую секцию
+
     new_section = doc.add_section(WD_SECTION.NEW_PAGE)
-    
-    # Копируем основные настройки
+
     new_section.orientation = WD_ORIENTATION.PORTRAIT
-    new_section.page_width = Inches(8.3)  # Стандартная ширина для портрета
-    new_section.page_height = Inches(11.7)  # Стандартная высота для портрета
-    
-    # Копируем поля
-    #new_section.left_margin = current_section.left_margin
-    #new_section.right_margin = current_section.right_margin
-    #new_section.top_margin = current_section.top_margin
-    #new_section.bottom_margin = current_section.bottom_margin
+    new_section.page_width = Inches(8.3)
+    new_section.page_height = Inches(11.7)
 
-    # Задаем поля в миллиметрах
-    new_section.left_margin = Mm(25)    # 2.0 см
-    new_section.right_margin = Mm(10)   # 2.0 см
-    new_section.top_margin = Mm(10)     # 2.5 см
-    new_section.bottom_margin = Mm(10)  # 2.5 см
-    new_section.gutter = Mm(0) # ПЕРЕПЛЕТ
-    #new_section.gutter_position = -1 #(left = 0, top = 1, right = 2)
+    # Поля (мм)
+    new_section.left_margin = Mm(25)
+    new_section.right_margin = Mm(10)
+    new_section.top_margin = Mm(10)
+    new_section.bottom_margin = Mm(10)
+    new_section.gutter = Mm(0)  # переплёт
     new_section.header_distance = Mm(4)
-
 
     return doc
 
-def add_new_section_landscape(doc):
-    """Добавляет альбомную секцию"""
-    if len(doc.sections) == 0:
-        return doc
-    
-    current_section = doc.sections[-1]
-    
-    # Добавляем разрыв страницы перед созданием новой секции
-    doc.add_paragraph()
-    
-    # Создаем новую секцию
-    new_section = doc.add_section(WD_SECTION.NEW_PAGE)
-    
-    # Устанавливаем альбомную ориентацию
-    new_section.orientation = WD_ORIENTATION.LANDSCAPE
-    new_section.page_width = Inches(11.7)   # Ширина становится высотой
-    new_section.page_height = Inches(8.2) # Высота становится шириной
 
-    # Задаем поля в миллиметрах
-    new_section.left_margin = Mm(10)    # 2.0 см
-    new_section.right_margin = Mm(10)   # 2.0 см
-    new_section.top_margin = Mm(25)     # 2.5 см
-    new_section.bottom_margin = Mm(10)  # 2.5 см
+def add_new_section_landscape(doc):
+    """Добавляет альбомную секцию."""
+    # Разрыв страницы перед созданием новой секции
+    doc.add_paragraph()
+
+    new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+
+    new_section.orientation = WD_ORIENTATION.LANDSCAPE
+    new_section.page_width = Inches(11.7)
+    new_section.page_height = Inches(8.2)
+
+    # Поля (мм)
+    new_section.left_margin = Mm(10)
+    new_section.right_margin = Mm(10)
+    new_section.top_margin = Mm(25)
+    new_section.bottom_margin = Mm(10)
     new_section.header_distance = Mm(15)
 
     return doc
 
-def add_new_section_test(doc):
-    # Получаем текущий раздел
-    current_section = doc.sections[-1]
 
-    # Добавляем новый раздел
-    new_section = doc.add_section()
+def get_style_id(document, style_name):
+    """Возвращает style_id стиля с кэшированием на документе.
 
-    # Устанавливаем альбомную ориентацию
-    new_section.orientation = WD_ORIENTATION.LANDSCAPE
-    new_section.page_width = current_section.page_height
-    new_section.page_height = current_section.page_width
-
-    # Отключаем связь с предыдущими колонтитулами
-    new_section.header.is_linked_to_previous = False
-    new_section.footer.is_linked_to_previous = False
-
-    # Создаем новые колонтитулы для альбомной ориентации
-    header = new_section.header
-    footer = new_section.footer
-
-    # Добавляем содержимое в колонтитулы
-    header_para = header.paragraphs[0]
-    footer_para = footer.paragraphs[0]
-
-    # Здесь добавьте необходимое содержимое колонтитулов
-    header_para.text = "Ваш верхний колонтитул"
-    footer_para.text = "Ваш нижний колонтитул"
-
-    # Устанавливаем стиль и форматирование для колонтитулов
-    header_para.style = 'Header'  # или ваш собственный стиль
-    footer_para.style = 'Footer'  # или ваш собственный стиль
+    `paragraph.style = "Имя"` в python-docx каждый раз ищет стиль по имени
+    среди всех стилей документа (и ещё раз — стиль по умолчанию). На тысячах
+    ячеек таблиц это давало десятки секунд генерации.
+    """
+    cache = document.__dict__.setdefault('_style_id_cache', {})
+    if style_name not in cache:
+        cache[style_name] = document.styles[style_name].style_id
+    return cache[style_name]
 
 
+def set_paragraph_style(document, paragraph, style_name):
+    """Назначает стиль параграфу, минуя повторный поиск стиля по имени."""
+    paragraph._p.get_or_add_pPr().style = get_style_id(document, style_name)
+    return paragraph
+
+
+def add_paragraph(document, text='', style_name=None):
+    """Добавляет параграф и, при необходимости, назначает ему стиль."""
+    paragraph = document.add_paragraph(text)
+    if style_name:
+        set_paragraph_style(document, paragraph, style_name)
+    return paragraph
+
+
+def set_table_style(document, table, style_name):
+    """Назначает стиль таблице, минуя повторный поиск стиля по имени."""
+    table._tbl.tblPr.style = get_style_id(document, style_name)
+    return table

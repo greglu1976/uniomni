@@ -4,3 +4,8 @@
 /__pycache__
 */__pycache__
 /output
+/latex_build
+/logs
+temp.docx
+toa_*.tex
+attrs_*.txt

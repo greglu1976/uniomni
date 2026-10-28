@@ -1,234 +1,228 @@
-import fitz  # Импортируем библиотеку PyMuPDF
-import re
-import os
-import sys
+"""Обновление перечня сокращений в latex-документе.
+
+Алгоритм: берём текст pdf, вытаскиваем слова-кандидаты в сокращения,
+сверяемся со словарём dictionary.json и записываем latex-таблицу между
+невидимыми тегами <begABBRS> и <endABBRS>.
+"""
+
 import json
+import os
+import re
+import subprocess
+import sys
+
+try:  # PyMuPDF >= 1.24 предпочитает новое имя пакета
+    import pymupdf
+except ImportError:  # pragma: no cover - совместимость со старыми сборками
+    import fitz as pymupdf
 
 from logger.logger import Logger
+from utils.paths import find_file, project_path
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.append(parent_dir)
+# Начало и конец latex-таблицы перечня сокращений
+INTRO_STRS = [
+    r"\phantomsection" + "\n",
+    r"\color{uniblue}\section*{\centering{\large{ПЕРЕЧЕНЬ СОКРАЩЕНИЙ}}}" + "\n",
+    r"\addcontentsline{toc}{section}{Перечень сокращений}" + "\n",
+    r"{\color{white}\fontsize{0.1pt}{0.1pt}\selectfont<begABBRS>}" + "\n",
+    r"\color{black}" + "\n",
+    r'\begin{longtable}{>{\raggedright\arraybackslash}m{2cm}'
+    r'>{\raggedright\arraybackslash}m{0.5cm}'
+    r'>{\raggedright\arraybackslash}m{20cm}}' + "\n",
+    r'\endfirsthead\endhead\endfoot\endlastfoot' + "\n",
+]
 
+OUTRO_STRS = [
+    r'\end{longtable}' + "\n",
+]
 
-intro_strs = []
-intro_strs.append("\phantomsection"+"\n") # чтобы правильно генерировать ссылку
-intro_strs.append("\color{uniblue}\section*{\centering{\large{ПЕРЕЧЕНЬ СОКРАЩЕНИЙ}}}"+"\n")
-intro_strs.append("\\addcontentsline{toc}{section}{Перечень сокращений}"+"\n") # строка для включения в содержание
-intro_strs.append("{\color{white}\\fontsize{0.1pt}{0.1pt}\selectfont<begABBRS>}"+"\n") # невидимый тег начала перечня сокращений
-intro_strs.append("\color{black}"+"\n")
-intro_strs.append('\\begin{longtable}{>{\\raggedright\\arraybackslash}m{2cm}>{\\raggedright\\arraybackslash}m{0.5cm}>{\\raggedright\\arraybackslash}m{20cm}}'+'\n')
-intro_strs.append('\endfirsthead\endhead\endfoot\endlastfoot'+'\n')
-outro_strs = []
-outro_strs.append('\end{longtable}'+'\n')
-#outro_strs.append("{\color{white}\\fontsize{0.1pt}{0.1pt}\selectfont<endABBRS>}") # невидимый тег начала перечня сокращений
-
-abbrs = {
-    'ОСФ':'Орган сравнения фаз',
-    'КИТЦ':'Контроль исправности токовых цепей',
-    'КИЦТ':'Контроль исправности токовых цепей - неправильная абр',
-    'ЗП':'Защита от перегрузки',
-    'ЗПО':'Защита от потери охлаждения',
-    'УРОВ':'Устройство резервирования при отказе выключателя',
-    'ТЗНП':'Токовая защита нулевой последовательности',
-    'ТЗОП':'Токовая защита обратной последовательности',
-    'ФСУ':'Функционально-структурная схема',
-    'ЗПНОП':'Защита от повышения напряжения обратной последовательности',
+# Внутренний словарь на случай отсутствия dictionary.json
+DEFAULT_ABBR_DICT = {
+    'ОСФ': 'Орган сравнения фаз',
+    'КИТЦ': 'Контроль исправности токовых цепей',
+    'КИЦТ': 'Контроль исправности токовых цепей - неправильная абр',
+    'ЗП': 'Защита от перегрузки',
+    'ЗПО': 'Защита от потери охлаждения',
+    'УРОВ': 'Устройство резервирования при отказе выключателя',
+    'ТЗНП': 'Токовая защита нулевой последовательности',
+    'ТЗОП': 'Токовая защита обратной последовательности',
+    'ФСУ': 'Функционально-структурная схема',
+    'ЗПНОП': 'Защита от повышения напряжения обратной последовательности',
 }
 
+# Слова, которые не являются сокращениями
+EXCLUDE_LIST = {
+    "AB", "BC", "CA", "DZ", "II", "RS", "SF", "SFP", "SGF", "TOF", "TON", "TP",
+    "UA", "UB", "UC", "UI", "UА", "UБНН", "UС", "VD", "АВ", "ВС", "СА",
+    "ЗАКАЗА", "ЗАЩИТ", "РЕМОНТ", "СХЕМ", "СХЕМЫ", "ФУНКЦИИ", "ЦЕПЕЙ", "KR",
+    "KХ", "RJ", "RU", "АААА", "ВC", "ВЭД", "ИК", "ИЛИ", "ИС", "ИФ", "КОД",
+    "НЕ", "НИ", "НК", "НФ", "ОКПД", "ООО", "ПАО", "РАБОТА", "СЕРВИС", "ТП",
+    "ФЗ", "ФФ", "ЮНИТ", "ЮТКБ",
+}
 
-# Определяем словарь абревиатур
-def load_dict(abbrs):
-    data = abbrs
-    # Ищем файл со словарем
-    path_to_dict = 'dictionary.json'
-    if os.path.isfile(path_to_dict):
-        with open(path_to_dict, 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            Logger.info("Найден внешний словарь абревиатур dictionary.json")
-            return data
-    Logger.warning("Не найден внешний словарь абревиатур dictionary.json, будет использоваться пустой внутренний словарь!")
-    return data
+# Первые две заглавные буквы, дальше допустимы буквы, тильда и пробелы
+ABBR_RE = re.compile(r'^[A-ZА-Я]{2}[A-Za-zА-Яа-я~\s]*$')
 
-def get_abbrs_new(word_list, abbr_dict):
-    abbr_set = set(abbr_dict.keys())
-    new_list = []
-    for word in word_list:
-        for abbr in abbr_set:
-            if abbr in word:
-                new_list.append(abbr)
-    word_set = set(new_list)
-    word_list = sorted(list(word_set))    
-    return word_list
+
+def load_dict(default_dict=None):
+    """Читает dictionary.json из корня проекта (или отдаёт встроенный словарь)."""
+    data = default_dict if default_dict is not None else DEFAULT_ABBR_DICT
+    path = find_file(project_path(), 'dictionary.json')
+    if path is None:
+        Logger.warning("Не найден external словарь сокращений dictionary.json — "
+                       "используется встроенный")
+        return data
+
+    try:
+        with open(path, 'r', encoding='utf-8') as file:
+            Logger.info("Найден внешний словарь сокращений dictionary.json")
+            return json.load(file)
+    except (OSError, json.JSONDecodeError) as error:
+        Logger.error(f"Не удалось прочитать dictionary.json: {error}")
+        return data
+
 
 def get_abbrs(word_list):
-    # Список слов, которые нужно исключить (можно изменять внутри функции)
-    EXCLUDE_LIST = ["AB", "BC", "CA", "DZ", "II", "RS", "SF", "SFP", "SGF", "TOF", "TON", "TP", "UA", "UB", "UC", "UI", "UА", "UБНН", "UС", "VD", "АВ", "ВС", "СА", "ЗАКАЗА", "ЗАЩИТ", "РЕМОНТ", "СХЕМ", "СХЕМЫ", "ФУНКЦИИ",
-                     "ЦЕПЕЙ", "KR", "KХ", "RJ", "RU", "АААА", "ВC", "ВЭД", "ИК", "ИЛИ", "ИС", "ИФ", "КОД", "НЕ", "НИ", "НК", "НФ", "ОКПД", "ООО", "ПАО", "РАБОТА", "СЕРВИС", "ТП", "ФЗ", "ФФ", "ЮНИТ", "ЮТКБ"]
-    
-    # оставляем только слова по шаблону - первые две бкувы заглавные - остальные любые
+    """Отбирает из списка слов кандидатов в сокращения."""
     new_word_list = []
     for word in word_list:
-        cleaned_string = re.sub(r'^[^A-Za-zА-Яа-я]+', '', word)
-        cleaned_string = re.sub(r'[^A-Za-zА-Яа-я]+$', '', cleaned_string)
-        if re.match('^[A-ZА-Я]{2}[A-Za-zА-Яа-я~\s]*$', cleaned_string): #^[A-ZА-Я]{2}[A-Za-zА-Яа-я~\s]*$ # ^[A-ZА-Я]{2}[A-Za-zА-Яа-я]*$
-            new_word_list.append(cleaned_string)
-        
-    abbrs = []
-    for word in new_word_list:
-        if len(word)<=7 and word not in EXCLUDE_LIST:
-            abbrs.append(word)
-    set_abbrs = set(abbrs)
-    return list(set_abbrs)
+        cleaned = re.sub(r'^[^A-Za-zА-Яа-я]+', '', word)
+        cleaned = re.sub(r'[^A-Za-zА-Яа-я]+$', '', cleaned)
+        if ABBR_RE.match(cleaned):
+            new_word_list.append(cleaned)
+
+    abbrs = {word for word in new_word_list
+             if len(word) <= 7 and word not in EXCLUDE_LIST}
+    return sorted(abbrs)
+
 
 def extract_words_from_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
+    """Возвращает слова pdf, кроме содержимого существующей таблицы сокращений."""
     words = []
-    skip = False  # игнорировать слова, если True
-    for page in doc:
-        # Получаем текст страницы как строку
-        text = page.get_text("text")
-        # Объединяем "АСУ ТП" в "АСУ~ТП" (тильда предотвратит разбиение)
-        text = re.sub(r'АСУ\s+ТП', 'АСУ~ТП', text)
-        # Разбиваем текст на токены (по любым пробельным символам)
-        tokens = text.split()
-        i = 0
-        while i < len(tokens):
-            token = tokens[i]
-            # Обработка маркеров начала и конца таблицы
-            if token == '<begABBRS>':
-                skip = True
-                i += 1
-                continue
-            if token == '<endABBRS>':
-                skip = False
-                i += 1
-                continue
-            # Если не в режиме пропуска – добавляем слово
-            if not skip:
-                words.append(token)
-            i += 1 
-    doc.close()
+    skip = False
+
+    with pymupdf.open(str(pdf_path)) as document:
+        for page in document:
+            text = page.get_text("text")
+            # «АСУ ТП» не должно разбиваться на два слова
+            text = re.sub(r'АСУ\s+ТП', 'АСУ~ТП', text)
+
+            for token in text.split():
+                if token == '<begABBRS>':
+                    skip = True
+                    continue
+                if token == '<endABBRS>':
+                    skip = False
+                    continue
+                if not skip:
+                    words.append(token)
+
     return words
 
-#  переработаная функция для GUI
-def replace_pdf_with_attrs_txt(path):
-    path = os.path.normpath(path)
+
+def build_paths(pdf_path):
+    """Пути основных файлов обновления (pdf, .tex, .txt, .docx)."""
+    path = os.path.normpath(str(pdf_path))
     base_path, file_name = os.path.split(path)
-    file_name_without_extension = os.path.splitext(file_name)[0]
-    new_txt_filename ='toa_' + file_name_without_extension + '.tex'
-    new_attrs_filename = 'attrs_' + file_name_without_extension + '.txt'
-    new_doc_filename = file_name_without_extension + '.docx'
-    new_txt_path = os.path.join(base_path, new_txt_filename)
-    new_attrs_path = os.path.join(base_path, new_attrs_filename)
-    new_doc_path = os.path.join(base_path, new_doc_filename)
-    return (path, os.path.abspath(new_txt_path), os.path.abspath(new_attrs_path), os.path.abspath(new_doc_path))
+    stem = os.path.splitext(file_name)[0]
 
-def parse_tex(new_word_list, data):
-    used_keys = []
+    return (
+        path,
+        os.path.abspath(os.path.join(base_path, f'toa_{stem}.tex')),
+        os.path.abspath(os.path.join(base_path, f'attrs_{stem}.txt')),
+    )
+
+
+def open_in_editor(path):
+    """Открывает файл во внешней программе (если это возможно).
+
+    Раньше здесь был os.startfile — он есть только в Windows.
+    """
+    try:
+        if os.name == 'nt':
+            os.startfile(str(path))  # type: ignore[attr-defined]
+        elif sys.platform == 'darwin':
+            subprocess.Popen(['open', str(path)])
+        else:
+            subprocess.Popen(['xdg-open', str(path)])
+    except (OSError, AttributeError) as error:
+        Logger.warning(f"Не удалось открыть {path} во внешней программе: {error}")
+
+
+def parse_tex(new_word_list, dictionary):
+    """Строки latex-таблицы перечня сокращений."""
     tex_list = []
-    doc_list = []
     for word in new_word_list:
-        # Проверяем, встречается ли ключ словаря в списке слов и не использовался ли уже
-        if word in data.keys() and word not in used_keys:
-            used_keys.append(word)
-            value = data[word]
-            #value = value[0].lower() + value[1:] # с маленькой буквы ?
-            # Формируем строку tex и добавляем ее в tex_list
-            if value.startswith('!'):
-                value = value[1:]
-                temp = '\\textcolor{red}{'+value+'}'
-                tex_list.append(f'{word} & -- & {temp}; \\\\'+'\n')
-            else:
-                tex_list.append(f'{word} & -- & {value}; \\\\'+'\n')
-            doc_list.append(f'{word} - {value}')
-    # Меняем в последней строке ; на точку
-    if tex_list:
-            last_element_index = len(tex_list) - 1
-            last_element = tex_list[last_element_index]
-            updated_last_element = last_element.replace('; \\\\\n', '. \\\\\n')
-            tex_list[last_element_index] = updated_last_element
-            tex_list.append("{\color{white}\\fontsize{0.1pt}{0.1pt}\selectfont<endABBRS>}"+'\n')
-    return tex_list 
+        if word not in dictionary:
+            continue
 
-def parse_tex_new(new_word_list, dict):
-    tex_list = []
-    for key in new_word_list:
-        if key in dict:
-            val = dict[key] 
-            if val.startswith('!'):
-                val = val[1:]
-                temp = '\\textcolor{red}{'+val+'}'
-                tex_list.append(f'{key} & -- & {temp}; \\\\'+'\n')
-            else:
-                tex_list.append(f'{key} & -- & {val}; \\\\'+'\n')
-    # Меняем в последней строке ; на точку
+        value = str(dictionary[word])
+        if value.startswith('!'):
+            # Восклицательный знак в словаре — выделение красным
+            tex_list.append(f'{word} & -- & \\textcolor{{red}}{{{value[1:]}}}; \\\\' + "\n")
+        else:
+            tex_list.append(f'{word} & -- & {value}; \\\\' + "\n")
+
     if tex_list:
-            last_element_index = len(tex_list) - 1
-            last_element = tex_list[last_element_index]
-            updated_last_element = last_element.replace('; \\\\\n', '. \\\\\n')
-            tex_list[last_element_index] = updated_last_element
+        # В последней строке точка вместо точки с запятой
+        last_index = len(tex_list) - 1
+        tex_list[last_index] = tex_list[last_index].replace('; \\\\\n', '. \\\\\n')
+        tex_list.append(
+            r"{\color{white}\fontsize{0.1pt}{0.1pt}\selectfont<endABBRS>}" + "\n")
+
     return tex_list
 
-########################## ТОЧКА ВХОДА ###################################
+
 def start_abbr(filepath):
+    """Точка входа: обновить перечень сокращений по pdf-файлу.
 
-    Logger.info("Запуск скрипта обновления абревиатур...")
+    Returns:
+        str: 'ok', 'noabbrs' или 'error'.
+    """
+    Logger.info("Запуск скрипта обновления сокращений...")
 
-    #pdf_path = filepath+'/general.pdf'
-    path_to_pdf = replace_pdf_with_attrs_txt(filepath)
+    pdf_path, tex_path, attrs_path = build_paths(filepath)
 
-    Logger.info(f"Обработка {path_to_pdf[0]}")
-    word_list_origin = extract_words_from_pdf(path_to_pdf[0])
+    if not os.path.isfile(pdf_path):
+        Logger.error(f"Файл pdf не найден: {pdf_path}")
+        return 'error'
 
-    # убираем повторяющиеся слова
-    word_set = set(word_list_origin)
-    word_list = sorted(list(word_set))
-    # вытаскиваем абревиатуры
-    new_word_list = sorted(get_abbrs(word_list))
+    Logger.info(f"Обработка {pdf_path}")
+    try:
+        words = extract_words_from_pdf(pdf_path)
+    except (RuntimeError, ValueError, OSError) as error:
+        Logger.error(f"Не удалось прочитать pdf {pdf_path}: {error}")
+        return 'error'
+
+    word_list = sorted(set(words))
+    new_word_list = get_abbrs(word_list)
     Logger.info(new_word_list)
 
-    # если список пустой возвращаемся
     if not new_word_list:
-        Logger.info("Нет распознанных абревиатур в текущем файле pdf...")
+        Logger.info("Нет распознанных сокращений в текущем файле pdf...")
         return 'noabbrs'
 
-    ####################################################
-    # Вывод списка аббревиатур в файл
-    with open(path_to_pdf[2], 'w', encoding='utf-8') as file:
-        file.write(', '.join(new_word_list))
+    dictionary = load_dict(DEFAULT_ABBR_DICT)
+    known_keys = set(dictionary)
+    new_abbrs = [word for word in new_word_list if word not in known_keys]
 
-    with open('dictionary.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        # Извлекаем множество ключей (сокращений)
-        exclude_keys = set(data.keys())
+    with open(attrs_path, 'w', encoding='utf-8') as file:
+        file.write("Список всех найденных сокращений в general.pdf: "
+                   + ", ".join(new_word_list) + "\n")
+        file.write("Список новых сокращений для добавления в dictionary.json: "
+                   + ", ".join(new_abbrs))
 
-    # Фильтруем new_word_list, оставляя только те слова, которых нет в exclude_keys
-    new_abbrs = [word for word in new_word_list if word not in exclude_keys]
+    # Показываем файл, чтобы можно было дописать новые сокращения в словарь
+    if new_abbrs:
+        Logger.warning(f"Найдены сокращения, отсутствующие в dictionary.json: "
+                       f"{', '.join(new_abbrs)}")
+        open_in_editor(attrs_path)
 
-    # Записываем (или перезаписываем) файл с двумя строками
-    with open(path_to_pdf[2], 'w', encoding='utf-8') as file:
-        file.write("Список всех найденных сокращений в general.pdf: " + ", ".join(new_word_list) + "\n")
-        file.write("Список новых сокращений для добавления в dictionary.json: " + ", ".join(new_abbrs))
-    
-    # Открытие файла, чтобы убедиться, что нет новых аббревиатур. Если есть, добавить новые аббревиатуры в dictionary.json
-    os.startfile(path_to_pdf[2])
-    ####################################################
+    tex_list = parse_tex(new_word_list, dictionary)
+    final_tex = INTRO_STRS + tex_list + OUTRO_STRS
 
-    # Ищем файл со словарем
-    dict = load_dict(abbrs)
-    # старое решение
-    tex_list = parse_tex(new_word_list, dict) 
-    # новое решение
+    with open(tex_path, 'w', encoding='utf-8') as file:
+        file.writelines(final_tex)
 
-    #abbrs_got = get_abbrs_new(word_list, dict) # получили все аббревиатуры , причем только те, что в словаре
-    #tex_list = parse_tex_new(abbrs_got, dict)
-    final_tex = intro_strs + tex_list + outro_strs
-
-    # Открываем файл для записи в UTF-8
-    with open(path_to_pdf[1], 'w', encoding='utf-8') as file:
-        for line in final_tex:
-            file.write(line)  # Добавляем символ новой строки после каждой строки
-
-    Logger.info("Останов скрипта поиска абревиатур...")
-    return
-
+    Logger.info(f"Перечень сокращений записан: {tex_path}")
+    return 'ok'

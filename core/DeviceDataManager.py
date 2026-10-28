@@ -3,19 +3,28 @@ import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+from utils.paths import project_path
+
+
 class DeviceDataManager:
-    def __init__(self, config_path: str = 'devices.ini'):
-        self.config_path = Path(config_path)
+    """Читает devices.ini и отдаёт данные устройств."""
+
+    def __init__(self, config_path: str = None):
+        self.config_path = Path(config_path) if config_path else project_path("devices.ini")
         if not self.config_path.exists():
             raise FileNotFoundError(f"Файл конфигурации устройств не найден: {self.config_path}")
         self._devices = self._load_devices()
 
     def _load_devices(self) -> Dict[str, Dict[str, Any]]:
         """Загружает и парсит devices.ini в словарь устройств."""
-        config = configparser.ConfigParser()
+        # interpolation=None: в значениях могут встречаться символы '%'
+        # (описания, пути), которые иначе ConfigParser пытается подставлять.
+        config = configparser.ConfigParser(interpolation=None)
         # Сохраняем регистр имён параметров (по умолчанию ConfigParser приводит к нижнему)
         config.optionxform = str
-        config.read(self.config_path, encoding='utf-8')
+
+        if not config.read(self.config_path, encoding='utf-8'):
+            raise OSError(f"Не удалось прочитать файл конфигурации: {self.config_path}")
 
         devices = {}
         for section in config.sections():
@@ -53,11 +62,11 @@ class DeviceDataManager:
     def get_device_by_name_and_version(self, name: str, version: str) -> Optional[Dict[str, Any]]:
         """
         Возвращает устройство по полю 'name' и полю 'version'.
-        
+
         Args:
             name (str): Имя устройства (например, "ЮНИТ-М300-ДЗТ2")
             version (str): Версия устройства (например, "1.0")
-        
+
         Returns:
             dict или None: Найденное устройство или None, если не найдено.
         """
@@ -75,8 +84,7 @@ class DeviceDataManager:
         return list(self._devices.values())
 
     def add_device(self, key: str, device_data: Dict[str, Any]):
-        """Добавляет новое устройство (в памяти). Для сохранения в файл — нужен отдельный метод."""
-        # Преобразуем сложные типы в строки (например, list/dict → JSON)
+        """Добавляет новое устройство (в памяти). Для сохранения в файл — save_to_file()."""
         safe_data = {}
         for k, v in device_data.items():
             if isinstance(v, (dict, list)):
@@ -88,17 +96,16 @@ class DeviceDataManager:
     def save_to_file(self, output_path: str = None):
         """Сохраняет текущие данные обратно в INI-файл."""
         output_path = Path(output_path) if output_path else self.config_path
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(interpolation=None)
         config.optionxform = str  # сохраняем регистр
 
         for key, device in self._devices.items():
             config[key] = {}
             for param, value in device.items():
-                # Убеждаемся, что значение — строка
                 if isinstance(value, (dict, list)):
                     config[key][param] = json.dumps(value, ensure_ascii=False)
                 else:
                     config[key][param] = str(value)
 
         with open(output_path, 'w', encoding='utf-8') as f:
-            config.write(f, space_around_delimiters=False)
+            config.write(f)

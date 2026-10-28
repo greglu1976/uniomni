@@ -1,89 +1,77 @@
-import json
+from utils.paths import load_packet_json
+
 
 class ExtensionHandler:
+    """Доступ к EXTENSION.json пакета поддержки (перечисления, трансформации, единицы)."""
 
-    def __init__(self, root_path = ''):
-        with open(root_path+"EXTENSION.json", 'r', encoding='utf-8') as f:
-            self.data = json.load(f)
+    def __init__(self, root_path=""):
+        self.data, self.path = load_packet_json(root_path, "EXTENSION.json")
+
+        # Индексы по имени: раньше на каждый вызов выполнялся линейный поиск
+        # по списку из тысяч элементов, а вызывается это на каждую уставку.
+        self._parameters = {
+            item.get("Parameter"): item
+            for item in self.data.get("Parameters", [])
+        }
+        self._enums = {
+            item.get("Enum"): item
+            for item in self.data.get("Enums", [])
+        }
+        self._transformations = {
+            item.get("Transformation"): item
+            for item in self.data.get("Transformations", [])
+        }
+
+    def _transformation_name(self, parameter_name):
+        parameter = self._parameters.get(parameter_name) or {}
+        return parameter.get("Transformation")
 
     def find_enum_by_parameter_name(self, name):
-        # 1. Ищем имя Enum по имени Параметра
-        pars = self.data.get("Parameters", []) # Защита, если ключа нет
-        #print(pars)
-        enum_name = None
-        
-        for par in pars:
-            # Используем .get(), чтобы не упасть, если ключа "Parameter" нет в словаре
-            if par.get("Parameter") == name:
-                enum_name = par.get("Enum")
-                break
-        
-        # Если параметр вообще не найден или у него нет поля Enum
+        """Возвращает список значений перечисления для параметра или None."""
+        parameter = self._parameters.get(name) or {}
+        enum_name = parameter.get("Enum")
         if not enum_name:
-            return None 
+            return None
 
-        # 2. Ищем значения по имени Enum
-        enums = self.data.get("Enums", [])
-        for en in enums:
-            # Сравниваем имя Enum из параметра с именем в списке Enums
-            if en.get("Enum") == enum_name:
-                return en.get("Value")  # Возвращаем найденные значения
-        
-        # Если цикл закончился, значит Enum с таким именем не найден в разделе "Enums"
-        return None
+        enum = self._enums.get(enum_name)
+        return enum.get("Value") if enum else None
 
     def find_trans_by_parameter_name(self, name):
-        # 1. Ищем имя Enum по имени Параметра
-        pars = self.data.get("Parameters", []) # Защита, если ключа нет
-        #print(pars)
-        enum_name = None
-        
-        for par in pars:
-            # Используем .get(), чтобы не упасть, если ключа "Parameter" нет в словаре
-            if par.get("Parameter") == name:
-                enum_name = par.get("Transformation")
-                break
-      
-        # Если параметр вообще не найден или у него нет поля Enum
-        if not enum_name:
-            return None, None 
+        """Возвращает (единицы из InitialDeclarationUnits, "ед1 / ед2 / ...").
 
-        trans = self.data.get("Transformations", []) 
+        Второй элемент — строка со всеми доступными единицами трансформации;
+        если данных нет, оба элемента равны None.
+        """
+        transformation_name = self._transformation_name(name)
+        if not transformation_name:
+            return None, None
 
+        transformation = self._transformations.get(transformation_name)
+        if not transformation:
+            return None, None
 
-        for en in trans:
-            # Сравниваем имя Enum из параметра с именем в списке Enums
-            units_data = en.get("AvailableUnits")
-            str = " / ".join(item["Units"] for item in units_data)
-            if en.get("Transformation") == enum_name:
-                return en.get("InitialDeclarationUnits"), str  # Возвращаем найденные значения
-        
-        # Если цикл закончился, значит Enum с таким именем не найден в разделе "Enums"
-        return None, None 
+        available_units = [
+            unit.get("Units", "")
+            for unit in transformation.get("AvailableUnits", [])
+        ]
+        units_text = " / ".join(available_units)
+        return transformation.get("InitialDeclarationUnits"), units_text
 
     def find_units_by_type(self, name, unit_type="Secondary"):
-        """
+        """Возвращает строку с единицей нужного типа или None.
+
         unit_type: 'Primary' | 'Secondary' | 'Relative'
-        Возвращает строку с единицей нужного типа или None.
         """
-        pars = self.data.get("Parameters", [])
-        trans_name = None
-        for par in pars:
-            if par.get("Parameter") == name:
-                trans_name = par.get("Transformation")
-                break
-        if not trans_name:
+        transformation_name = self._transformation_name(name)
+        if not transformation_name:
             return None
 
-        for en in self.data.get("Transformations", []):
-            if en.get("Transformation") != trans_name:
-                continue
-            for u in en.get("AvailableUnits", []):
-                if u.get("Type") == unit_type:
-                    return u.get("Units")
+        transformation = self._transformations.get(transformation_name)
+        if not transformation:
             return None
+
+        for unit in transformation.get("AvailableUnits", []):
+            if unit.get("Type") == unit_type:
+                return unit.get("Units")
+
         return None
-
-#a = ExtensionHandler()
-#m = a.find_enum_by_parameter_name("Supervision_TimeSource")
-#print(m)
