@@ -6,10 +6,11 @@ import os
 from pathlib import Path
 
 from core.SettingBlanc2 import SettingBlanc
-from core.UnitConverter import DEFAULT_UNIT_TYPE
+from core.UnitConverter import DEFAULT_TIME_UNIT, DEFAULT_UNIT_TYPE
 from logger.logger import Logger
 from utils.abbrs import start_abbr
-from utils.latex import escape_name, format_mark, format_numeric, parse_note_to_latex
+from utils.latex import (escape_latex, escape_name, format_mark, format_numeric,
+                         parse_note_to_latex)
 
 START_SETTINGS_TAG = '%===m>'
 END_SETTINGS_TAG = '%===m\n'
@@ -18,13 +19,16 @@ SUMM_TABLE_TAG = '%===t2\n'
 class Manual:
     """Руководство по эксплуатации (РЭ) в формате latex."""
 
-    def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE):
+    def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE,
+                 time_unit=DEFAULT_TIME_UNIT):
         self.device_data = device_data
         self.unit_type = unit_type
+        self.time_unit = time_unit
         self.path_to_latex_desc = device_data["path_to_latex_desc"]
         self.path_to_ru_desc = device_data["path_to_ru_desc"]
 
-        self.setting_blanc = SettingBlanc(self.device_data, unit_type=unit_type)
+        self.setting_blanc = SettingBlanc(self.device_data, unit_type=unit_type,
+                                          time_unit=time_unit)
 
     # --------------------------------------------------------------- утилиты
 
@@ -65,7 +69,7 @@ class Manual:
         for idx, sub in enumerate(settings_data.get("sub_functions", [])):
             subtitle = sub.get("subtitle", "")
             prefix = '' if idx == 0 else '\\hline\n'
-            table.append(prefix + '\\multicolumn{5}{|c|}{ ' + self.escape_latex(subtitle)
+            table.append(prefix + '\\multicolumn{5}{|c|}{ ' + escape_latex(subtitle)
                          + ' } \\\\ \\hline \n')
 
             for i, row in enumerate(sub.get("rows", [])):

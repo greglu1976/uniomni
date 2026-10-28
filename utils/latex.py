@@ -1,6 +1,7 @@
 """Общие помощники формирования LaTeX (экранирование и форматирование ячеек)."""
 
 import ast
+import re
 
 from logger.logger import Logger
 
@@ -28,10 +29,20 @@ def escape_name(text):
     return text.replace('>>', r'\verb|>>|').replace('<<', r'\verb|<<|')
 
 
+_EXPONENT_RE = re.compile(r'^(?P<mantissa>[^eE]*)(?P<exponent>[eE].*)?$')
+
+
 def format_numeric(value, escape_percent=False):
-    """Форматирует числовую ячейку LaTeX (дефис → тире)."""
+    """Форматирует числовую ячейку LaTeX (дефис → тире).
+
+    Дефис заменяется на «--» только в мантиссе: иначе знак минус в
+    экспоненциальной записи (8,333e-7) превращался в «8,333e--7».
+    """
     text = "" if value is None else str(value)
-    text = text.replace('-', r'--')
+    match = _EXPONENT_RE.match(text)
+    mantissa = (match.group('mantissa') or '').replace('-', r'--')
+    exponent = match.group('exponent') or ''
+    text = mantissa + exponent
     if escape_percent:
         text = text.replace('%', r'\%')
     return text

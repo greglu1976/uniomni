@@ -44,6 +44,23 @@ UNIT_TYPE_TITLES = {
 # По умолчанию — вторичные (как было настроено в TARGET_UNIT_TYPE)
 DEFAULT_UNIT_TYPE = UNIT_TYPE_SECONDARY
 
+# Единицы-множители (время). Значения совпадают с `Units` в EXTENSION.json.
+# «мин» не предлагаем: коэффициент в пакете задан как 1.666665e-05 (неточный),
+# из-за чего 5 мин выводились бы как 4,999995.
+TIME_UNIT_CHOICES = ("мс", "сек")
+DEFAULT_TIME_UNIT = "мс"
+
+# Точные коэффициенты пересчёта времени (сколько единицы в 1 мс).
+# Нужны для уставок времени, у которых в пакете нет трансформации.
+SIMPLE_TIME_COEFFICIENTS = {
+    "нс": 1e6,
+    "мс": 1.0,
+    "с": 0.001,
+    "сек": 0.001,
+    "мин": 1.0 / 60000.0,
+    "минуты": 1.0 / 60000.0,
+}
+
 
 def to_float(value, default=None):
     """Приводит значение из JSON/meta к float (или возвращает default)."""
@@ -149,10 +166,11 @@ class UnitConverter:
     """Пересчёт значений одного пакета поддержки в выбранную систему единиц."""
 
     def __init__(self, config_handler, extension_handler,
-                 target_type=DEFAULT_UNIT_TYPE):
+                 target_type=DEFAULT_UNIT_TYPE, time_unit=DEFAULT_TIME_UNIT):
         self.config_handler = config_handler
         self.extension_handler = extension_handler
         self.target_type = target_type or DEFAULT_UNIT_TYPE
+        self.time_unit = time_unit or DEFAULT_TIME_UNIT
         self._cache = {}
         self._warned = set()
 
@@ -162,6 +180,13 @@ class UnitConverter:
         if target_type == self.target_type:
             return
         self.target_type = target_type or DEFAULT_UNIT_TYPE
+        self._cache.clear()
+
+    def set_time_unit(self, time_unit):
+        """Переключает единицы времени (мс / сек / мин)."""
+        if time_unit == self.time_unit:
+            return
+        self.time_unit = time_unit or DEFAULT_TIME_UNIT
         self._cache.clear()
 
     def _parameter_number(self, parameter_name):
@@ -176,6 +201,23 @@ class UnitConverter:
         coefficient_value = self._parameter_number(unit_entry.get("CoefficientParameter"))
         basis_value = self._parameter_number(unit_entry.get("BasisParameter"))
         return UnitScale(unit_entry, coefficient_value, basis_value)
+
+    @staticmethod
+    def _simple_time_scale(label):
+        """Шкала времени по её точному определению (без трансформации пакета)."""
+        coefficient = SIMPLE_TIME_COEFFICIENTS.get(label)
+        if coefficient is None:
+            return None
+        return UnitScale({"Units": label, "Type": UNIT_TYPE_MULTIPLIER,
+                          "Coefficient": coefficient})
+
+    def _simple_time_resolution(self, declared):
+        """Пересчёт времени, когда в пакете нет трансформации (1 сек = 1000 мс)."""
+        source = self._simple_time_scale(declared)
+        target = self._simple_time_scale(self.time_unit)
+        if source is None or target is None or source.label == target.label:
+            return (None, None, declared)
+        return (source, target, target.label)
 
     def _resolve(self, parameter_name):
         """Возвращает (исходная шкала, целевая шкала, подпись единиц).
@@ -193,13 +235,28 @@ class UnitConverter:
 
         transformation = self.extension_handler.find_transformation_by_parameter_name(parameter_name)
         if not transformation:
-            result = (None, None, declared)
+            result = self._simple_time_resolution(declared)
             self._cache[parameter_name] = result
             return result
 
         scales = [self._make_scale(unit) for unit in transformation.get("AvailableUnits") or []]
         source = next((scale for scale in scales if scale.label == declared), None)
-        target = next((scale for scale in scales if scale.unit_type == self.target_type), None)
+
+        electrical = [scale for scale in scales
+                      if scale.unit_type in (UNIT_TYPE_PRIMARY, UNIT_TYPE_SECONDARY,
+                                             UNIT_TYPE_RELATIVE)]
+        if electrical:
+            target = next((scale for scale in electrical
+                           if scale.unit_type == self.target_type), None)
+        else:
+            # Время (и другие множители): единицы выбираются по подписи
+            multipliers = [scale for scale in scales
+                           if scale.unit_type == UNIT_TYPE_MULTIPLIER]
+            target = next((scale for scale in multipliers
+                           if scale.label == self.time_unit), None)
+            if target is None:
+                target = next((scale for scale in multipliers
+                               if scale.label == declared), None)
 
         if source is None:
             # Подпись в meta.json не совпала ни с одной системой единиц —

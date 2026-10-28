@@ -11,7 +11,9 @@ from core.LatexDoc import LatexDoc
 from core.Manual2 import Manual
 from core.SettingBlanc2 import SettingBlanc
 from core.UnitConverter import (
+    DEFAULT_TIME_UNIT,
     DEFAULT_UNIT_TYPE,
+    TIME_UNIT_CHOICES,
     UNIT_TYPE_TITLES,
 )
 from logger.logger import Logger
@@ -53,7 +55,7 @@ class Application:
         dpg.bind_font(default_font)
 
         # Главное окно
-        with dpg.window(label="Главное окно", width=400, height=470, pos=[20, 20]):
+        with dpg.window(label="Главное окно", width=400, height=495, pos=[20, 20]):
             self.device_combo = dpg.add_combo(
                 label="Устройство",
                 items=[],
@@ -73,10 +75,16 @@ class Application:
             )
             dpg.add_spacer(height=5)
 
+            dpg.add_text("Единицы времени")
+            self.time_combo = dpg.add_combo(
+                items=list(TIME_UNIT_CHOICES),
+                default_value=DEFAULT_TIME_UNIT,
+                width=300,
+            )
+            dpg.add_spacer(height=5)
+
             dpg.add_button(label="Создать бланк уставок в docx",
                            callback=self.generate_setting_blanc_docx, width=300)
-            dpg.add_button(label="Создать раздел «Уставки» в tex",
-                           callback=self.generate_settings_tex, width=300)
             dpg.add_spacer(height=5)
             dpg.add_separator()
             dpg.add_spacer(height=5)
@@ -134,6 +142,11 @@ class Application:
                 return unit_type
         return DEFAULT_UNIT_TYPE
 
+    def _selected_time_unit(self):
+        """Выбранные в интерфейсе единицы времени."""
+        value = dpg.get_value(self.time_combo)
+        return value if value in TIME_UNIT_CHOICES else DEFAULT_TIME_UNIT
+
     def _require_device(self):
         """Проверяет, что устройство выбрано, и загружает его данные."""
         selected_text = dpg.get_value(self.device_combo)
@@ -169,21 +182,11 @@ class Application:
 
     def _task_setting_blanc_docx(self):
         unit_type = self._selected_unit_type()
+        time_unit = self._selected_time_unit()
         Logger.info(f"Начинаем создавать бланк уставок "
-                    f"({UNIT_TYPE_TITLES[unit_type]})...")
-        SettingBlanc(self.device_data, unit_type=unit_type).get_blanc()
-
-    def generate_settings_tex(self):
-        if not self._require_device():
-            return
-        self._safe(self._task_settings_tex)
-
-    def _task_settings_tex(self):
-        unit_type = self._selected_unit_type()
-        Logger.info(f"Формируем раздел «Уставки» в tex "
-                    f"({UNIT_TYPE_TITLES[unit_type]})...")
-        path = SettingBlanc(self.device_data, unit_type=unit_type).export_settings_tex()
-        Logger.info(f"Файл создан: {path}")
+                    f"({UNIT_TYPE_TITLES[unit_type]}, время: {time_unit})...")
+        SettingBlanc(self.device_data, unit_type=unit_type,
+                     time_unit=time_unit).get_blanc()
 
     def renew_setting_tables_re(self):
         if not self._require_device():
@@ -191,8 +194,12 @@ class Application:
         self._safe(self._task_renew_setting_tables_re)
 
     def _task_renew_setting_tables_re(self):
-        Logger.info('Обновляем таблицы с уставками в РЭ...')
-
+        Logger.info(f"Обновляем таблицы с уставками в РЭ "
+                    f"({UNIT_TYPE_TITLES[self._selected_unit_type()]}, "
+                    f"время: {self._selected_time_unit()})...")
+        Manual(device_data=self.device_data,
+               unit_type=self._selected_unit_type(),
+               time_unit=self._selected_time_unit()).renew_setting_tables_re()
         Logger.info('Таблицы с уставками в РЭ обновлены')
 
     def renew_sum_table_latex(self):
@@ -202,7 +209,9 @@ class Application:
 
     def _task_renew_sum_table_latex(self):
         Logger.info('Обновляем таблицу сигналов в РЭ...')
-
+        Manual(device_data=self.device_data,
+               unit_type=self._selected_unit_type(),
+               time_unit=self._selected_time_unit()).renew_sum_table_latex()
         Logger.info('Таблица сигналов в РЭ обновлена')
 
     def renew_abbrs(self):
@@ -212,7 +221,8 @@ class Application:
 
     def _task_renew_abbrs(self):
         result = Manual(device_data=self.device_data,
-                        unit_type=self._selected_unit_type()).renew_abbrs()
+                        unit_type=self._selected_unit_type(),
+                        time_unit=self._selected_time_unit()).renew_abbrs()
         if result in (None, 'ok', 'noabbrs'):
             Logger.info('Перечень сокращений в РЭ обновлен')
         else:
@@ -225,7 +235,8 @@ class Application:
 
     def _task_renew_abbrs_ru(self):
         result = Manual(device_data=self.device_data,
-                        unit_type=self._selected_unit_type()).renew_abbrs_ru()
+                        unit_type=self._selected_unit_type(),
+                        time_unit=self._selected_time_unit()).renew_abbrs_ru()
         if result == 0:
             Logger.info('Перечень сокращений в РУ обновлен')
         else:

@@ -7,7 +7,13 @@ from decimal import Decimal
 from typing import Any, Dict, List
 
 from core.MainConfigHandler import MainConfigHandler
-from core.UnitConverter import DEFAULT_UNIT_TYPE, UnitConverter, format_value, to_float
+from core.UnitConverter import (
+    DEFAULT_TIME_UNIT,
+    DEFAULT_UNIT_TYPE,
+    UnitConverter,
+    format_value,
+    to_float,
+)
 from logger.logger import Logger
 from utils.paths import load_packet_json
 
@@ -90,7 +96,7 @@ class NodeResolver:
 class OrderHandler:
 
     def __init__(self, config_handler=None, extension_handler=None, root_path='',
-                 unit_type=DEFAULT_UNIT_TYPE):
+                 unit_type=DEFAULT_UNIT_TYPE, time_unit=DEFAULT_TIME_UNIT):
         self.data, self.path = load_packet_json(root_path, "grouping.json")
 
         self.settings_group1 = []
@@ -106,8 +112,10 @@ class OrderHandler:
 
         # Пересчёт значений уставок в выбранную систему единиц
         self.unit_type = unit_type or DEFAULT_UNIT_TYPE
+        self.time_unit = time_unit or DEFAULT_TIME_UNIT
         self.unit_converter = UnitConverter(
-            self.config_handler, self.extension_handler, self.unit_type)
+            self.config_handler, self.extension_handler,
+            self.unit_type, self.time_unit)
 
         self.mapping = {}
         self._create_mapping_from_structure()
@@ -178,6 +186,11 @@ class OrderHandler:
         """Переключает систему единиц без пересоздания обработчика."""
         self.unit_type = unit_type or DEFAULT_UNIT_TYPE
         self.unit_converter.set_target_type(self.unit_type)
+
+    def set_time_unit(self, time_unit):
+        """Переключает единицы времени (мс / сек / мин)."""
+        self.time_unit = time_unit or DEFAULT_TIME_UNIT
+        self.unit_converter.set_time_unit(self.time_unit)
 
     def _conversion_needed(self, parameter_name) -> bool:
         """Нужен ли пересчёт значений этого параметра."""
