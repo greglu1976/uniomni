@@ -243,8 +243,8 @@ def _format_header_cell(doc, cell, text=None):
 ####################################################################################
 
 TABLE_WIDTHS_SETTINGS = (
-    Inches(0.25), Inches(2.0), Inches(1.8), Inches(0.5), Inches(0.5),
-    Inches(1.5), Inches(1), Inches(1), Inches(1), Inches(1),
+    Inches(0.25), Inches(1.7), Inches(1.8), Inches(0.6), Inches(0.8),
+    Inches(1.4), Inches(1), Inches(1), Inches(1), Inches(1),
 )
 
 
