@@ -11,6 +11,7 @@ from docx import Document
 from docxtpl import DocxTemplate, RichText
 
 from core.ExtensionHandler import ExtensionHandler
+from core.FsuInformation import FsuInformation
 from core.MainConfigHandler import MainConfigHandler
 from core.OrderHandler import OrderHandler
 from core.UnitConverter import DEFAULT_TIME_UNIT, DEFAULT_UNIT_TYPE
@@ -52,7 +53,7 @@ class SettingBlanc:
     """Бланк уставок: docx-документ с таблицами уставок, входов/выходов и т.д."""
 
     def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE,
-                 time_unit=DEFAULT_TIME_UNIT, convert_step=True):
+                 time_unit=DEFAULT_TIME_UNIT, convert_step=True, use_fsu=True):
         packet_path = device_data.get('path_to_support_packets')
         Logger.info(f"Путь к пакетам поддержки: {packet_path}")
 
@@ -60,6 +61,9 @@ class SettingBlanc:
         self.unit_type = unit_type or DEFAULT_UNIT_TYPE
         self.time_unit = time_unit or DEFAULT_TIME_UNIT
         self.convert_step = bool(convert_step)
+        # Источник уставок: fsu-information.json (по умолчанию) или GROUPING/meta
+        self.use_fsu = bool(use_fsu)
+        self.fsu_information = None
         self.code = self.device_data.get("setting_blanc_code", "")
         self.versions = self.device_data.get("versions") or []
         self.base_structure = None
@@ -78,6 +82,11 @@ class SettingBlanc:
                                           packet_path, unit_type=self.unit_type,
                                           time_unit=self.time_unit,
                                           convert_step=self.convert_step)
+
+        if self.use_fsu:
+            self.fsu_information = FsuInformation.try_load(packet_path)
+            if self.fsu_information is None:
+                self.use_fsu = False
 
         self.di_list = []
         self.maps = self.order_handler.get_mapping()
@@ -179,6 +188,14 @@ class SettingBlanc:
             elif func_type == 'complex':
                 add_paragraph(doc, title, STYLE_HEADING_2)
 
+                # Собственные уставки блока (источник fsu-information):
+                # в GROUPING такие уставки не выводились вовсе
+                if func_block.get('rows'):
+                    add_paragraph(doc, title, STYLE_TABLE_TITLE)
+                    table = add_table_settings_core4(doc)
+                    self._fill_table_settings(table, func_block['rows'])
+                    add_paragraph(doc, '', STYLE_TAGS)
+
                 for sub_func in func_block.get('sub_functions', []):
                     subtitle = sub_func.get('subtitle', '')
                     if subtitle:
@@ -236,15 +253,26 @@ class SettingBlanc:
         return table
 
     def get_all_settings(self):
-        ordered_fbs = list(self.maps.keys())
-        base_structure = []
-        for fb in ordered_fbs:
-            fb_map = self.maps.get(fb)
-            if not fb_map:
-                continue
-            json_data = self.order_handler.get_data_by_fb_name(fb_map)
-            parsed_blocks = self.order_handler.parse_rza_structure(json_data, all_struct=0)
-            base_structure.extend(parsed_blocks)
+        """Собирает блоки уставок из выбранного источника (fsu или GROUPING)."""
+        if self.use_fsu and self.fsu_information is not None:
+            base_structure = self.order_handler.build_settings_blocks_from_fsu(
+                self.fsu_information)
+            # Для обновления таблиц в РЭ используем те же имена блоков
+            self.maps = {block['func_name']: block['func_name'] for block in base_structure}
+            Logger.info(f"Источник уставок: fsu-information.json "
+                        f"({len(base_structure)} блоков)")
+        else:
+            base_structure = []
+            for fb in list(self.maps.keys()):
+                fb_map = self.maps.get(fb)
+                if not fb_map:
+                    continue
+                json_data = self.order_handler.get_data_by_fb_name(fb_map)
+                base_structure.extend(
+                    self.order_handler.parse_rza_structure(json_data, all_struct=0))
+            Logger.info(f"Источник уставок: GROUPING.json/meta.json "
+                        f"({len(base_structure)} блоков)")
+
         self.base_structure = base_structure
         Logger.info(f"Загружено {len(base_structure)} блоков уставок")
         return base_structure
@@ -663,7 +691,10 @@ class SettingBlanc:
                 for sub_func in block.get('sub_functions', [])
                 if sub_func.get('rows')
             ]
-            if not subs:
+            # Собственные уставки блока (источник fsu-information)
+            if block.get('rows'):
+                output["rows"] = prepare_rows(block['rows'])
+            if not subs and not output.get("rows"):
                 return None
             output["sub_functions"] = subs
         else:

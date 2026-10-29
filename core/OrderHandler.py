@@ -12,6 +12,7 @@ from core.UnitConverter import (
     DEFAULT_UNIT_TYPE,
     UnitConverter,
     format_value,
+    normalize_unit_label,
     to_float,
 )
 from logger.logger import Logger
@@ -241,16 +242,24 @@ class OrderHandler:
 
         return f"{number:.{decimals}f}".replace('.', ',')
 
-    def prepare_data_for_table(self, parameter_name):
+    def prepare_data_for_table(self, parameter_name, info=None, apply_conversion=True):
         """Строка таблицы уставок: (ключ, наименование, обозначение, диапазон,
         ед. изм., шаг, значение по умолчанию, пустое поле).
 
-        Числовые значения (диапазон, шаг, значение по умолчанию) пересчитываются
-        в систему единиц, выбранную в интерфейсе (первичные/вторичные/о.е.).
+        Args:
+            parameter_name: имя параметра (ключ в meta.json/EXTENSION.json).
+            info: описание параметра; по умолчанию берётся из meta.json.
+            apply_conversion: пересчитывать ли значения в выбранную систему
+                единиц. Для источника fsu-information.json — False: там
+                значения и шаг уже в о.е. и берутся как есть, без коэффициентов.
         """
-        info = self.config_handler.get_param_info(parameter_name)
+        if info is None:
+            info = self.config_handler.get_param_info(parameter_name)
         if not info:
             raise KeyError(f"Параметр отсутствует в meta.json: {parameter_name}")
+
+        # Внешний источник (fsu-information.json): значения уже в своих единицах
+        external_source = info is not None and not apply_conversion
 
         description = str(info.get("description") or "")
         short_description = description.split("_", 1)[1] if "_" in description else description
@@ -267,28 +276,44 @@ class OrderHandler:
 
         options = {}
         is_sgf = bool(note)
-        convert = self._conversion_needed(parameter_name)
+        convert = apply_conversion and self._conversion_needed(parameter_name)
 
-        # Пересчитанные значения (None, если значения нет или пересчёт не нужен)
-        converted_min = self._convert_number(parameter_name, min_value) if convert else None
-        converted_max = self._convert_number(parameter_name, max_value) if convert else None
-        converted_default = (self._convert_number(parameter_name, default_value)
-                             if convert and default_value else None)
-        converted_step = (self._convert_number(parameter_name, step)
-                          if convert and step else None)
+        # Пересчитанные значения (только для режима пересчёта)
+        converted_min = converted_max = converted_default = converted_step = None
+        if convert:
+            converted_min = self._convert_number(parameter_name, min_value)
+            converted_max = self._convert_number(parameter_name, max_value)
+            converted_default = self._convert_number(parameter_name, default_value) if default_value else None
+            converted_step = self._convert_number(parameter_name, step) if step else None
 
         # Точность диапазона и значения по умолчанию диктует шаг: пересчитанный,
-        # если шаг пересчитывается, иначе исходный из meta.json. Выравниваем
-        # только по «ровному» шагу; дополнительно не теряем значащие цифры,
-        # если шаг крупнее самих значений.
+        # если шаг пересчитывается, иначе исходный. Выравниваем только по
+        # «ровному» шагу; дополнительно не теряем значащие цифры, если шаг
+        # крупнее самих значений.
         decimals = None
-        step_for_decimals = converted_step if (self.convert_step and converted_step) else step
+        if external_source:
+            step_for_decimals = step
+        elif convert and self.convert_step and converted_step:
+            step_for_decimals = converted_step
+        else:
+            step_for_decimals = step
+
         if step_for_decimals and self._is_clean_step(step_for_decimals):
             decimals = min(8, self._decimals_count(step_for_decimals))
-            for candidate in (converted_min, converted_max, converted_default):
-                if candidate is not None:
-                    decimals = max(decimals, self._min_decimals(candidate))
+            candidates = ([converted_min, converted_max, converted_default, min_value, max_value, default_value]
+                          if not external_source else [min_value, max_value, default_value])
+            for candidate in candidates:
+                number = to_float(candidate)
+                if number is not None:
+                    decimals = max(decimals, self._min_decimals(number))
             decimals = min(8, decimals)
+
+        def format_raw(raw_value):
+            """Значение источника без пересчёта (точность — по шагу)."""
+            number = to_float(raw_value)
+            if number is None:
+                return '' if raw_value is None else str(raw_value)
+            return self._format_converted(number, decimals)
 
         # --- Значение / Диапазон ---
         if note:
@@ -300,6 +325,11 @@ class OrderHandler:
                         f"{self._format_converted(converted_max, decimals)}")
             else:
                 col3 = '-'
+        elif external_source:
+            if min_value is not None and max_value is not None:
+                col3 = f"{format_raw(min_value)}...{format_raw(max_value)}"
+            else:
+                col3 = '-'
         elif step and min_value is not None and max_value is not None:
             legacy_decimals = self._decimals_count(step)
             col3 = (f"{self._format_step_value(min_value, legacy_decimals)}..."
@@ -309,8 +339,12 @@ class OrderHandler:
         else:
             col3 = '-'
 
-        # --- Единицы измерения (подпись выбранной системы единиц) ---
-        col4 = self.unit_converter.unit_label(parameter_name) or str(info.get("units") or "") or "-"
+        # --- Единицы измерения ---
+        if external_source:
+            col4 = normalize_unit_label(str(info.get("units") or "")) or "-"
+        else:
+            col4 = (self.unit_converter.unit_label(parameter_name)
+                    or str(info.get("units") or "") or "-")
 
         # --- Шаг ---
         # При convert_step=False шаг берётся из meta.json как есть (без
@@ -319,6 +353,8 @@ class OrderHandler:
             col5 = "-"
         elif convert and self.convert_step and converted_step is not None:
             col5 = self._format_converted(converted_step, decimals)
+        elif external_source:
+            col5 = format_raw(step) if step else "-"
         elif step:
             col5 = self._format_step_value(step, self._decimals_count(step))
         else:
@@ -336,12 +372,65 @@ class OrderHandler:
                 col6 = options.get(str(default_value), default_value)
             elif convert and converted_default is not None:
                 col6 = self._format_converted(converted_default, decimals)
+            elif external_source:
+                col6 = format_raw(default_value)
             elif step:
                 col6 = self._format_step_value(default_value, self._decimals_count(step))
             else:
                 col6 = default_value
 
         return col0, col1, col2, col3, col4, col5, col6, ''
+
+    def build_fsu_row(self, parameter_name, fsu_description, variable=None):
+        """Строка таблицы по данным fsu-information.json (значения в о.е.).
+
+        Коэффициенты не применяются: Min/Max/Step/DefaultValue и Units берутся
+        из fsu как есть. Из meta.json добираются только справочные поля,
+        которых в fsu нет (note с вариантами перечисления).
+        """
+        meta_info = self.config_handler.get_param_info(parameter_name) or {}
+
+        info = {
+            "name": parameter_name,
+            "description": str(fsu_description.get("Description") or ""),
+            "fullDescription": str(fsu_description.get("FullDescription") or ""),
+            "appliedDescription": str(fsu_description.get("AppliedDescription") or ""),
+            "units": str(fsu_description.get("Units") or ""),
+            "minValue": self._fsu_number(fsu_description.get("Min")),
+            "maxValue": self._fsu_number(fsu_description.get("Max")),
+            "step": self._fsu_number(fsu_description.get("Step")),
+            "defaultValue": self._fsu_number(fsu_description.get("DefaultValue")),
+            "note": meta_info.get("note") or "",
+            "type": meta_info.get("type"),
+        }
+
+        try:
+            col0, col1, col2, col3, col4, col5, col6, col7 = self.prepare_data_for_table(
+                parameter_name, info=info, apply_conversion=False)
+        except KeyError as error:
+            Logger.warning(f"Строка уставки пропущена: {error}")
+            return None
+
+        return {
+            "col0": col0, "col1": col1, "col2": col2, "col3": col3,
+            "col4": col4, "col5": col5, "col6": col6, "col7": col7,
+        }
+
+    @staticmethod
+    def _fsu_number(value):
+        """Нормализует значение из fsu: False/True → 0/1, пустое → ''."""
+        if value is None:
+            return ''
+        text = str(value).strip()
+        if text in ("False", "false"):
+            return '0'
+        if text in ("True", "true"):
+            return '1'
+        return text
+
+    def build_settings_blocks_from_fsu(self, fsu_information):
+        """Блоки уставок по функциональным блокам из fsu-information.json."""
+        return fsu_information.get_blocks(self.build_fsu_row)
 
     def parse_rza_structure(self, data: List[Dict[str, Any]], all_struct: bool = True) -> List[Dict[str, Any]]:
         """Преобразует дерево уставок в список блоков для генерации таблиц.

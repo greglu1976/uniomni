@@ -56,7 +56,7 @@ class Application:
         dpg.bind_font(default_font)
 
         # Главное окно
-        with dpg.window(label="Главное окно", width=400, height=520, pos=[20, 20]):
+        with dpg.window(label="Главное окно", width=400, height=545, pos=[20, 20]):
             self.device_combo = dpg.add_combo(
                 label="Устройство",
                 items=[],
@@ -86,6 +86,10 @@ class Application:
 
             self.step_checkbox = dpg.add_checkbox(
                 label="Преобразовывать Шаг",
+                default_value=True,
+            )
+            self.fsu_checkbox = dpg.add_checkbox(
+                label="Генерировать из fsu-information",
                 default_value=True,
             )
             dpg.add_spacer(height=5)
@@ -161,6 +165,10 @@ class Application:
         """Нужно ли пересчитывать шаг уставки коэффициентом."""
         return bool(dpg.get_value(self.step_checkbox))
 
+    def _use_fsu(self):
+        """Брать ли уставки из fsu-information.json (иначе — из GROUPING/meta)."""
+        return bool(dpg.get_value(self.fsu_checkbox))
+
     def _require_device(self):
         """Проверяет, что устройство выбрано, и загружает его данные."""
         selected_text = dpg.get_value(self.device_combo)
@@ -197,11 +205,14 @@ class Application:
     def _task_setting_blanc_docx(self):
         unit_type = self._selected_unit_type()
         time_unit = self._selected_time_unit()
-        Logger.info(f"Начинаем создавать бланк уставок "
-                    f"({UNIT_TYPE_TITLES[unit_type]}, время: {time_unit})...")
+        source = ('fsu-information (значения и шаг как в файле, в о.е.)'
+                  if self._use_fsu() else
+                  f'GROUPING/meta ({UNIT_TYPE_TITLES[unit_type]}, время: {time_unit})')
+        Logger.info(f"Начинаем создавать бланк уставок — источник: {source}...")
         SettingBlanc(self.device_data, unit_type=unit_type,
                      time_unit=time_unit,
-                     convert_step=self._convert_step()).get_blanc()
+                     convert_step=self._convert_step(),
+                     use_fsu=self._use_fsu()).get_blanc()
 
     def renew_setting_tables_re(self):
         if not self._require_device():
@@ -212,11 +223,13 @@ class Application:
         Logger.info(f"Обновляем таблицы с уставками в РЭ "
                     f"({UNIT_TYPE_TITLES[self._selected_unit_type()]}, "
                     f"время: {self._selected_time_unit()}, "
-                    f"шаг преобразуется: {'да' if self._convert_step() else 'нет'})...")
+                    f"шаг преобразуется: {'да' if self._convert_step() else 'нет'}, "
+                    f"источник: {'fsu-information' if self._use_fsu() else 'GROUPING/meta'})...")
         Manual(device_data=self.device_data,
                unit_type=self._selected_unit_type(),
                time_unit=self._selected_time_unit(),
-               convert_step=self._convert_step()).renew_setting_tables_re()
+               convert_step=self._convert_step(),
+               use_fsu=self._use_fsu()).renew_setting_tables_re()
         Logger.info('Таблицы с уставками в РЭ обновлены')
 
     def renew_sum_table_latex(self):
@@ -229,7 +242,8 @@ class Application:
         Manual(device_data=self.device_data,
                unit_type=self._selected_unit_type(),
                time_unit=self._selected_time_unit(),
-               convert_step=self._convert_step()).renew_sum_table_latex()
+               convert_step=self._convert_step(),
+               use_fsu=self._use_fsu()).renew_sum_table_latex()
         Logger.info('Таблица сигналов в РЭ обновлена')
 
     def renew_abbrs(self):

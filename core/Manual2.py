@@ -20,17 +20,19 @@ class Manual:
     """Руководство по эксплуатации (РЭ) в формате latex."""
 
     def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE,
-                 time_unit=DEFAULT_TIME_UNIT, convert_step=True):
+                 time_unit=DEFAULT_TIME_UNIT, convert_step=True, use_fsu=True):
         self.device_data = device_data
         self.unit_type = unit_type
         self.time_unit = time_unit
         self.convert_step = bool(convert_step)
+        self.use_fsu = bool(use_fsu)
         self.path_to_latex_desc = device_data["path_to_latex_desc"]
         self.path_to_ru_desc = device_data["path_to_ru_desc"]
 
         self.setting_blanc = SettingBlanc(self.device_data, unit_type=unit_type,
                                           time_unit=time_unit,
-                                          convert_step=convert_step)
+                                          convert_step=convert_step,
+                                          use_fsu=use_fsu)
 
     # --------------------------------------------------------------- утилиты
 
@@ -68,7 +70,13 @@ class Manual:
             table.append('\\hline\n')
             return table
 
-        for idx, sub in enumerate(settings_data.get("sub_functions", [])):
+        subs = list(settings_data.get("sub_functions", []))
+        if settings_data.get("rows"):
+            # Уставки самого блока (источник fsu-information) — отдельной таблицей
+            subs.insert(0, {"subtitle": settings_data.get("func_name", ""),
+                            "rows": settings_data["rows"]})
+
+        for idx, sub in enumerate(subs):
             subtitle = sub.get("subtitle", "")
             prefix = '' if idx == 0 else '\\hline\n'
             table.append(prefix + '\\multicolumn{5}{|c|}{ ' + escape_latex(subtitle)
@@ -84,6 +92,10 @@ class Manual:
 
     def renew_setting_tables_re(self):
         """Обновляет таблицы уставок в приложении «Уставки» РЭ."""
+        # Сначала собираем блоки выбранным источником (fsu или GROUPING),
+        # чтобы сопоставление ФБ шло по актуальным именам
+        if not self.setting_blanc.base_structure:
+            self.setting_blanc.get_all_settings()
         mapping = self.setting_blanc.maps
 
         path_to_desc = (self.device_data.get("path_to_latex_desc") or '').rstrip('/\\')
