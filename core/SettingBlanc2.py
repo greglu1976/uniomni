@@ -52,13 +52,14 @@ class SettingBlanc:
     """Бланк уставок: docx-документ с таблицами уставок, входов/выходов и т.д."""
 
     def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE,
-                 time_unit=DEFAULT_TIME_UNIT):
+                 time_unit=DEFAULT_TIME_UNIT, convert_step=True):
         packet_path = device_data.get('path_to_support_packets')
         Logger.info(f"Путь к пакетам поддержки: {packet_path}")
 
         self.device_data = device_data
         self.unit_type = unit_type or DEFAULT_UNIT_TYPE
         self.time_unit = time_unit or DEFAULT_TIME_UNIT
+        self.convert_step = bool(convert_step)
         self.code = self.device_data.get("setting_blanc_code", "")
         self.versions = self.device_data.get("versions") or []
         self.base_structure = None
@@ -75,7 +76,8 @@ class SettingBlanc:
 
         self.order_handler = OrderHandler(self.config_handler, self.extension_handler,
                                           packet_path, unit_type=self.unit_type,
-                                          time_unit=self.time_unit)
+                                          time_unit=self.time_unit,
+                                          convert_step=self.convert_step)
 
         self.di_list = []
         self.maps = self.order_handler.get_mapping()

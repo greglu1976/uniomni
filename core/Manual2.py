@@ -20,15 +20,17 @@ class Manual:
     """Руководство по эксплуатации (РЭ) в формате latex."""
 
     def __init__(self, device_data, unit_type=DEFAULT_UNIT_TYPE,
-                 time_unit=DEFAULT_TIME_UNIT):
+                 time_unit=DEFAULT_TIME_UNIT, convert_step=True):
         self.device_data = device_data
         self.unit_type = unit_type
         self.time_unit = time_unit
+        self.convert_step = bool(convert_step)
         self.path_to_latex_desc = device_data["path_to_latex_desc"]
         self.path_to_ru_desc = device_data["path_to_ru_desc"]
 
         self.setting_blanc = SettingBlanc(self.device_data, unit_type=unit_type,
-                                          time_unit=time_unit)
+                                          time_unit=time_unit,
+                                          convert_step=convert_step)
 
     # --------------------------------------------------------------- утилиты
 

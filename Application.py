@@ -55,7 +55,7 @@ class Application:
         dpg.bind_font(default_font)
 
         # Главное окно
-        with dpg.window(label="Главное окно", width=400, height=495, pos=[20, 20]):
+        with dpg.window(label="Главное окно", width=400, height=520, pos=[20, 20]):
             self.device_combo = dpg.add_combo(
                 label="Устройство",
                 items=[],
@@ -80,6 +80,12 @@ class Application:
                 items=list(TIME_UNIT_CHOICES),
                 default_value=DEFAULT_TIME_UNIT,
                 width=300,
+            )
+            dpg.add_spacer(height=5)
+
+            self.step_checkbox = dpg.add_checkbox(
+                label="Преобразовывать Шаг",
+                default_value=True,
             )
             dpg.add_spacer(height=5)
 
@@ -147,6 +153,10 @@ class Application:
         value = dpg.get_value(self.time_combo)
         return value if value in TIME_UNIT_CHOICES else DEFAULT_TIME_UNIT
 
+    def _convert_step(self):
+        """Нужно ли пересчитывать шаг уставки коэффициентом."""
+        return bool(dpg.get_value(self.step_checkbox))
+
     def _require_device(self):
         """Проверяет, что устройство выбрано, и загружает его данные."""
         selected_text = dpg.get_value(self.device_combo)
@@ -186,7 +196,8 @@ class Application:
         Logger.info(f"Начинаем создавать бланк уставок "
                     f"({UNIT_TYPE_TITLES[unit_type]}, время: {time_unit})...")
         SettingBlanc(self.device_data, unit_type=unit_type,
-                     time_unit=time_unit).get_blanc()
+                     time_unit=time_unit,
+                     convert_step=self._convert_step()).get_blanc()
 
     def renew_setting_tables_re(self):
         if not self._require_device():
@@ -196,10 +207,12 @@ class Application:
     def _task_renew_setting_tables_re(self):
         Logger.info(f"Обновляем таблицы с уставками в РЭ "
                     f"({UNIT_TYPE_TITLES[self._selected_unit_type()]}, "
-                    f"время: {self._selected_time_unit()})...")
+                    f"время: {self._selected_time_unit()}, "
+                    f"шаг преобразуется: {'да' if self._convert_step() else 'нет'})...")
         Manual(device_data=self.device_data,
                unit_type=self._selected_unit_type(),
-               time_unit=self._selected_time_unit()).renew_setting_tables_re()
+               time_unit=self._selected_time_unit(),
+               convert_step=self._convert_step()).renew_setting_tables_re()
         Logger.info('Таблицы с уставками в РЭ обновлены')
 
     def renew_sum_table_latex(self):
@@ -211,7 +224,8 @@ class Application:
         Logger.info('Обновляем таблицу сигналов в РЭ...')
         Manual(device_data=self.device_data,
                unit_type=self._selected_unit_type(),
-               time_unit=self._selected_time_unit()).renew_sum_table_latex()
+               time_unit=self._selected_time_unit(),
+               convert_step=self._convert_step()).renew_sum_table_latex()
         Logger.info('Таблица сигналов в РЭ обновлена')
 
     def renew_abbrs(self):
@@ -222,7 +236,8 @@ class Application:
     def _task_renew_abbrs(self):
         result = Manual(device_data=self.device_data,
                         unit_type=self._selected_unit_type(),
-                        time_unit=self._selected_time_unit()).renew_abbrs()
+                        time_unit=self._selected_time_unit(),
+               convert_step=self._convert_step()).renew_abbrs()
         if result in (None, 'ok', 'noabbrs'):
             Logger.info('Перечень сокращений в РЭ обновлен')
         else:
@@ -236,7 +251,8 @@ class Application:
     def _task_renew_abbrs_ru(self):
         result = Manual(device_data=self.device_data,
                         unit_type=self._selected_unit_type(),
-                        time_unit=self._selected_time_unit()).renew_abbrs_ru()
+                        time_unit=self._selected_time_unit(),
+               convert_step=self._convert_step()).renew_abbrs_ru()
         if result == 0:
             Logger.info('Перечень сокращений в РУ обновлен')
         else:

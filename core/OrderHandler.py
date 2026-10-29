@@ -96,7 +96,8 @@ class NodeResolver:
 class OrderHandler:
 
     def __init__(self, config_handler=None, extension_handler=None, root_path='',
-                 unit_type=DEFAULT_UNIT_TYPE, time_unit=DEFAULT_TIME_UNIT):
+                 unit_type=DEFAULT_UNIT_TYPE, time_unit=DEFAULT_TIME_UNIT,
+                 convert_step=True):
         self.data, self.path = load_packet_json(root_path, "grouping.json")
 
         self.settings_group1 = []
@@ -113,6 +114,8 @@ class OrderHandler:
         # Пересчёт значений уставок в выбранную систему единиц
         self.unit_type = unit_type or DEFAULT_UNIT_TYPE
         self.time_unit = time_unit or DEFAULT_TIME_UNIT
+        # Преобразовывать ли шаг коэффициентом (для тестов можно выключить)
+        self.convert_step = bool(convert_step)
         self.unit_converter = UnitConverter(
             self.config_handler, self.extension_handler,
             self.unit_type, self.time_unit)
@@ -181,16 +184,6 @@ class OrderHandler:
             return f"{float(value):.{decimals}f}".replace('.', ',')
         except (TypeError, ValueError):
             return str(value)
-
-    def set_unit_type(self, unit_type):
-        """Переключает систему единиц без пересоздания обработчика."""
-        self.unit_type = unit_type or DEFAULT_UNIT_TYPE
-        self.unit_converter.set_target_type(self.unit_type)
-
-    def set_time_unit(self, time_unit):
-        """Переключает единицы времени (мс / сек / мин)."""
-        self.time_unit = time_unit or DEFAULT_TIME_UNIT
-        self.unit_converter.set_time_unit(self.time_unit)
 
     def _conversion_needed(self, parameter_name) -> bool:
         """Нужен ли пересчёт значений этого параметра."""
@@ -279,9 +272,11 @@ class OrderHandler:
         col4 = self.unit_converter.unit_label(parameter_name) or str(info.get("units") or "") or "-"
 
         # --- Шаг ---
+        # При convert_step=False шаг берётся из meta.json как есть (без
+        # коэффициента) — режим для проверки пересчёта.
         if note:
             col5 = "-"
-        elif convert:
+        elif convert and self.convert_step:
             converted_step = self._convert_number(parameter_name, step)
             col5 = (self._format_converted(converted_step, decimals)
                     if converted_step is not None else "-")

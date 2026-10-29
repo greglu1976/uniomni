@@ -176,19 +176,6 @@ class UnitConverter:
 
     # ------------------------------------------------------------ служебное
 
-    def set_target_type(self, target_type):
-        if target_type == self.target_type:
-            return
-        self.target_type = target_type or DEFAULT_UNIT_TYPE
-        self._cache.clear()
-
-    def set_time_unit(self, time_unit):
-        """Переключает единицы времени (мс / сек / мин)."""
-        if time_unit == self.time_unit:
-            return
-        self.time_unit = time_unit or DEFAULT_TIME_UNIT
-        self._cache.clear()
-
     def _parameter_number(self, parameter_name):
         if not parameter_name:
             return None
