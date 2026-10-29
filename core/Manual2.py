@@ -6,7 +6,8 @@ import os
 from pathlib import Path
 
 from core.SettingBlanc2 import SettingBlanc
-from core.UnitConverter import DEFAULT_TIME_UNIT, DEFAULT_UNIT_TYPE
+from core.UnitConverter import (DEFAULT_TIME_UNIT, DEFAULT_UNIT_TYPE,
+                                SUFFIX_MARKER_LATEX, with_suffix)
 from logger.logger import Logger
 from utils.abbrs import start_abbr
 from utils.latex import (escape_latex, escape_name, format_mark, format_numeric,
@@ -45,12 +46,18 @@ class Manual:
     def _render_latex_settings_block(self, settings_data):
         """Строки latex-таблицы уставок по данным одного ФБ."""
         def render_row(row):
+            suffix = row.get("suffix")
             parts = [
                 r'\centering ' + escape_name(row.get("col2")),
-                r'\centering ' + parse_note_to_latex(row.get("col3")),
+                r'\centering ' + with_suffix(parse_note_to_latex(row.get("col3")),
+                                              suffix, SUFFIX_MARKER_LATEX,
+                                              wrap_range=True),
                 r'\centering ' + format_numeric(row.get("col4"), escape_percent=True),
-                r'\centering ' + format_numeric(row.get("col5")),
-                r'\centering \arraybackslash ' + ("" if row.get("col6") is None else str(row.get("col6"))),
+                r'\centering ' + with_suffix(format_numeric(row.get("col5")),
+                                              suffix, SUFFIX_MARKER_LATEX),
+                r'\centering \arraybackslash ' + with_suffix(
+                    "" if row.get("col6") is None else str(row.get("col6")),
+                    suffix, SUFFIX_MARKER_LATEX),
             ]
             return ' & '.join(parts) + ' \\\\\n'
 

@@ -14,7 +14,8 @@ from core.ExtensionHandler import ExtensionHandler
 from core.FsuInformation import FsuInformation
 from core.MainConfigHandler import MainConfigHandler
 from core.OrderHandler import OrderHandler
-from core.UnitConverter import DEFAULT_TIME_UNIT, DEFAULT_UNIT_TYPE
+from core.UnitConverter import (DEFAULT_TIME_UNIT, DEFAULT_UNIT_TYPE,
+                                SUFFIX_MARKER_WORD, with_suffix)
 from logger.logger import Logger
 from utils.docx_handler import (
     add_new_section,
@@ -222,18 +223,22 @@ class SettingBlanc:
 
             set_cell_multiline_text(cells[1], display_name)
 
+            suffix = row_data.get('suffix')
+
             col3_value = row_data.get('col3', '')
             if isinstance(col3_value, str) and col3_value.startswith('note_'):
                 col3_value = self._parse_note_dict(col3_value)
             if enum500:
                 col3_value = " / ".join(str(item.get('VisibleValue', '')) for item in enum500)
-            set_cell_text(cells[2], col3_value)
+            set_cell_text(cells[2], with_suffix(col3_value, suffix,
+                                                SUFFIX_MARKER_WORD, wrap_range=True))
             set_paragraph_alignment(cells[2].paragraphs[0], ALIGN_CENTER)
 
             set_cell_text(cells[3], row_data.get('col4'))
             set_paragraph_alignment(cells[3].paragraphs[0], ALIGN_CENTER)
 
-            set_cell_text(cells[4], row_data.get('col5'))
+            set_cell_text(cells[4], with_suffix(row_data.get('col5'), suffix,
+                                                SUFFIX_MARKER_WORD))
             set_paragraph_alignment(cells[4].paragraphs[0], ALIGN_CENTER)
 
             col6_value = row_data.get('col6', '')
@@ -243,7 +248,8 @@ class SettingBlanc:
                     col6_value = lookup.get(int(col6_value), col6_value)
                 except (ValueError, TypeError):
                     pass
-            set_cell_text(cells[5], col6_value)
+            set_cell_text(cells[5], with_suffix(col6_value, suffix,
+                                                SUFFIX_MARKER_WORD))
             set_paragraph_alignment(cells[5].paragraphs[0], ALIGN_CENTER)
 
             for j in range(6, 10):
@@ -671,6 +677,7 @@ class SettingBlanc:
                     "col5": row_data.get('col5', ''),
                     "col6": col6_value,
                     "col7": row_data.get('col7', ''),
+                    "suffix": row_data.get('suffix'),
                 })
             return result_rows
 

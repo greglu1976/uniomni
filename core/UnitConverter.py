@@ -55,6 +55,10 @@ DEFAULT_TIME_UNIT = "мс"
 TIME_UNIT_TITLES = {"мс": "мс", "сек": "с"}
 
 # Приведение подписей единиц к обозначениям, принятым в документации
+# Знак умножения перед Iном/Uном/Zном: свой для docx и для latex
+SUFFIX_MARKER_WORD = "·"
+SUFFIX_MARKER_LATEX = r"$\cdot$"
+
 UNIT_LABEL_ALIASES = {
     "сек": "с",
     "Эл. градусы": "град.",
@@ -137,6 +141,26 @@ def format_decimal(value, significant_digits=6):
 
     text = format(number.normalize(), 'f')
     return text.replace('.', ',')
+
+
+def with_suffix(value, suffix, marker, wrap_range=False):
+    """Добавляет множитель к значению уставки: '0,01' -> '0,01·Iном'.
+
+    Args:
+        value: значение (число или строка).
+        suffix: 'Iном' / 'Uном' / 'Zном' или None.
+        marker: знак умножения для конкретного формата
+            (Word -- '·', LaTeX -- '$\\cdot$').
+        wrap_range: брать диапазон в скобки: '(0,04...30,00)·Iном'.
+    """
+    if not suffix:
+        return value
+    text = "" if value is None else str(value)
+    if not text or text == "-":
+        return value
+    if wrap_range and not (text.startswith("(") and text.endswith(")")):
+        text = f"({text})"
+    return f"{text}{marker}{suffix}"
 
 
 def normalize_unit_label(label):

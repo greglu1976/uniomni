@@ -429,16 +429,13 @@ class OrderHandler:
             Logger.warning(f"Строка уставки пропущена: {error}")
             return None
 
-        # Если есть суффикс — добавляем Iном/Uном/Zном к значениям
-        if suffix:
-            col3 = self._apply_fsu_suffix(col3, suffix, use_parens=True)
-            col5 = self._apply_fsu_suffix(col5, suffix, use_parens=False)
-            col6 = self._apply_fsu_suffix(col6, suffix, use_parens=False)
-            # Подпись единиц уже проставлена через preferred_units в info["units"]
-
+        # Множитель (Iном/Uном/Zном) не склеиваем со значением: знак
+        # умножения свой для docx ('·') и для latex ('$\\cdot$'),
+        # поэтому передаём суффикс отдельным полем.
         return {
             "col0": col0, "col1": col1, "col2": col2, "col3": col3,
             "col4": col4, "col5": col5, "col6": col6, "col7": col7,
+            "suffix": suffix,
         }
 
 
@@ -482,31 +479,6 @@ class OrderHandler:
         if variable_type == "REAL":
             return "о.е."
         return "-"
-
-    @staticmethod
-    def _apply_fsu_suffix(value_str, suffix, use_parens):
-        """Добавляет суффикс к строке значения.
-
-        Если суффикса нет, возвращает строку без изменений.
-        Для суффикса Iном/Uном/Zном:
-          если use_parens=True: '(0,04...30,00)Iном'
-          если use_parens=False: '0,01Iном'
-        """
-        if not suffix:
-            return value_str
-        text = str(value_str) if value_str is not None else ""
-        if not text:
-            return text
-        if use_parens:
-            # Диапазон вида "0,04...30,00" → "(0,04...30,00)Iном"
-            if text.startswith('(') and text.endswith(')'):
-                inner = text[1:-1]
-                return f'({inner}){suffix}'
-            else:
-                return f'({text}){suffix}'
-        else:
-            # Шаг или значение по умолчанию: "0,01" → "0,01Iном"
-            return f'{text}{suffix}'
 
     @staticmethod
     def _fsu_number(value):
