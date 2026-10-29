@@ -3,7 +3,7 @@
 # ЮНИТ Сервис РЗА): уставки, сигналы, конфигурация, регистрация.
 
 import re
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List
 
 from core.MainConfigHandler import MainConfigHandler
@@ -171,6 +171,33 @@ class OrderHandler:
         return result
 
     @staticmethod
+    def _is_clean_step(step, max_significant=3) -> bool:
+        """«Ровный» ли шаг (0,001 / 0,005 / 0,01 / 5).
+
+        Только по такому шагу имеет смысл выравнивать число знаков после
+        запятой. «Кривой» шаг (например, пересчитанный 8,333e-7 или
+        0,00054645) выравнивание не задаёт — иначе диапазон и значение по
+        умолчанию обрастали бы бессмысленными нулями.
+        """
+        try:
+            value = Decimal(f"{float(step):.12g}").normalize()
+        except (InvalidOperation, ValueError, TypeError):
+            return False
+
+        if value == 0:
+            return False
+
+        return len(value.as_tuple().digits) <= max_significant
+
+    @staticmethod
+    def _min_decimals(value, limit=8) -> int:
+        """Минимум знаков после запятой, чтобы не потерять значение."""
+        text = format_value(value)
+        if 'e' in text:          # экспоненциальная запись — точность не критична
+            return limit
+        return len(text.split(',')[1]) if ',' in text else 0
+
+    @staticmethod
     def _decimals_count(step) -> int:
         """Количество знаков после запятой в шаге уставки."""
         try:
@@ -198,7 +225,12 @@ class OrderHandler:
 
     @staticmethod
     def _format_converted(value, decimals=None) -> str:
-        """Форматирует пересчитанное значение (запятая, без лишних нулей)."""
+        """Форматирует пересчитанное значение с точностью по шагу.
+
+        Число знаков после запятой задаётся шагом уставки (например, при шаге
+        0,005 получаем «0,000...300,000»), поэтому нули НЕ отбрасываются:
+        иначе диапазон и значение по умолчанию выглядели бы несогласованно.
+        """
         if value is None:
             return '-'
         number = float(value)
@@ -207,10 +239,7 @@ class OrderHandler:
         if decimals is None or (number and abs(number) < 1e-6):
             return format_value(value)
 
-        text = f"{number:.{decimals}f}"
-        if '.' in text:
-            text = text.rstrip('0').rstrip('.')
-        return text.replace('.', ',') or '0'
+        return f"{number:.{decimals}f}".replace('.', ',')
 
     def prepare_data_for_table(self, parameter_name):
         """Строка таблицы уставок: (ключ, наименование, обозначение, диапазон,
@@ -240,20 +269,32 @@ class OrderHandler:
         is_sgf = bool(note)
         convert = self._conversion_needed(parameter_name)
 
-        # Точность для пересчитанных чисел берём из пересчитанного же шага
+        # Пересчитанные значения (None, если значения нет или пересчёт не нужен)
+        converted_min = self._convert_number(parameter_name, min_value) if convert else None
+        converted_max = self._convert_number(parameter_name, max_value) if convert else None
+        converted_default = (self._convert_number(parameter_name, default_value)
+                             if convert and default_value else None)
+        converted_step = (self._convert_number(parameter_name, step)
+                          if convert and step else None)
+
+        # Точность диапазона и значения по умолчанию диктует шаг: пересчитанный,
+        # если шаг пересчитывается, иначе исходный из meta.json. Выравниваем
+        # только по «ровному» шагу; дополнительно не теряем значащие цифры,
+        # если шаг крупнее самих значений.
         decimals = None
-        if convert and step:
-            converted_step = self._convert_number(parameter_name, step)
-            if converted_step:
-                decimals = min(8, self._decimals_count(converted_step))
+        step_for_decimals = converted_step if (self.convert_step and converted_step) else step
+        if step_for_decimals and self._is_clean_step(step_for_decimals):
+            decimals = min(8, self._decimals_count(step_for_decimals))
+            for candidate in (converted_min, converted_max, converted_default):
+                if candidate is not None:
+                    decimals = max(decimals, self._min_decimals(candidate))
+            decimals = min(8, decimals)
 
         # --- Значение / Диапазон ---
         if note:
             options = self.parse_options(note)
             col3 = "note_" + str(options)
         elif convert:
-            converted_min = self._convert_number(parameter_name, min_value)
-            converted_max = self._convert_number(parameter_name, max_value)
             if converted_min is not None and converted_max is not None:
                 col3 = (f"{self._format_converted(converted_min, decimals)}..."
                         f"{self._format_converted(converted_max, decimals)}")
@@ -276,10 +317,8 @@ class OrderHandler:
         # коэффициента) — режим для проверки пересчёта.
         if note:
             col5 = "-"
-        elif convert and self.convert_step:
-            converted_step = self._convert_number(parameter_name, step)
-            col5 = (self._format_converted(converted_step, decimals)
-                    if converted_step is not None else "-")
+        elif convert and self.convert_step and converted_step is not None:
+            col5 = self._format_converted(converted_step, decimals)
         elif step:
             col5 = self._format_step_value(step, self._decimals_count(step))
         else:
@@ -295,10 +334,8 @@ class OrderHandler:
             if is_sgf:
                 # SGF-параметр: заменяем код на текстовое описание
                 col6 = options.get(str(default_value), default_value)
-            elif convert:
-                converted_default = self._convert_number(parameter_name, default_value)
-                col6 = (converted_default if converted_default is None
-                        else self._format_converted(converted_default, decimals))
+            elif convert and converted_default is not None:
+                col6 = self._format_converted(converted_default, decimals)
             elif step:
                 col6 = self._format_step_value(default_value, self._decimals_count(step))
             else:
