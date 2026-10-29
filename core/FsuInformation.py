@@ -12,17 +12,23 @@
 from collections import defaultdict
 
 from logger.logger import Logger
-from utils.paths import load_packet_json
+from utils.paths import find_file, load_packet_json
 
 SETTING_GROUP = "setting"
 DEFAULT_SCHEMA_NAME = "ФСУ"
+
+# Имена файлов с описанием ФСУ: базовое и варианты для других устройств
+FSU_FILE_NAMES = ("fsu-information.json", "fsu-information2.json",
+                  "fsu-information3.json", "fsu-information4.json")
 
 
 class FsuInformation:
     """Чтение fsu-information.json и сборка блоков уставок по ФБ."""
 
     def __init__(self, root_path=''):
-        self.data, self.path = load_packet_json(root_path, "fsu-information.json")
+        file_name = self._resolve_file_name(root_path)
+        self.data, self.path = load_packet_json(root_path, file_name)
+        Logger.info(f"fsu-information: используется {self.path.name}")
 
         schema = self.data.get("FunctionalSchemaInformation") or {}
         self.schema_name = str(schema.get("Name") or DEFAULT_SCHEMA_NAME).strip()
@@ -34,13 +40,21 @@ class FsuInformation:
         for block in self.blocks:
             self._children[block.get("ParentId")].append(block)
 
+    @staticmethod
+    def _resolve_file_name(root_path):
+        """Ищет файл описания ФСУ: fsu-information.json, затем ...2.json и т.д."""
+        for file_name in FSU_FILE_NAMES:
+            if find_file(root_path, file_name) is not None:
+                return file_name
+        return FSU_FILE_NAMES[0]   # приведёт к FileNotFoundError с понятным текстом
+
     @classmethod
     def try_load(cls, root_path=''):
         """Загружает файл, если он есть в пакете; иначе None (без исключения)."""
         try:
             return cls(root_path)
         except FileNotFoundError:
-            Logger.warning("В пакете поддержки нет fsu-information.json — "
+            Logger.warning("В пакете поддержки нет fsu-information*.json — "
                            "уставки будут взяты из GROUPING.json/meta.json")
             return None
 

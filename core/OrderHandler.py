@@ -390,22 +390,23 @@ class OrderHandler:
 
         По имени трансформации (Current/Voltage/Resistance) к значениям
         добавляется суффикс (Iном/Uном/Zном) и проставляется А (втор.)/
-        В (втор.)/Ом (втор.). Для null-трансформации ед.изм. = о.е.
+        В (втор.)/Ом (втор.).
+
+        Графа «Ед. изм.» зависит от типа переменной: ключи и переключатели
+        (BOOL/UINT) — дискретные, у них прочерк; аналоговые (REAL) получают
+        единицы из трансформации/fsu, а при пустых — «о.е.».
         """
         meta_info = self.config_handler.get_param_info(parameter_name) or {}
         transformation_name = fsu_description.get("Transformation")
         suffix, preferred_units = self._fsu_transformation_info(transformation_name)
 
         raw_units = str(fsu_description.get("Units") or "")
-        # Если ответ не зависит от трансформации (null / time / любое другое) —
-        # предпочтительные единицы имеют приоритет. Если их нет и raw_units
-        # пустая — проставляем "о.е." (случай перечислений без Units в fsu).
-        if preferred_units is not None:
-            fsu_units = preferred_units
-        elif raw_units:
-            fsu_units = raw_units
-        else:
-            fsu_units = "о.е."
+        variable_type = str((variable or {}).get("Type") or "").upper()
+        fsu_units = self._fsu_unit_label(variable_type, raw_units, preferred_units)
+
+        # Ключи/переключатели суффикса не получают даже при трансформации
+        if variable_type in ("BOOL", "UINT"):
+            suffix = None
 
         info = {
             "name": parameter_name,
@@ -450,8 +451,8 @@ class OrderHandler:
             suffix — 'Iном', 'Uном', 'Zном' или None.
             unit_label — 'А (втор.)', 'В (втор.)', 'Ом (втор.)', 'о.е.' или None (оставить как в fsu).
         """
-        if transformation_name is None:
-            return None, "о.е."
+        if not transformation_name:
+            return None, None
         if "Current" in transformation_name:
             return "Iном", "А (втор.)"
         if "Voltage" in transformation_name:
@@ -460,6 +461,27 @@ class OrderHandler:
             return "Zном", "Ом (втор.)"
         # Время (Top_ms_s_min) и прочее — без изменений
         return None, None
+
+    @staticmethod
+    def _fsu_unit_label(variable_type, fsu_units, preferred_units):
+        """Подпись «Ед. изм.» по данным fsu.
+
+        Ключи и переключатели (BOOL/UINT) — дискретные, единицы не имеют:
+        в графе ставим прочерк. Аналоговые значения (REAL) получают единицы
+        из трансформации (А/В/Ом) либо из fsu (мс, Гц, Эл. градусы), а при
+        пустых единицах — «о.е.».
+        """
+        variable_type = str(variable_type or "").upper()
+
+        if variable_type in ("BOOL", "UINT"):
+            return "-"
+        if preferred_units is not None:
+            return preferred_units
+        if fsu_units:
+            return fsu_units
+        if variable_type == "REAL":
+            return "о.е."
+        return "-"
 
     @staticmethod
     def _apply_fsu_suffix(value_str, suffix, use_parens):
