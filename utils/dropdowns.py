@@ -79,8 +79,24 @@ def _disabled_item(display_text, value):
     )
 
 
-def _build_xml(items_xml, default, alias, instruction_text, font_half_points):
-    """Собирает XML content control с выпадающим списком."""
+def _build_xml(items_xml, default, alias, instruction_text, font_half_points,
+               pin_font_size=False):
+    """Собирает XML content control с выпадающим списком.
+
+    pin_font_size=True добавляет <w:rPr> внутрь <w:sdtPr>: этот кегль Word
+    применяет к тексту, который подставляется при выборе пункта. Без него в
+    плотных таблицах выбранное значение показывается кеглем таблицы, а не
+    списка (для 10-пт списков это заметно).
+    """
+    pin_properties = ''
+    if pin_font_size:
+        pin_properties = (
+            '<w:rPr>'
+            f'<w:sz w:val="{font_half_points}"/>'
+            f'<w:szCs w:val="{font_half_points}"/>'
+            '</w:rPr>'
+        )
+
     return f'''
         <w:sdt xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:sdtPr>
@@ -92,6 +108,7 @@ def _build_xml(items_xml, default, alias, instruction_text, font_half_points):
                     {items_xml}
                 </w:dropDownList>
                 <w:showingPlcHdr/>
+                {pin_properties}
                 <w:placeholder>
                     <w:docPart w:val="{_xml_attr(instruction_text)}"/>
                 </w:placeholder>
@@ -122,7 +139,7 @@ def _get_template(key, xml):
 
 
 def _insert_dropdown(paragraph, items_xml, default, alias, instruction_text,
-                     font_half_points=24, cache_key=None):
+                     font_half_points=24, cache_key=None, pin_font_size=False):
     """Вставляет content control в параграф.
 
     Returns:
@@ -130,12 +147,13 @@ def _insert_dropdown(paragraph, items_xml, default, alias, instruction_text,
         на обычный текст (описано в логе).
     """
     key = cache_key or (id(items_xml), default, alias, instruction_text,
-                        font_half_points)
+                        font_half_points, pin_font_size)
 
     try:
         template = _get_template(
             key,
-            _build_xml(items_xml, default, alias, instruction_text, font_half_points),
+            _build_xml(items_xml, default, alias, instruction_text,
+                       font_half_points, pin_font_size),
         )
         sdt = copy.deepcopy(template)
     except Exception as error:  # некорректный XML — не роняем генерацию документа
@@ -191,7 +209,9 @@ def add_formatted_dropdown2_10pt(paragraph, choices, default="Не назнач�
         alias=alias,
         instruction_text=instruction_text,
         font_half_points=20,
-        cache_key=(tuple(choices or ()), default, alias, instruction_text, 20),
+        cache_key=(tuple(choices or ()), default, alias, instruction_text, 20, True),
+        # Кегль фиксируем в sdtPr, иначе выбранное значение выводится кеглем таблицы
+        pin_font_size=True,
     )
     if not inserted:
         _append_text_fallback(paragraph, default, font_half_points=20)

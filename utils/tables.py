@@ -24,7 +24,6 @@ from .docx_handler import set_paragraph_style, set_table_style
 from .dropdowns import (
     add_formatted_dropdown2,
     add_formatted_dropdown2_10pt,
-    add_formatted_dropdown3,
 )
 
 # Стили, которые обязаны присутствовать в шаблоне origin.docx
@@ -286,8 +285,11 @@ def add_table_settings_core4(doc):
 TABLE_WIDTHS_MTRX_INS = (Inches(2), Inches(4))
 
 
-def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, sigs, di_sigs):
-    """Матрица дискретных входов слота: вход → назначенный сигнал (dropdown)."""
+def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, choices):
+    """Матрица дискретных входов слота: вход → назначенный сигнал (dropdown).
+
+    Список сигналов один и тот же для всех ячеек — как в проверенной ветке.
+    """
     if not inputs_list:
         return None
 
@@ -308,11 +310,7 @@ def add_table_mtrx_ins_core4(doc, slot_name, inputs_list, sigs, di_sigs):
         set_paragraph_alignment(cells[0].paragraphs[0], ALIGN_LEFT)
 
         right_paragraph = cells[1].paragraphs[0]
-        add_formatted_dropdown3(
-            paragraph=right_paragraph,
-            inputs_choices=sigs,
-            controls_choices=di_sigs,
-        )
+        add_formatted_dropdown2(paragraph=right_paragraph, choices=choices)
         set_paragraph_alignment(right_paragraph, ALIGN_CENTER)
 
     _set_column_widths(table, TABLE_WIDTHS_MTRX_INS)

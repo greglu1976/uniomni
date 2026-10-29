@@ -367,15 +367,6 @@ class SettingBlanc:
     # ------------------------------------------------------- входы/выходы
 
     @staticmethod
-    def _extract_description(item):
-        if isinstance(item, dict):
-            return (item.get('fullDescription')
-                    or item.get('appliedDescription')
-                    or item.get('description')
-                    or item.get('name', ''))
-        return str(item)
-
-    @staticmethod
     def _slot_sort_key(slot_name):
         match = re.search(r'M(\d+)', slot_name or '')
         return int(match.group(1)) if match else 0
@@ -399,9 +390,8 @@ class SettingBlanc:
         return result
 
     def _create_section_inouts_core4(self, doc):
-        raw_sigs, raw_gen_sigs = self.order_handler.get_fsu_signals()
-        sigs_list = [desc for desc in (self._extract_description(s) for s in raw_sigs) if desc]
-        gen_signs = [desc for desc in (self._extract_description(s) for s in raw_gen_sigs) if desc]
+        # Один плоский список сигналов — как в проверенной ветке
+        sigs_list = self.order_handler.get_fsu_signals()
 
         slots_data = self.order_handler.get_slots_data()
         items_to_process = []
@@ -431,15 +421,13 @@ class SettingBlanc:
                     doc=doc,
                     slot_name=slot_name,
                     inputs_list=final_dict_inputs[slot_name],
-                    sigs=sigs_list,
-                    di_sigs=gen_signs,
+                    choices=sigs_list,
                 )
                 doc.add_paragraph()
 
         if final_dict_outputs:
             add_paragraph(doc, 'Выходные реле', STYLE_HEADING_2)
-            outs_list = self.extract_all_signals_from_structure(
-                self.order_handler.get_fsu_out_signals())
+            outs_list = self.order_handler.get_fsu_out_signals()
             for slot_name in sorted(final_dict_outputs, key=self._slot_sort_key):
                 add_paragraph(doc, slot_name, STYLE_TABLE_TITLE)
                 add_table_mtrx_outs_core4(
@@ -448,15 +436,6 @@ class SettingBlanc:
                     sigs_list=outs_list,
                 )
                 doc.add_paragraph()
-
-    def extract_all_signals_from_structure(self, data_structure):
-        all_signals = []
-        for function_item in data_structure or []:
-            for subfunc in function_item.get('subfunctions', []):
-                for signal in subfunc.get('data', []):
-                    if signal:
-                        all_signals.append(signal)
-        return all_signals
 
     # ------------------------------------------------ светодиоды и клавиши
 
@@ -495,7 +474,7 @@ class SettingBlanc:
 
         add_paragraph(doc, 'Функциональные клавиши', STYLE_HEADING_2)
 
-        buttons_list = self.order_handler.get_fsu_hmi_buttons()
+        buttons_list = self.order_handler.get_digital_signals_for_fk()
         add_paragraph(doc, "ИЧМ", STYLE_TABLE_TITLE)
         add_table_fks_core4(doc, buttons_list)
 
