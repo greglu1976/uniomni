@@ -25,6 +25,7 @@
 """
 
 import math
+import re
 from decimal import Decimal, localcontext
 
 from logger.logger import Logger
@@ -49,6 +50,19 @@ DEFAULT_UNIT_TYPE = UNIT_TYPE_SECONDARY
 # из-за чего 5 мин выводились бы как 4,999995.
 TIME_UNIT_CHOICES = ("мс", "сек")
 DEFAULT_TIME_UNIT = "мс"
+
+# Подписи для интерфейса (в документах используется «с», см. normalize_unit_label)
+TIME_UNIT_TITLES = {"мс": "мс", "сек": "с"}
+
+# Приведение подписей единиц к обозначениям, принятым в документации
+UNIT_LABEL_ALIASES = {
+    "сек": "с",
+    "Эл. градусы": "град.",
+    "Эл. градус": "град.",
+}
+
+# «(первич.)» / «(первич)» / «(вторич.)» → «(перв.)» / «(втор.)»
+_UNIT_PARENTHESIS_RE = re.compile(r"\((?:перв|вторич)[^)]*\)")
 
 # Точные коэффициенты пересчёта времени (сколько единицы в 1 мс).
 # Нужны для уставок времени, у которых в пакете нет трансформации.
@@ -123,6 +137,22 @@ def format_decimal(value, significant_digits=6):
 
     text = format(number.normalize(), 'f')
     return text.replace('.', ',')
+
+
+def normalize_unit_label(label):
+    """Приводит подпись единиц к виду, принятому в бланке уставок и РЭ.
+
+    «сек» → «с», «Эл. градусы» → «град.», «А (первич.)» → «А (перв.)»,
+    «Ом (вторич.)» → «Ом (втор.)».
+    """
+    text = "" if label is None else str(label).strip()
+    if not text:
+        return text
+
+    text = UNIT_LABEL_ALIASES.get(text, text)
+    return _UNIT_PARENTHESIS_RE.sub(
+        lambda match: "(перв.)" if match.group(0).startswith("(перв") else "(втор.)",
+        text)
 
 
 class UnitScale:
@@ -267,7 +297,7 @@ class UnitConverter:
     def unit_label(self, parameter_name):
         """Подпись единиц для выбранной системы (или исходная подпись)."""
         _source, _target, label = self._resolve(parameter_name)
-        return label
+        return normalize_unit_label(label)
 
     def scale_factor(self, parameter_name):
         """Множитель пересчёта или None, если пересчёт не требуется.

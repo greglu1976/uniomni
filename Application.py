@@ -14,6 +14,7 @@ from core.UnitConverter import (
     DEFAULT_TIME_UNIT,
     DEFAULT_UNIT_TYPE,
     TIME_UNIT_CHOICES,
+    TIME_UNIT_TITLES,
     UNIT_TYPE_TITLES,
 )
 from logger.logger import Logger
@@ -77,8 +78,8 @@ class Application:
 
             dpg.add_text("Единицы времени")
             self.time_combo = dpg.add_combo(
-                items=list(TIME_UNIT_CHOICES),
-                default_value=DEFAULT_TIME_UNIT,
+                items=[TIME_UNIT_TITLES.get(unit, unit) for unit in TIME_UNIT_CHOICES],
+                default_value=TIME_UNIT_TITLES.get(DEFAULT_TIME_UNIT, DEFAULT_TIME_UNIT),
                 width=300,
             )
             dpg.add_spacer(height=5)
@@ -149,9 +150,12 @@ class Application:
         return DEFAULT_UNIT_TYPE
 
     def _selected_time_unit(self):
-        """Выбранные в интерфейсе единицы времени."""
-        value = dpg.get_value(self.time_combo)
-        return value if value in TIME_UNIT_CHOICES else DEFAULT_TIME_UNIT
+        """Выбранные в интерфейсе единицы времени (в списке показывается «с»)."""
+        title = dpg.get_value(self.time_combo)
+        for unit, unit_title in TIME_UNIT_TITLES.items():
+            if unit_title == title:
+                return unit
+        return DEFAULT_TIME_UNIT
 
     def _convert_step(self):
         """Нужно ли пересчитывать шаг уставки коэффициентом."""
