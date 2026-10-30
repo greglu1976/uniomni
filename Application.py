@@ -20,7 +20,7 @@ from core.UnitConverter import (
 from logger.logger import Logger
 from utils.additional import create_directories
 
-WINDOW_TITLE = "Omni for M500 v0.0.4 28.10.26 deepseek edition"
+WINDOW_TITLE = "Omni for M500 v0.0.5 30.10.26 deepseek edition"
 
 LOG_SCROLL_TAG = "log_container"
 LOG_CONTENT_TAG = "log_content"
