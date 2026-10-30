@@ -3,10 +3,14 @@
 Все три публичные функции — add_formatted_dropdown2, add_formatted_dropdown2_10pt
 и add_formatted_dropdown3 — собираются одним внутренним построителем.
 
-Важно: каждому content control присваивается уникальный w:id и непустые
-w:alias/w:tag. Раньше id вычислялся как hash(alias), а alias всегда был
-пустой строкой (hash("") == 0), из-за чего в документе оказывались тысячи
-контролов с w:id="0".
+Важно: каждому content control присваивается уникальный w:id. Раньше id
+вычислялся как hash(alias), а alias всегда был пустой строкой
+(hash("") == 0), из-за чего в документе оказывались тысячи контролов с
+w:id="0".
+
+w:alias / w:tag остаются такими, какими их передал вызывающий код (обычно
+пустыми): Word показывает alias/tag пользователю как название контрола,
+поэтому подставлять туда служебные имена вида Dropdown17 нельзя.
 """
 
 import copy
@@ -163,13 +167,6 @@ def _insert_dropdown(paragraph, items_xml, default, alias, instruction_text,
     control_id = next(_CONTROL_IDS)
     sdt_properties = sdt.find(qn("w:sdtPr"))
     sdt_properties.find(qn("w:id")).set(qn("w:val"), str(control_id))
-
-    # Пустые alias/tag делали все контролы неотличимыми друг от друга
-    # для любого инструмента, который ищет их по тегу.
-    if not alias:
-        unique_alias = f"Dropdown{control_id}"
-        sdt_properties.find(qn("w:alias")).set(qn("w:val"), unique_alias)
-        sdt_properties.find(qn("w:tag")).set(qn("w:val"), unique_alias)
 
     paragraph._p.append(sdt)
     return True
