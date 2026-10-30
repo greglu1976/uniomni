@@ -678,7 +678,8 @@ class OrderHandler:
         Источник и порядок — как в проверенной ветке (ParametersToHmiSignalizationTree):
 
         1. «Общие сигналы ФС»: сначала сигналы из ParametersToHmiButtonsTree,
-           затем из ParametersToHmiSignalizationTree;
+           которых нет в дереве сигнализации, затем сама группа
+           «Общие сигналы ФС» дерева сигнализации;
         2. «Дерево внутренних переменных СПЛ»;
         3. слоты M1..M99 — по номеру;
         4. остальные группы в порядке появления.
@@ -710,16 +711,16 @@ class OrderHandler:
                 elif node_type == "Parameter":
                     add_param(node.get("Name"), current_group)
 
-        def walk_forced_group(nodes, forced_group):
-            """Обход дерева, где все параметры подписаны одной группой."""
+        def walk_only(nodes, wanted_names, current_group=None):
+            """Обход дерева только по нужным параметрам, с их группами."""
             for node in nodes or []:
                 if not isinstance(node, dict):
                     continue
                 node_type = node.get("Type")
                 if node_type == "Group":
-                    walk_forced_group(node.get("Nodes", []), forced_group)
-                elif node_type == "Parameter":
-                    add_param(node.get("Name"), forced_group)
+                    walk_only(node.get("Nodes", []), wanted_names, node.get("Name"))
+                elif node_type == "Parameter" and node.get("Name") in wanted_names:
+                    add_param(node.get("Name"), current_group)
 
         def find_group(nodes, name):
             for node in nodes or []:
@@ -738,10 +739,19 @@ class OrderHandler:
                            "список светодиодов пуст")
             return result
 
-        # 1. Общие сигналы ФС: сначала из дерева кнопок ИЧМ
+        # 1. Общие сигналы ФС: сначала сигналы из дерева кнопок ИЧМ.
+        #    Берём только те, которых нет в дереве сигнализации: в старых
+        #    пакетах это дерево и состоит из «общих сигналов ФС», а в новых
+        #    (M500) содержит всю структуру ФБ — иначе весь список кнопок
+        #    попадал в начало списка светодиодов ещё раз, да ещё с подписью
+        #    «Общие сигналы ФС» (список ФК выглядел как список светодиодов).
         buttons_nodes = self._find_tree(TREE_HMI_BUTTONS)
         if buttons_nodes:
-            walk_forced_group(buttons_nodes, "Общие сигналы ФС")
+            hmi_names = set(self.extract_parameters(hmi_nodes))
+            extra_names = {name for name in self.extract_parameters(buttons_nodes)
+                           if name not in hmi_names}
+            if extra_names:
+                walk_only(buttons_nodes, extra_names)
 
         # 2. Затем «Общие сигналы ФС» из дерева сигнализации
         common_group = find_group(hmi_nodes, "Общие сигналы ФС")
