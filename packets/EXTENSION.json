@@ -1037,19 +1037,19 @@
       "Enum": "Выведено/введено"
     },
     {
-      "Parameter": "IO_dZ_dt_2_Rsr",
+      "Parameter": "IO_dZ_dt_1_Rsr",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_Xsr",
+      "Parameter": "IO_dZ_dt_1_Xsr",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_dR",
+      "Parameter": "IO_dZ_dt_1_dR",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_dX",
+      "Parameter": "IO_dZ_dt_1_dX",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
@@ -2581,38 +2581,6 @@
       "Enum": "BehaviourModeKind"
     },
     {
-      "Parameter": "VirtPort_ServerEthCom1_Protocol",
-      "Enum": "disabled_IEC103_Modbus_IEC101"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom1_Transport",
-      "Enum": "TCP_UDP"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom2_Protocol",
-      "Enum": "disabled_IEC103_Modbus_IEC101"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom2_Transport",
-      "Enum": "TCP_UDP"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom3_Protocol",
-      "Enum": "disabled_IEC103_Modbus_IEC101"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom3_Transport",
-      "Enum": "TCP_UDP"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom4_Protocol",
-      "Enum": "disabled_IEC103_Modbus_IEC101"
-    },
-    {
-      "Parameter": "VirtPort_ServerEthCom4_Transport",
-      "Enum": "TCP_UDP"
-    },
-    {
       "Parameter": "Supervision_M1_PowerSupply_SynchroSignalPPS",
       "Enum": "On_Off"
     },
@@ -3749,35 +3717,35 @@
       "Transformation": "MeasU3ph_1_Voltage_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_dR_SG1",
+      "Parameter": "IO_dZ_dt_1_dR_SG1",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_dR_SG2",
+      "Parameter": "IO_dZ_dt_1_dR_SG2",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_dX_SG1",
+      "Parameter": "IO_dZ_dt_1_dX_SG1",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_dX_SG2",
+      "Parameter": "IO_dZ_dt_1_dX_SG2",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_Rsr_SG1",
+      "Parameter": "IO_dZ_dt_1_Rsr_SG1",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_Rsr_SG2",
+      "Parameter": "IO_dZ_dt_1_Rsr_SG2",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_Xsr_SG1",
+      "Parameter": "IO_dZ_dt_1_Xsr_SG1",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
-      "Parameter": "IO_dZ_dt_2_Xsr_SG2",
+      "Parameter": "IO_dZ_dt_1_Xsr_SG2",
       "Transformation": "CalcZpp3ph_1_Resistance_Settings_Transformation"
     },
     {
@@ -8996,8 +8964,20 @@
       "Enum": "SntpMaxPoll",
       "Value": [
         {
+          "ParameterValue": 1,
+          "VisibleValue": "2 с"
+        },
+        {
+          "ParameterValue": 2,
+          "VisibleValue": "4 с"
+        },
+        {
+          "ParameterValue": 3,
+          "VisibleValue": "8 с"
+        },
+        {
           "ParameterValue": 4,
-          "VisibleValue": "16 с"
+          "VisibleValue": "16 с"
         },
         {
           "ParameterValue": 5,
@@ -9005,7 +8985,7 @@
         },
         {
           "ParameterValue": 6,
-          "VisibleValue": "64 с"
+          "VisibleValue": "64 с"
         },
         {
           "ParameterValue": 7,
@@ -9017,7 +8997,7 @@
         },
         {
           "ParameterValue": 9,
-          "VisibleValue": "512 с"
+          "VisibleValue": "512 с"
         },
         {
           "ParameterValue": 10,
@@ -9029,57 +9009,7 @@
         },
         {
           "ParameterValue": 12,
-          "VisibleValue": "4096 с"
-        },
-        {
-          "ParameterValue": 13,
-          "VisibleValue": "8192 с"
-        },
-        {
-          "ParameterValue": 14,
-          "VisibleValue": "16384 с"
-        },
-        {
-          "ParameterValue": 15,
-          "VisibleValue": "32768 с"
-        },
-        {
-          "ParameterValue": 16,
-          "VisibleValue": "65536 с"
-        }
-      ]
-    },
-    {
-      "Enum": "disabled_IEC103_Modbus_IEC101",
-      "Value": [
-        {
-          "ParameterValue": 0,
-          "VisibleValue": "Отключен"
-        },
-        {
-          "ParameterValue": 1,
-          "VisibleValue": "IEC-103"
-        },
-        {
-          "ParameterValue": 2,
-          "VisibleValue": " Modbus"
-        },
-        {
-          "ParameterValue": 3,
-          "VisibleValue": " IEC-101"
-        }
-      ]
-    },
-    {
-      "Enum": "TCP_UDP",
-      "Value": [
-        {
-          "ParameterValue": 0,
-          "VisibleValue": "TCP"
-        },
-        {
-          "ParameterValue": 1,
-          "VisibleValue": "UDP"
+          "VisibleValue": "4096 с"
         }
       ]
     }
